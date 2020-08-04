@@ -24,15 +24,10 @@ public class LoginInfo {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public Integer getVolunteerId() {
-		return volunteerId;
-	}
-	public void setVolunteerId(Integer volunteerId) {
-		this.volunteerId = volunteerId;
-	}
 	String message;
-	Integer volunteerId;
+	Integer id;
 	Integer LoginOTP;
+	Integer role;
 
 
 	public Integer getIdgrevance() {
@@ -56,10 +51,20 @@ public class LoginInfo {
 		this.volunteerassignment = volunteerassignment;
 	}
 	Volunteer volunteer;
+	Admin admin;
+	
 	VolunteerAssignment volunteerassignment;
 	MedicalandGreivance  medicalandgreivance;
 	List<GreivanceTracking> greivanceTrackingList;
 	
+	
+	public Admin getAdmin() {
+		return admin;
+	}
+	public void setAdmin(Admin admin) {
+		this.admin = admin;
+	}
+
 	public List<GreivanceTracking> getGreivanceTrackingList() {
 		return greivanceTrackingList;
 	}
@@ -77,6 +82,18 @@ public class LoginInfo {
 	}
 	public void setLoginOTP(Integer loginOTP) {
 		LoginOTP = loginOTP;
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Integer getRole() {
+		return role;
+	}
+	public void setRole(Integer role) {
+		this.role = role;
 	}
 
 }

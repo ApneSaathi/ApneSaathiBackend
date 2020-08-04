@@ -81,6 +81,11 @@ private Integer idvolunteer;
 	@Column(name="pic")
 	private byte[] pic;
 	
+	//1=Volunteer 2=Staff Member 3=District Admin 4=Master Admin
+	
+	@Column(name="role")
+	private Integer role;
+	
 	
  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
  @JoinColumn(name = "idvolunteer")
@@ -215,6 +220,12 @@ public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
 		
 		
 		
+	}
+	public Integer getRole() {
+		return role;
+	}
+	public void setRole(Integer role) {
+		this.role = role;
 	}
 	
 

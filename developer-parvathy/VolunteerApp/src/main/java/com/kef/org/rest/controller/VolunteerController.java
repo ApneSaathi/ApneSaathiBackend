@@ -18,15 +18,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kef.org.rest.model.Admin;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.LoginInfo;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.repository.AdminRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
+import com.kef.org.rest.service.AdminService;
 import com.kef.org.rest.service.MedicalandGreivanceService;
 import com.kef.org.rest.service.VolunteerService;
 
@@ -42,6 +45,10 @@ public class VolunteerController
     VolunteerService volunteerService; 
     
     
+    @Autowired
+    AdminService adminService; 
+    
+    
     
     @Autowired
     MedicalandGreivanceService medicalandgreivanceservice; 
@@ -53,6 +60,9 @@ public class VolunteerController
     @Autowired
    	private VolunteerAssignmentRepository volunteerassignmentRespository;
     
+    @Autowired
+   	private AdminRepository adminRespository;
+    
     
     @Autowired
    	private GreivanceTrackingRepository greivanceTrackingRepository;
@@ -61,25 +71,45 @@ public class VolunteerController
     @Autowired
 	private VolunteerRepository volunteerRespository;
 	
-   
-    @RequestMapping(value = "/LoginVolunteer", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+   //Need to add role to LoginInfo object
+    @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<LoginInfo>  checkVolunteermobile(@RequestBody Volunteer volunteer)
-    { String phoneNo = volunteer.getphoneNo();
-     logger.info("phoneNo" +phoneNo); 
+    public ResponseEntity<LoginInfo>  checkVolunteerOrAdminMobile(@RequestBody Volunteer volunteer)
+    { 
+    	String phoneNo = volunteer.getphoneNo();
+        logger.info("phoneNo" +phoneNo); 
     	LoginInfo loginInfo = new LoginInfo();
+    	if(null != phoneNo) {
     	if((volunteerService.findvolunteerId(phoneNo)) != null )
     	{
     		loginInfo.setMessage("Success"); 
     		loginInfo.setStatusCode("0");
-  		  loginInfo.setVolunteerId(volunteerService.findvolunteerId(phoneNo));
-  		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    		
+    		Volunteer v= new Volunteer();
+    		v = volunteerService.findvolunteerDetails(phoneNo);
+    		loginInfo.setId(v.getIdvolunteer());
+    		loginInfo.setRole(v.getRole());
+  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+    	}
+    	else if( null!= adminService.findAdminId(phoneNo) ){
+    		loginInfo.setMessage("Success"); 
+    		loginInfo.setStatusCode("0");
+    		Admin a= new Admin();
+    		a = adminService.fetchAdminDetails(phoneNo);
+    		loginInfo.setId(a.getAdminId());
+    		loginInfo.setRole(a.getRole());
+  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
     	}else {
+  		  logger.info("Reached here"); 
+  		  loginInfo.setMessage("Failure");
+  		  loginInfo.setStatusCode("1"); 		  
+  		  loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
+  		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT); }
+    	}
+    	else {
 		  logger.info("Reached here"); 
 		  loginInfo.setMessage("Failure");
 		  loginInfo.setStatusCode("1"); 		  
-		  loginInfo.setVolunteerId(volunteerService.findvolunteerId(phoneNo));
+		  loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
 		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT); }
 		 
     	

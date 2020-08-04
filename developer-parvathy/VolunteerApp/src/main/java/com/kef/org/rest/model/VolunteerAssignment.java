@@ -66,7 +66,7 @@ public class VolunteerAssignment {
 	private String villagesrcitizen;
 	
 	
-	//  2.Not Picked 3.Not Reachable 4.Number Busy 5.Call Later 6.Call Dropped  7.Wrong Number 8.Number doesn't exist 9.Disconnected 10.Connected
+	// 1.Pending 2.Not Picked 3.Not Reachable 4.Number Busy 5.Call Later 6.Call Dropped  7.Wrong Number 8.Number doesn't exist 9.Disconnected 10.Connected
 	
 	@Column(name = "call_status_code",columnDefinition = "integer default 2")
 	private Integer callstatusCode;
