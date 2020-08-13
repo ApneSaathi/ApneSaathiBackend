@@ -1,5 +1,8 @@
 package com.kef.org.rest.domain.model;
 
+import java.util.List;
+
+import com.kef.org.rest.model.VolunteerAssignment;
 
 public class Admin {
 
@@ -20,6 +23,18 @@ public class Admin {
 	private Integer role;
 
 	private String password;
+	
+	private List<VolunteerVO> volunteerList;
+	
+	private List<VolunteerAssignment> adminCallList;
+
+	public List<VolunteerAssignment> getAdminCallList() {
+		return adminCallList;
+	}
+
+	public void setAdminCallList(List<VolunteerAssignment> adminCallList) {
+		this.adminCallList = adminCallList;
+	}
 
 	public Integer getAdminId() {
 		return adminId;
@@ -91,6 +106,14 @@ public class Admin {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public List<VolunteerVO> getVolunteerList() {
+		return volunteerList;
+	}
+
+	public void setVolunteerList(List<VolunteerVO> volunteerList) {
+		this.volunteerList = volunteerList;
 	}
 
 }

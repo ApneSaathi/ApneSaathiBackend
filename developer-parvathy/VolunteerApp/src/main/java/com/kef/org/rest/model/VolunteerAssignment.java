@@ -6,6 +6,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
+import org.hibernate.annotations.NamedQueries;
+import org.hibernate.annotations.NamedQuery;
+import org.springframework.data.jpa.repository.Temporal;
+
 import javax.persistence.FetchType;
 import javax.persistence.CascadeType;
 import javax.persistence.JoinColumn;
@@ -16,7 +21,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "volunteer_assignment")	
+@Table(name = "volunteer_assignment")
+@NamedQueries({
+@NamedQuery(name = "VolunteerAssignment.findAllByIdVolunteer",
+query = "SELECT DISTINCT v FROM VolunteerAssignment v WHERE v.idvolunteer =:idvolunteer"
+),
+@NamedQuery(name = "VolunteerAssignment.findAllByAdminId",
+query = "SELECT v FROM VolunteerAssignment v WHERE v.adminId =:adminId and role =:role"
+)
+})
 public class VolunteerAssignment {
 	
 	@Id
@@ -25,7 +38,13 @@ public class VolunteerAssignment {
     private Integer callid;
 
 	@Column(name = "idvolunteer",nullable =false)
-	private Integer idvolunteer;	
+	private Integer idvolunteer;
+	
+	@Column(name = "admin_id",nullable =false)
+	private Integer adminId;
+	
+	@Column(name = "role",nullable =false)
+	private Integer role;
 	
 	public Integer getIdvolunteer() {
 		return idvolunteer;
@@ -105,7 +124,7 @@ public class VolunteerAssignment {
 	private LocalDateTime loggeddateTime;
 	
 	
-	 @OneToMany(cascade = CascadeType.ALL)
+	 @OneToMany(cascade = CascadeType.ALL ,  fetch = FetchType.EAGER)
 	 @JoinColumn(name = "CALL_ID")
 	 private List <MedicalandGreivance> medicalandgreivance;
 	 
@@ -236,6 +255,22 @@ public class VolunteerAssignment {
 
 	public void setLoggeddateTime(LocalDateTime loggeddateTime) {
 		this.loggeddateTime = loggeddateTime;
+	}
+
+	public Integer getRole() {
+		return role;
+	}
+
+	public void setRole(Integer role) {
+		this.role = role;
+	}
+
+	public Integer getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
 	}
 
 

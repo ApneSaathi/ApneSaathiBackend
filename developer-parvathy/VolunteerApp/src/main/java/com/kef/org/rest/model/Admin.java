@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.OneToMany;
 import org.hibernate.annotations.NamedQueries;
@@ -54,6 +55,14 @@ public class Admin {
 	
 	@Column(name="PASSWORD")
 	private char[] password;
+	
+	 @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	 @JoinColumn(name = "adminId")
+	   private List <Volunteer> volunteerList;
+	 
+	 @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	 @JoinColumn(name = "adminId")
+	   private List <District> districtList;
 	
 	public Integer getAdminId() {
 		return adminId;
@@ -125,6 +134,22 @@ public class Admin {
 
 	public void setRole(Integer role) {
 		this.role = role;
+	}
+
+	public List<Volunteer> getVolunteerList() {
+		return volunteerList;
+	}
+
+	public void setVolunteerList(List<Volunteer> volunteerList) {
+		this.volunteerList = volunteerList;
+	}
+
+	public List<District> getDistrictList() {
+		return districtList;
+	}
+
+	public void setDistrictList(List<District> districtList) {
+		this.districtList = districtList;
 	}
 
 

@@ -1,4 +1,6 @@
 package com.kef.org.rest.service;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,12 @@ public class VolunteerService implements VolunteerInterface{
 	public Volunteer findvolunteerDetails(String phoneNo)
 	{
 		return volunteerRespository.fetchVolunteerDetails(phoneNo);
+	}
+
+	@Override
+	public List<Volunteer> findAllVolunteerDetailsByAdminId(Integer adminId) {
+		
+		return volunteerRespository.findAllVolunteerDetailsByAdminId(adminId);
 	}
 	
 	

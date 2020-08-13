@@ -17,10 +17,16 @@ import org.hibernate.annotations.NamedQuery;
 @Table(name = "greivance_tracking")
 @NamedQueries({
 @NamedQuery(name = "GreivanceTracking.findAllbyidvolunteer",
-query = "SELECT g FROM GreivanceTracking g WHERE g.idvolunteer =:idvolunteer"
+query = "SELECT g FROM GreivanceTracking g WHERE g.idvolunteer =:idvolunteer and g.createdBy =:createdBy"
+),
+@NamedQuery(name = "GreivanceTracking.findAllbyadminId",
+query = "SELECT g FROM GreivanceTracking g WHERE g.adminId =:adminId and g.createdBy =:createdBy"
 ),
 @NamedQuery(name = "GreivanceTracking.findbytrackingid",
 query = "SELECT g FROM GreivanceTracking g WHERE g.trackingId =:trackingId "
+),
+@NamedQuery(name = "GreivanceTracking.findAllbyDistrictName",
+query = "SELECT g FROM GreivanceTracking g WHERE g.districtsrcitizen =:districtName "
 )
 }) 
 public class GreivanceTracking {
@@ -36,6 +42,15 @@ public class GreivanceTracking {
 	  
 	  @Column(name = "IDVOLUNTEER",nullable =false)
 	  private Integer idvolunteer;
+	  
+	  @Column(name = "admin_id",nullable =false)
+	  private Integer adminId;
+	  
+	  @Column(name="role")
+	  private Integer role;
+	  
+	  @Column(name="district_srcitizen")
+	  private String districtsrcitizen;
 	  
 	  @Column(name = "IDGREIVANCE",nullable =false)
 	  private Integer idgrevance;
@@ -77,7 +92,8 @@ public class GreivanceTracking {
 	  @Column(name = "resolvedremarks", columnDefinition ="varchar(45) default ''")
 	  private String resolvedRemarks;
 	  
-	  
+	  @Column(name = "createdby",columnDefinition ="varchar(255) default NULL")
+	  private String createdBy;
 
 	
 
@@ -209,6 +225,38 @@ public class GreivanceTracking {
 
 	public void setIdgrevance(Integer idgrevance) {
 		this.idgrevance = idgrevance;
+	}
+
+	public Integer getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
+	}
+
+	public Integer getRole() {
+		return role;
+	}
+
+	public void setRole(Integer role) {
+		this.role = role;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
+
+	public String getDistrictsrcitizen() {
+		return districtsrcitizen;
+	}
+
+	public void setDistrictsrcitizen(String districtsrcitizen) {
+		this.districtsrcitizen = districtsrcitizen;
 	}
 	  
 	  

@@ -26,11 +26,13 @@ query = "SELECT v FROM Volunteer v WHERE v.phoneNo =?1 "
 ),
 @NamedQuery(name = "Volunteer.findbyidvolunteer",
 query = "SELECT v FROM Volunteer v WHERE v.idvolunteer =:idvolunteer "
+),
+@NamedQuery(name = "Volunteer.findAllVolunteerDetailsByAdminId",
+query = "SELECT v FROM Volunteer v WHERE v.adminId =:adminId "
 )
 }) 
 public class Volunteer  {
 	
-
 
 	@Id
 	  @GeneratedValue(strategy=GenerationType.IDENTITY) 
@@ -41,6 +43,9 @@ private Integer idvolunteer;
 	
 	@Column(name="MOBILENO",nullable = false, unique = true)
 	  private String phoneNo;
+	
+	@Column(name = "adminId")
+	private Integer adminId;
 	
 	@Column(name="FIRSTNAME")
 	private String firstName;
@@ -229,7 +234,12 @@ public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
 	}
 	
 
-	
+	public Integer getAdminId() {
+		return adminId;
+	}
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
+	}
 	
 	
 }

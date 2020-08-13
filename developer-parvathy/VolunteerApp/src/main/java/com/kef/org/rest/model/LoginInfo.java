@@ -2,7 +2,8 @@ package com.kef.org.rest.model;
 
 import java.util.List;
 
-import com.kef.org.rest.model.MedicalandGreivance;
+import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
+import com.kef.org.rest.domain.model.VolunteerVO;
 
 public class LoginInfo { 
 	
@@ -12,6 +13,20 @@ public class LoginInfo {
 	}
 
 	String statusCode;
+	String message;
+	Integer id;
+	Integer LoginOTP;
+	Integer role;
+	List<VolunteerVO> volunteers;
+	List<VolunteerAssignmentVO> srCitizenList;
+	Volunteer volunteer;
+	Admin admin;
+	com.kef.org.rest.domain.model.Admin adminDomain;
+	
+	VolunteerAssignment volunteerassignment;
+	MedicalandGreivance  medicalandgreivance;
+	List<GreivanceTracking> greivanceTrackingList;
+	
 	public String getStatusCode() {
 		return statusCode;
 	}
@@ -24,10 +39,7 @@ public class LoginInfo {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	String message;
-	Integer id;
-	Integer LoginOTP;
-	Integer role;
+	
 
 
 	public Integer getIdgrevance() {
@@ -50,12 +62,7 @@ public class LoginInfo {
 	public void setVolunteerassignment(VolunteerAssignment volunteerassignment) {
 		this.volunteerassignment = volunteerassignment;
 	}
-	Volunteer volunteer;
-	Admin admin;
 	
-	VolunteerAssignment volunteerassignment;
-	MedicalandGreivance  medicalandgreivance;
-	List<GreivanceTracking> greivanceTrackingList;
 	
 	
 	public Admin getAdmin() {
@@ -94,6 +101,24 @@ public class LoginInfo {
 	}
 	public void setRole(Integer role) {
 		this.role = role;
+	}
+	public List<VolunteerVO> getVolunteers() {
+		return volunteers;
+	}
+	public void setVolunteers(List<VolunteerVO> volunteers) {
+		this.volunteers = volunteers;
+	}
+	public List<VolunteerAssignmentVO> getSrCitizenList() {
+		return srCitizenList;
+	}
+	public void setSrCitizenList(List<VolunteerAssignmentVO> srCitizenList) {
+		this.srCitizenList = srCitizenList;
+	}
+	public com.kef.org.rest.domain.model.Admin getAdminDomain() {
+		return adminDomain;
+	}
+	public void setAdminDomain(com.kef.org.rest.domain.model.Admin adminDomain) {
+		this.adminDomain = adminDomain;
 	}
 
 }

@@ -3,6 +3,7 @@ package com.kef.org.rest.model;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,8 +30,15 @@ public class MedicalandGreivance {
 	  @Column(name = "CALL_ID",nullable =false)
 	  private Integer callid;
 	  
+	  
 	  @Column(name = "IDVOLUNTEER",nullable =false)
 	  private Integer idvolunteer;
+	  
+	  @Column(name = "admin_id",nullable =false)
+	  private Integer adminId;
+	  
+	  @Column(name="role")
+	  private Integer role;
 	  
 	  @Column(name = "is_diabetic",columnDefinition ="varchar(10) default 'N'")
 	  private String diabetic;
@@ -139,11 +147,38 @@ public class MedicalandGreivance {
 	  @Column(name = "practice_not_allowed",columnDefinition ="varchar(255) default NULL")
 	  private String practiceNotAllowed;
 	  
-	  @OneToMany(cascade = CascadeType.ALL)
+	  @Column(name = "createdby",columnDefinition ="varchar(255) default NULL")
+	  private String createdBy;
+	  
+	  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	  @JoinColumn(name = "IDGREIVANCE")
 	  private List <GreivanceTracking> greivanceTracking;
 	  
 	
+
+	public Integer getAdminId() {
+		return adminId;
+	}
+
+	public void setAdminId(Integer adminId) {
+		this.adminId = adminId;
+	}
+
+	public Integer getRole() {
+		return role;
+	}
+
+	public void setRole(Integer role) {
+		this.role = role;
+	}
+
+	public String getCreatedBy() {
+		return createdBy;
+	}
+
+	public void setCreatedBy(String createdBy) {
+		this.createdBy = createdBy;
+	}
 
 	public LocalDateTime getCreatedDate() {
 		return createdDate;

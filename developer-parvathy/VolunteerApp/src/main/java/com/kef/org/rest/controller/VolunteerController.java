@@ -3,9 +3,13 @@ package com.kef.org.rest.controller;
 
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,13 +22,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kef.org.rest.domain.model.GreivanceTrackingVO;
+import com.kef.org.rest.domain.model.InputVO;
+import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.model.Admin;
+import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.LoginInfo;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.repository.AdminRepository;
+import com.kef.org.rest.repository.DistrictRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
@@ -70,6 +79,9 @@ public class VolunteerController
     
     @Autowired
 	private VolunteerRepository volunteerRespository;
+    
+    @Autowired
+	private DistrictRepository districtRespository;
 	
    //Need to add role to LoginInfo object
     @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -145,21 +157,47 @@ public class VolunteerController
     
     @RequestMapping(value = "/loadDashboard", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public  ResponseEntity<LoginInfo>  loadVolunteerDashboard(@RequestBody Volunteer volunteer)
+    public  ResponseEntity<LoginInfo>  loadVolunteerDashboard(@RequestBody InputVO inputVO)
     {
     	LoginInfo loginInfo = new LoginInfo();
-    	Optional<Volunteer> v1	= volunteerRespository.findById(volunteer.getIdvolunteer());
-    	if(v1.isPresent()) {
-    		loginInfo.setMessage("Success"); 
-    		loginInfo.setStatusCode("0");
-			loginInfo.setVolunteer(v1.get());
-			 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    		
-    	}else {
+    	Admin a2 = new Admin();
+    	com.kef.org.rest.domain.model.Admin adminDomain = new com.kef.org.rest.domain.model.Admin();;
+    	String createdBy = inputVO.getFilterBy() == 1 ? "Volunteer" : inputVO.getFilterBy()== 2 ? "Staff Member" : inputVO.getFilterBy()== 4 ? "Master Admin" : null;
+		if (null!=createdBy && createdBy.equals("Volunteer")) {
+			Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
+			if (v1.isPresent()) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				loginInfo.setVolunteer(v1.get());
+			}
+		}
+		else if(null!=createdBy && (createdBy.equals("Staff Member") || createdBy.equals("Master Admin"))) {
+			
+			Optional<Admin> a1 = adminRespository.findById(inputVO.getId());
+			if(a1.isPresent()) {
+				a2=a1.get();
+				Integer role = createdBy.equals("Staff Member") ? 2 : 4;
+				List<VolunteerAssignment> volunteerAssignmentList = volunteerassignmentRespository.findAllByAdminId(inputVO.getId(), role);
+				adminDomain.setAdminId(a2.getAdminId());
+				adminDomain.setDistrict(a2.getDistrict());
+				adminDomain.setEmail(a2.getEmail());
+				adminDomain.setFirstName(a2.getEmail());
+				adminDomain.setLastName(a2.getLastName());
+				adminDomain.setMobileNo(a2.getMobileNo());
+				adminDomain.setRole(a2.getRole());
+				adminDomain.setState(a2.getState());
+				adminDomain.setAdminCallList(volunteerAssignmentList);
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				loginInfo.setAdminDomain(adminDomain);
+			}
+			
+		}
+    	else {
     		loginInfo.setMessage("Failure");
 			loginInfo.setStatusCode("1"); 
-			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
     	}
+		return new ResponseEntity<LoginInfo>(loginInfo, loginInfo.getStatusCode().equals("0") ? HttpStatus.OK :HttpStatus.CONFLICT);
 }
     
     @RequestMapping(value = "/seniorcitizenDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -246,12 +284,25 @@ public class VolunteerController
     
     @RequestMapping(value = "/getGreivanceDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<LoginInfo>  fetchGreivanceDetails(@RequestBody GreivanceTracking greivanceTracking)
+    public ResponseEntity<LoginInfo>  fetchGreivanceDetails(@RequestBody GreivanceTrackingVO greivanceTrackingVO)
     {
     	LoginInfo loginInfo = new LoginInfo();
     	List<GreivanceTracking> greivanceTrackingList = new ArrayList<>();
 		
-    	greivanceTrackingList =  greivanceTrackingRepository.findAllbyidvolunteer(greivanceTracking.getIdvolunteer());
+    	if(null !=greivanceTrackingVO.getFilterBy() && greivanceTrackingVO.getFilterBy() == 1) {
+    		greivanceTrackingList =  greivanceTrackingRepository.findAllbyidvolunteer(greivanceTrackingVO.getId(), "Volunteer");
+    	}
+    	if(null !=greivanceTrackingVO.getFilterBy() && (greivanceTrackingVO.getFilterBy() == 2 || greivanceTrackingVO.getFilterBy() == 4)){
+    		String createdBy = greivanceTrackingVO.getFilterBy() == 2 ? "Staff Member" : "Master Admin";
+    		greivanceTrackingList =  greivanceTrackingRepository.findAllbyadminId(greivanceTrackingVO.getId(), createdBy);
+    	}
+    	if(null != greivanceTrackingVO.getId() && null!=greivanceTrackingVO.getDistrictId()) {
+    		District district = districtRespository.fetchDistrictDetailsByDistrictId(greivanceTrackingVO.getDistrictId(), greivanceTrackingVO.getId());
+    		if(null != district) {
+    			greivanceTrackingList = greivanceTrackingRepository.findAllbyDistrictName(district.getDistrictName());
+    		}
+    	}
+    	
 		  if(null != greivanceTrackingList && !greivanceTrackingList.isEmpty()) {
 		  loginInfo.setMessage("Success");
 		  loginInfo.setStatusCode("0"); 
@@ -407,7 +458,66 @@ public class VolunteerController
 		  }
    
 }
-    
+    @RequestMapping(value = "/getSrCitizenDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<LoginInfo>  fetchSrCitizenDetails(@RequestBody VolunteerAssignmentVO volunteerAssignmentVO)
+    {
+    	LoginInfo loginInfo = new LoginInfo();
+    	List<VolunteerAssignment> volunteerAssignmentList = new ArrayList<>();
+    	List<VolunteerAssignmentVO> volunteerAssignmentVOList = new ArrayList<>();
+    	String str = volunteerAssignmentVO.getLoggeddateTime();
+    	DateTimeFormatter DATEFORMATTER1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        DateTimeFormatter DATEFORMATTER = new DateTimeFormatterBuilder().append(DATEFORMATTER1)
+        .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+        .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+        .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+        .toFormatter();
+
+        //DateTimeFormatter DATEFORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDateTime ldt = LocalDateTime.parse(str, DATEFORMATTER);
+        logger.info("Reached here"+ldt.toLocalDate()); 
+    	
+    	volunteerAssignmentList =  volunteerassignmentRespository.findAllByIdVolunteer(volunteerAssignmentVO.getIdvolunteer());
+		  if(null != volunteerAssignmentList && !volunteerAssignmentList.isEmpty()) {
+			  volunteerAssignmentList = volunteerAssignmentList.stream().filter(va ->((va.getLoggeddateTime().toLocalDate().isEqual(ldt.toLocalDate()))||
+					  (va.getLoggeddateTime().toLocalDate().isBefore(ldt.toLocalDate())))).collect(Collectors.toList());
+			  for (VolunteerAssignment volunteerAssignment : volunteerAssignmentList) {
+				  VolunteerAssignmentVO volunteerAssignmentVO1 = new VolunteerAssignmentVO();
+				  volunteerAssignmentVO1.setAddresssrcitizen(volunteerAssignment.getAddresssrcitizen());
+				  volunteerAssignmentVO1.setAgesrcitizen(volunteerAssignment.getAgesrcitizen());
+				  volunteerAssignmentVO1.setBlocknamesrcitizen(volunteerAssignment.getBlocknamesrcitizen());
+				  volunteerAssignmentVO1.setCallid(volunteerAssignment.getCallid());
+				  volunteerAssignmentVO1.setDistrictsrcitizen(volunteerAssignment.getDistrictsrcitizen());
+				  volunteerAssignmentVO1.setEmailsrcitizen(volunteerAssignment.getEmailsrcitizen());
+				  volunteerAssignmentVO1.setGendersrcitizen(volunteerAssignment.getGendersrcitizen());
+				  volunteerAssignmentVO1.setIdvolunteer(volunteerAssignment.getIdvolunteer());
+				  volunteerAssignmentVO1.setLoggeddateTime(volunteerAssignment.getLoggeddateTime().toString());
+				  volunteerAssignmentVO1.setNamesrcitizen(volunteerAssignment.getNamesrcitizen());
+				  volunteerAssignmentVO1.setPhonenosrcitizen(volunteerAssignment.getPhonenosrcitizen());
+				  volunteerAssignmentVO1.setStatesrcitizen(volunteerAssignment.getStatesrcitizen());
+				  volunteerAssignmentVO1.setVillagesrcitizen(volunteerAssignment.getVillagesrcitizen());
+				  volunteerAssignmentVO1.setCallstatusCode(volunteerAssignment.getCallstatusCode());
+				  volunteerAssignmentVOList.add(volunteerAssignmentVO1);
+				  
+			}
+		  loginInfo.setMessage("Success");
+		  loginInfo.setStatusCode("0"); 
+		  loginInfo.setSrCitizenList(volunteerAssignmentVOList);
+		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+		  
+		  }else { 
+			  loginInfo.setMessage("Failure"); 
+			  loginInfo.setStatusCode("1"); 
+			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+		  
+		  }
+		 
+    	
+    	
+    	
+    	
+    }
     
 
 
