@@ -31,12 +31,15 @@ import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.LoginInfo;
 import com.kef.org.rest.model.MedicalandGreivance;
+import com.kef.org.rest.model.SeniorCitizen;
+import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.repository.AdminRepository;
 import com.kef.org.rest.repository.DistrictRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
+import com.kef.org.rest.repository.SeniorCitizenRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 import com.kef.org.rest.service.AdminService;
@@ -83,6 +86,9 @@ public class VolunteerController
     
     @Autowired
 	private DistrictRepository districtRespository;
+    
+    @Autowired
+    private SeniorCitizenRepository seniorcitizenRepository;
 	
    //Need to add role to LoginInfo object
     @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -585,7 +591,67 @@ public class VolunteerController
 		
 		return volunteerassignement;
     }
-
+  //khushboo - get volunteer list
+    @RequestMapping(value = "/getVolunteerList", method = RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<LoginInfo> getVolunteerList(){
+    	
+    	LoginInfo loginInfo = new LoginInfo();
+    	List<Volunteer> volunteer1 = volunteerRespository.findAll();
+    	List <VolunteerVO> volunteers=new ArrayList<>();
+    	if(null!=volunteer1 && !volunteer1.isEmpty()) {
+    		
+    		for (Volunteer v:volunteer1) {
+    			VolunteerVO v1=new VolunteerVO();
+    			v1.setAddress(v.getAddress());
+    			v1.setAdminId(v.getAdminId());
+    			v1.setAssignedtoFellow(v.getAssignedtoFellow());
+    			v1.setAssignedtoFellowContact(v.getAssignedtoFellowContact());
+    			v1.setBlock(v.getBlock());
+    			v1.setDistrict(v.getBlock());
+    			v1.setEmail(v.getEmail());
+    			v1.setFirstName(v.getFirstName());
+    			v1.setGender(v.getGender());
+    			v1.setIdvolunteer(v.getIdvolunteer());
+    			v1.setLastName(v.getLastName());
+    			v1.setphoneNo(v.getphoneNo());
+    			v1.setPic(v.getPic());
+    			v1.setRole(v.getRole());
+    			v1.setState(v.getState());
+    			v1.setVillage(v.getVillage());
+    			volunteers.add(v1);
+    		}
+    		loginInfo.setMessage("Success"); 
+    		loginInfo.setStatusCode("0");
+    		loginInfo.setVolunteers(volunteers);
+    		 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+			
+		}
+    	else {
+    			loginInfo.setMessage("Failure");
+    				loginInfo.setStatusCode("1"); 
+    				return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+    	}
+    	
+    }
+    @RequestMapping(value="/getSrCitizenList",method=RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<SrCitizenResponse> getSrCitizenList(){
+    	
+    	SrCitizenResponse srCitizen =new SrCitizenResponse();
+    	List<SeniorCitizen> srCitizenList=seniorcitizenRepository.findAll();
+    	
+    	if(null!=srCitizenList && !srCitizenList.isEmpty()) {
+    		srCitizen.setSrCitizenList(srCitizenList);
+    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
+    	}
+    	else {
+    		
+    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.CONFLICT);
+    	}
+    	
+    	}
+    
     
 
 }
