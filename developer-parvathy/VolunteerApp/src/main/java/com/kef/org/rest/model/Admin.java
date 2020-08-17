@@ -56,6 +56,12 @@ public class Admin {
 	@Column(name="PASSWORD")
 	private char[] password;
 	
+	@Column(name = "GENDER")
+	private String gender;
+	
+	@Column(name = "ADDRESS")
+	private String address;
+	
 	 @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	 @JoinColumn(name = "adminId")
 	   private List <Volunteer> volunteerList;
@@ -150,6 +156,22 @@ public class Admin {
 
 	public void setDistrictList(List<District> districtList) {
 		this.districtList = districtList;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 

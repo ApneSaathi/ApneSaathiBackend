@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
+import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.model.Admin;
 import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.GreivanceTracking;
@@ -87,71 +88,82 @@ public class VolunteerController
     @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
     public ResponseEntity<LoginInfo>  checkVolunteerOrAdminMobile(@RequestBody Volunteer volunteer)
-    { 
-    	String phoneNo = volunteer.getphoneNo();
-        logger.info("phoneNo" +phoneNo); 
-    	LoginInfo loginInfo = new LoginInfo();
-    	if(null != phoneNo) {
-    	if((volunteerService.findvolunteerId(phoneNo)) != null )
-    	{
-    		loginInfo.setMessage("Success"); 
-    		loginInfo.setStatusCode("0");
-    		Volunteer v= new Volunteer();
-    		v = volunteerService.findvolunteerDetails(phoneNo);
-    		loginInfo.setId(v.getIdvolunteer());
-    		loginInfo.setRole(v.getRole());
-  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    	}
-    	else if( null!= adminService.findAdminId(phoneNo) ){
-    		loginInfo.setMessage("Success"); 
-    		loginInfo.setStatusCode("0");
-    		Admin a= new Admin();
-    		a = adminService.fetchAdminDetails(phoneNo);
-    		loginInfo.setId(a.getAdminId());
-    		loginInfo.setRole(a.getRole());
-  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    	}else {
-  		  logger.info("Reached here"); 
-  		  loginInfo.setMessage("Failure");
-  		  loginInfo.setStatusCode("1"); 		  
-  		  loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
-  		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT); }
-    	}
-    	else {
-		  logger.info("Reached here"); 
-		  loginInfo.setMessage("Failure");
-		  loginInfo.setStatusCode("1"); 		  
-		  loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
-		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT); }
-		 
-    	
-    	
-    	
-    }
+	{
+		String phoneNo = volunteer.getphoneNo();
+		Integer districtId = null;
+		logger.info("phoneNo" + phoneNo);
+		LoginInfo loginInfo = new LoginInfo();
+		if (null != phoneNo) {
+			if ((volunteerService.findvolunteerId(phoneNo)) != null) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				Volunteer v = new Volunteer();
+				v = volunteerService.findvolunteerDetails(phoneNo);
+				loginInfo.setId(v.getIdvolunteer());
+				loginInfo.setRole(v.getRole());
+			} else if (null != adminService.findAdminId(phoneNo)) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				Admin a = new Admin();
+				a = adminService.fetchAdminDetails(phoneNo);
+				loginInfo.setId(a.getAdminId());
+				loginInfo.setRole(a.getRole());
+				if (a.getRole() == 3) {
+					districtId = districtRespository.findDistrictId(a.getAdminId());
+					loginInfo.setDistrictId(districtId);
+				}
+			} else {
+				logger.info("Reached here");
+				loginInfo.setMessage("Failure");
+				loginInfo.setStatusCode("1");
+				loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
+			}
+		} else {
+			logger.info("Reached here");
+			loginInfo.setMessage("Failure");
+			loginInfo.setStatusCode("1");
+			loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
+		}
+		return new ResponseEntity<LoginInfo>(loginInfo, loginInfo.getStatusCode().equals("0") ?  HttpStatus.OK:HttpStatus.CONFLICT);
+	}
     
-    @RequestMapping(value = "/VolunteerData", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/VolunteerorAdminData", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
     public ResponseEntity<LoginInfo>  VolunteerDetailsbymobile(@RequestBody Volunteer volunteer)
-    {LoginInfo loginInfo = new LoginInfo();
-    		String phoneNo = volunteer.getphoneNo();
-    		Volunteer v1 = volunteerService.findvolunteerDetails(phoneNo);
-    		if(v1.getIdvolunteer().equals(null))
-    		{   
-    			loginInfo.setMessage("Failure");
-    			loginInfo.setStatusCode("1"); 
-    			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
-    			
-    		}
-    		else {
-    			loginInfo.setMessage("Success"); 
-        		loginInfo.setStatusCode("0");
-    			loginInfo.setVolunteer(v1);
-    			 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    		}
-    		
-    	
-    	
-    }
+	{
+		LoginInfo loginInfo = new LoginInfo();
+		String phoneNo = volunteer.getphoneNo();
+		if (null != phoneNo) {
+			if ((volunteerService.findvolunteerId(phoneNo)) != null) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				Volunteer v = new Volunteer();
+				v = volunteerService.findvolunteerDetails(phoneNo);
+				loginInfo.setVolunteer(v);
+			} else if (null != adminService.findAdminId(phoneNo)) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				Admin a = new Admin();
+				a = adminService.fetchAdminDetails(phoneNo);
+				a.setVolunteerList(null);
+				a.setPassword(null);
+				a.setDistrictList(null);
+				loginInfo.setAdmin(a);
+			}else {
+				loginInfo.setMessage("Failure");
+				loginInfo.setStatusCode("1");
+			}
+			
+		} else {
+			loginInfo.setMessage("Failure");
+			loginInfo.setStatusCode("1");
+
+		}
+
+		return new ResponseEntity<LoginInfo>(loginInfo,
+				loginInfo.getStatusCode().equals("0") ? HttpStatus.OK : HttpStatus.CONFLICT);
+
+	}
 
     
     
@@ -161,7 +173,7 @@ public class VolunteerController
     {
     	LoginInfo loginInfo = new LoginInfo();
     	Admin a2 = new Admin();
-    	com.kef.org.rest.domain.model.Admin adminDomain = new com.kef.org.rest.domain.model.Admin();;
+    	com.kef.org.rest.domain.model.Admin adminDomain = new com.kef.org.rest.domain.model.Admin();
     	String createdBy = inputVO.getFilterBy() == 1 ? "Volunteer" : inputVO.getFilterBy()== 2 ? "Staff Member" : inputVO.getFilterBy()== 4 ? "Master Admin" : null;
 		if (null!=createdBy && createdBy.equals("Volunteer")) {
 			Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
@@ -181,12 +193,14 @@ public class VolunteerController
 				adminDomain.setAdminId(a2.getAdminId());
 				adminDomain.setDistrict(a2.getDistrict());
 				adminDomain.setEmail(a2.getEmail());
-				adminDomain.setFirstName(a2.getEmail());
+				adminDomain.setFirstName(a2.getFirstName());
 				adminDomain.setLastName(a2.getLastName());
 				adminDomain.setMobileNo(a2.getMobileNo());
 				adminDomain.setRole(a2.getRole());
 				adminDomain.setState(a2.getState());
 				adminDomain.setAdminCallList(volunteerAssignmentList);
+				adminDomain.setDistrictList(null != a2.getDistrictList() ? a2.getDistrictList() : null);
+				
 				loginInfo.setMessage("Success");
 				loginInfo.setStatusCode("0");
 				loginInfo.setAdminDomain(adminDomain);
@@ -271,16 +285,17 @@ public class VolunteerController
     
     @RequestMapping(value = "/registerNewSrCitizen", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<LoginInfo>  registerNewSrCitizen(@RequestBody VolunteerAssignment volunteerassignement)
-    {
-    	
-    	LoginInfo loginInfo = new LoginInfo();
-    	volunteerassignmentRespository.save(volunteerassignement);
-    	loginInfo.setMessage("Success"); 
+    public ResponseEntity<LoginInfo>  registerNewSrCitizen(@RequestBody VolunteerAssignmentVO volunteerassignementVO)
+	{
+
+		LoginInfo loginInfo = new LoginInfo();
+		VolunteerAssignment volunteerassignement = mapVolunteerAssignmentVOToEntity(volunteerassignementVO);
+		volunteerassignmentRespository.save(volunteerassignement);
+		loginInfo.setMessage("Success");
 		loginInfo.setStatusCode("0");
-		 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-   
-}
+		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+
+	}
     
     @RequestMapping(value = "/getGreivanceDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
@@ -336,13 +351,16 @@ public class VolunteerController
 			  greivanceTrack.setStatus(greivanceTracking.getStatus());
 			  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 				  greivanceTrack.setDescription(greivanceTracking.getDescription());
+				  greivanceTrack.setRaisedby(greivanceTracking.getRaisedby());
 				  greivanceTrack.setCreatedDate(LocalDateTime.now());
 			  }
 			  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
+				  greivanceTrack.setReviewedby(greivanceTracking.getReviewedby());
 				  greivanceTrack.setUnderReviewRemarks(greivanceTracking.getDescription());
 				  greivanceTrack.setUnderReviewDate(LocalDateTime.now());
 			  }
 			  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
+				  greivanceTrack.setResolvedby(greivanceTracking.getReviewedby());
 				  greivanceTrack.setResolvedRemarks(greivanceTracking.getDescription());
 				  greivanceTrack.setResolvedDate(LocalDateTime.now());
 			  }
@@ -432,30 +450,53 @@ public class VolunteerController
 
     @RequestMapping(value = "/updateProfile", method = RequestMethod.PUT,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<LoginInfo>  updateProfile(@RequestBody Volunteer volunteer)
+    public ResponseEntity<LoginInfo>  updateProfile(@RequestBody VolunteerVO volunteerVO)
     {
     	
     	LoginInfo loginInfo = new LoginInfo();
-    	Optional<Volunteer> volunteer1 = volunteerRespository.findById(volunteer.getIdvolunteer());
+    	if(null != volunteerVO.getIdvolunteer()) {
+    	Optional<Volunteer> volunteer1 = volunteerRespository.findById(volunteerVO.getIdvolunteer());
     	if(volunteer1.isPresent()) {
     		Volunteer vol = new Volunteer();
     		vol = volunteer1.get();
-    		vol.setFirstName(null != volunteer.getFirstName() ? volunteer.getFirstName() : vol.getFirstName());
-    		vol.setLastName(null != volunteer.getLastName() ? volunteer.getLastName() : vol.getLastName());
-    		vol.setAddress(null != volunteer.getAddress() ? volunteer.getAddress() : vol.getAddress());
-    		vol.setEmail(null != volunteer.getEmail() ? volunteer.getEmail() : vol.getEmail());
+    		vol.setFirstName(null != volunteerVO.getFirstName() ? volunteerVO.getFirstName() : vol.getFirstName());
+    		vol.setLastName(null != volunteerVO.getLastName() ? volunteerVO.getLastName() : vol.getLastName());
+    		vol.setAddress(null != volunteerVO.getAddress() ? volunteerVO.getAddress() : vol.getAddress());
+    		vol.setEmail(null != volunteerVO.getEmail() ? volunteerVO.getEmail() : vol.getEmail());
     		
     		volunteerRespository.save(vol);
     	
     	loginInfo.setMessage("Success"); 
 		loginInfo.setStatusCode("0");
-		 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-    	}else { 
+		 
+    	}else {
 			  loginInfo.setMessage("Failure"); 
 			  loginInfo.setStatusCode("1"); 
-			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
-		  
 		  }
+    	}else if(null != volunteerVO.getAdminId()){
+        	Optional<Admin> admin1 = adminRespository.findById(volunteerVO.getAdminId());
+        	if(admin1.isPresent()) {
+        		Admin a1 = new Admin();
+        		a1 = admin1.get();
+        		a1.setFirstName(null != volunteerVO.getFirstName() ? volunteerVO.getFirstName() : a1.getFirstName());
+        		a1.setLastName(null != volunteerVO.getLastName() ? volunteerVO.getLastName() : a1.getLastName());
+        		a1.setAddress(null != volunteerVO.getAddress() ? volunteerVO.getAddress() : a1.getAddress());
+        		a1.setEmail(null != volunteerVO.getEmail() ? volunteerVO.getEmail() : a1.getEmail());
+        		
+        		adminRespository.save(a1);
+        	
+        	loginInfo.setMessage("Success"); 
+    		loginInfo.setStatusCode("0");
+    		 
+        	}else {
+  			  loginInfo.setMessage("Failure"); 
+  			  loginInfo.setStatusCode("1"); 
+  		  }
+        	}else {
+			  loginInfo.setMessage("Failure"); 
+			  loginInfo.setStatusCode("1"); 
+		  }
+    	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
    
 }
     @RequestMapping(value = "/getSrCitizenDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -519,6 +560,32 @@ public class VolunteerController
     	
     }
     
+    public VolunteerAssignment mapVolunteerAssignmentVOToEntity(VolunteerAssignmentVO volunteerassignementVO) {
+    	
+    	VolunteerAssignment volunteerassignement = new VolunteerAssignment();
+    	Integer adminId = null;
+    	if(volunteerassignementVO.getRole() == 1) {
+			volunteerassignement.setIdvolunteer(volunteerassignementVO.getId());
+			adminId = volunteerRespository.findAdminId(volunteerassignementVO.getId());
+		}
+		volunteerassignement.setAddresssrcitizen(volunteerassignementVO.getAddresssrcitizen());
+		volunteerassignement.setAgesrcitizen(volunteerassignementVO.getAgesrcitizen());
+		volunteerassignement.setAdminId(null != volunteerassignementVO.getRole() && volunteerassignementVO.getRole() != 1? volunteerassignementVO.getId() : adminId );
+		volunteerassignement.setAssignedbyMember(volunteerassignementVO.getAssignedbyMember());
+		volunteerassignement.setBlocknamesrcitizen(volunteerassignementVO.getBlocknamesrcitizen());
+		volunteerassignement.setCallstatusCode(volunteerassignementVO.getCallstatusCode());
+		volunteerassignement.setDistrictsrcitizen(volunteerassignementVO.getDistrictsrcitizen());
+		volunteerassignement.setEmailsrcitizen(volunteerassignementVO.getEmailsrcitizen());
+		volunteerassignement.setGendersrcitizen(volunteerassignementVO.getGendersrcitizen());
+		volunteerassignement.setNamesrcitizen(volunteerassignementVO.getNamesrcitizen());
+		volunteerassignement.setPhonenosrcitizen(volunteerassignementVO.getPhonenosrcitizen());
+		volunteerassignement.setRole(volunteerassignementVO.getRole());
+		volunteerassignement.setStatesrcitizen(volunteerassignementVO.getStatesrcitizen());
+		volunteerassignement.setVillagesrcitizen(volunteerassignementVO.getVillagesrcitizen());
+		
+		return volunteerassignement;
+    }
 
+    
 
 }

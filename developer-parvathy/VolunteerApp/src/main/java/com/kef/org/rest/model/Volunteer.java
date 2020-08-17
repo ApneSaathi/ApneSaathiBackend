@@ -29,6 +29,9 @@ query = "SELECT v FROM Volunteer v WHERE v.idvolunteer =:idvolunteer "
 ),
 @NamedQuery(name = "Volunteer.findAllVolunteerDetailsByAdminId",
 query = "SELECT v FROM Volunteer v WHERE v.adminId =:adminId "
+),
+@NamedQuery(name = "Volunteer.findAdminId",
+query = "SELECT v.adminId FROM Volunteer v WHERE v.idvolunteer =:idvolunteer "
 )
 }) 
 public class Volunteer  {

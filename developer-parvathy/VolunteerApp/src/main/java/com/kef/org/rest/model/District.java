@@ -18,6 +18,9 @@ import org.hibernate.annotations.NamedQuery;
 @NamedQuery(name = "District.fetchDistrictDetailsByDistrictId",
 query = "SELECT D FROM District D WHERE D.adminId =:adminId and D.districtId =:districtId "
 ),
+@NamedQuery(name = "District.findDistrictId",
+query = "SELECT D.districtId FROM District D WHERE D.adminId =:adminId "
+)
 })
 public class District {
 

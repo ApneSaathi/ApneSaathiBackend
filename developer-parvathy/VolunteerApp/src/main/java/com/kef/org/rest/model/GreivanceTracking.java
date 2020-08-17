@@ -94,7 +94,15 @@ public class GreivanceTracking {
 	  
 	  @Column(name = "createdby",columnDefinition ="varchar(255) default NULL")
 	  private String createdBy;
+	  
+	  @Column(name = "raisedby",columnDefinition ="varchar(50) default NULL")
+	  private String raisedby;
+	  
+	  @Column(name = "reviewedby",columnDefinition ="varchar(50) default NULL")
+	  private String reviewedby;
 
+	  @Column(name = "resolvedby",columnDefinition ="varchar(50) default NULL")
+	  private String resolvedby;
 	
 
 	public LocalDateTime getUnderReviewDate() {
@@ -257,6 +265,30 @@ public class GreivanceTracking {
 
 	public void setDistrictsrcitizen(String districtsrcitizen) {
 		this.districtsrcitizen = districtsrcitizen;
+	}
+
+	public String getRaisedby() {
+		return raisedby;
+	}
+
+	public void setRaisedby(String raisedby) {
+		this.raisedby = raisedby;
+	}
+
+	public String getReviewedby() {
+		return reviewedby;
+	}
+
+	public void setReviewedby(String reviewedby) {
+		this.reviewedby = reviewedby;
+	}
+
+	public String getResolvedby() {
+		return resolvedby;
+	}
+
+	public void setResolvedby(String resolvedby) {
+		this.resolvedby = resolvedby;
 	}
 	  
 	  

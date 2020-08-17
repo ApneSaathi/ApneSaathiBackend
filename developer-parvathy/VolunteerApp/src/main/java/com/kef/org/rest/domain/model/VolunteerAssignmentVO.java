@@ -1,7 +1,5 @@
 package com.kef.org.rest.domain.model;
 
-import java.time.LocalDateTime;
-
 public class VolunteerAssignmentVO {
 	
     private Integer callid;
@@ -12,6 +10,7 @@ public class VolunteerAssignmentVO {
 	
 	private Integer role;
 	
+	private Integer id;
 
 	private String namesrcitizen;
 	
@@ -204,6 +203,14 @@ public class VolunteerAssignmentVO {
 
 	public void setLoggeddateTime(String loggeddateTime) {
 		this.loggeddateTime = loggeddateTime;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	
 	

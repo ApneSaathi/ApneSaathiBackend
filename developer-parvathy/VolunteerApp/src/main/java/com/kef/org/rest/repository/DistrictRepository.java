@@ -7,5 +7,7 @@ import com.kef.org.rest.model.District;
 public interface DistrictRepository extends JpaRepository<District, Integer>{
 	
 	District fetchDistrictDetailsByDistrictId(Integer districtId, Integer adminId);
+	
+	Integer findDistrictId(Integer adminId);
 
 }

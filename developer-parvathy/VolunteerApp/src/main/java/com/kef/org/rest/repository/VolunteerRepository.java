@@ -13,6 +13,8 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Integer> {
 	
 	    Integer fetchByphoneNumber(String phoneNo);
 	    
+	    Integer findAdminId(Integer idvolunteer);
+	    
 	    Volunteer fetchVolunteerDetails(String phoneNo);
 	    
 	    Volunteer findbyidvolunteer(Integer idvolunteer);

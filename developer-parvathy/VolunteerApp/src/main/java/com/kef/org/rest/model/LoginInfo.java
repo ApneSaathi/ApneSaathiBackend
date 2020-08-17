@@ -17,6 +17,7 @@ public class LoginInfo {
 	Integer id;
 	Integer LoginOTP;
 	Integer role;
+	Integer districtId;
 	List<VolunteerVO> volunteers;
 	List<VolunteerAssignmentVO> srCitizenList;
 	Volunteer volunteer;
@@ -119,6 +120,12 @@ public class LoginInfo {
 	}
 	public void setAdminDomain(com.kef.org.rest.domain.model.Admin adminDomain) {
 		this.adminDomain = adminDomain;
+	}
+	public Integer getDistrictId() {
+		return districtId;
+	}
+	public void setDistrictId(Integer districtId) {
+		this.districtId = districtId;
 	}
 
 }

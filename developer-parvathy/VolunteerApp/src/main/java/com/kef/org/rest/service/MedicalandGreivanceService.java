@@ -107,7 +107,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -142,7 +142,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -176,7 +176,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -200,7 +200,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -234,7 +234,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -268,7 +268,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -302,7 +302,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -336,7 +336,7 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
 							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
-							  greivanceTracking.setDistrictsrcitizen(volunteerassignement.getDistrictsrcitizen());
+							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  

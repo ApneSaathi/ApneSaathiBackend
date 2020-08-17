@@ -2,6 +2,7 @@ package com.kef.org.rest.domain.model;
 
 import java.util.List;
 
+import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.VolunteerAssignment;
 
 public class Admin {
@@ -24,9 +25,23 @@ public class Admin {
 
 	private String password;
 	
+	private String address;
+	
+	private String gender;
+	
 	private List<VolunteerVO> volunteerList;
 	
 	private List<VolunteerAssignment> adminCallList;
+	
+	private List<District> districtList;
+
+	public List<District> getDistrictList() {
+		return districtList;
+	}
+
+	public void setDistrictList(List<District> districtList) {
+		this.districtList = districtList;
+	}
 
 	public List<VolunteerAssignment> getAdminCallList() {
 		return adminCallList;
@@ -114,6 +129,22 @@ public class Admin {
 
 	public void setVolunteerList(List<VolunteerVO> volunteerList) {
 		this.volunteerList = volunteerList;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
 
 }
