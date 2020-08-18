@@ -57,7 +57,7 @@ public class VolunteerAssignmentVO {
 	
 	private String loggeddateTime;
 	
-	private List<MedicalandGreivance> medicalGreivanceList;
+	private List<MedicalandGreivance> medicalgreivance;
 
 	public Integer getCallid() {
 		return callid;
@@ -219,13 +219,14 @@ public class VolunteerAssignmentVO {
 		this.id = id;
 	}
 
-	public List<MedicalandGreivance> getMedicalGreivanceList() {
-		return medicalGreivanceList;
+	public List<MedicalandGreivance> getMedicalgreivance() {
+		return medicalgreivance;
 	}
 
-	public void setMedicalGreivanceList(List<MedicalandGreivance> medicalGreivanceList) {
-		this.medicalGreivanceList = medicalGreivanceList;
+	public void setMedicalgreivance(List<MedicalandGreivance> medicalgreivance) {
+		this.medicalgreivance = medicalgreivance;
 	}
+
 	
 	
 	
