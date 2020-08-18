@@ -551,7 +551,7 @@ public class VolunteerController
 					  medicalGreivanceList = volunteerAssignment.getMedicalandgreivance();
 					  medicalGreivanceList.forEach(p->p.setGreivanceTracking(null));
 				  }
-				  volunteerAssignmentVO1.setMedicalgreivance(!volunteerAssignment.getMedicalandgreivance().isEmpty()?medicalGreivanceList:null);
+				  volunteerAssignmentVO1.setMedicalandgreivance(!volunteerAssignment.getMedicalandgreivance().isEmpty()?medicalGreivanceList:null);
 				  volunteerAssignmentVOList.add(volunteerAssignmentVO1);
 				  
 			}

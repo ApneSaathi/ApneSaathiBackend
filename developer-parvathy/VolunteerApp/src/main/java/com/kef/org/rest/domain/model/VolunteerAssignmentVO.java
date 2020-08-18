@@ -41,7 +41,7 @@ public class VolunteerAssignmentVO {
 	
 	private Integer callstatusCode;
 	
-	 //private List <MedicalandGreivance> medicalandgreivance;
+	 private List <MedicalandGreivance> medicalandgreivance;
 	
 	/*
 	 * @Column(name = "call_status_subcode",columnDefinition = "integer default 1")
@@ -57,7 +57,6 @@ public class VolunteerAssignmentVO {
 	
 	private String loggeddateTime;
 	
-	private List<MedicalandGreivance> medicalgreivance;
 
 	public Integer getCallid() {
 		return callid;
@@ -219,13 +218,14 @@ public class VolunteerAssignmentVO {
 		this.id = id;
 	}
 
-	public List<MedicalandGreivance> getMedicalgreivance() {
-		return medicalgreivance;
+	public List<MedicalandGreivance> getMedicalandgreivance() {
+		return medicalandgreivance;
 	}
 
-	public void setMedicalgreivance(List<MedicalandGreivance> medicalgreivance) {
-		this.medicalgreivance = medicalgreivance;
+	public void setMedicalandgreivance(List<MedicalandGreivance> medicalandgreivance) {
+		this.medicalandgreivance = medicalandgreivance;
 	}
+
 
 	
 	
