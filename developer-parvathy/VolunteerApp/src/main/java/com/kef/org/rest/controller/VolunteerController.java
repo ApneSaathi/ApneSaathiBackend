@@ -510,6 +510,7 @@ public class VolunteerController
     public ResponseEntity<LoginInfo>  fetchSrCitizenDetails(@RequestBody VolunteerAssignmentVO volunteerAssignmentVO)
     {
     	LoginInfo loginInfo = new LoginInfo();
+    	List<MedicalandGreivance> medicalGreivanceList = null;
     	List<VolunteerAssignment> volunteerAssignmentList = new ArrayList<>();
     	List<VolunteerAssignmentVO> volunteerAssignmentVOList = new ArrayList<>();
     	String str = volunteerAssignmentVO.getLoggeddateTime();
@@ -545,6 +546,12 @@ public class VolunteerController
 				  volunteerAssignmentVO1.setStatesrcitizen(volunteerAssignment.getStatesrcitizen());
 				  volunteerAssignmentVO1.setVillagesrcitizen(volunteerAssignment.getVillagesrcitizen());
 				  volunteerAssignmentVO1.setCallstatusCode(volunteerAssignment.getCallstatusCode());
+				  if(!volunteerAssignment.getMedicalandgreivance().isEmpty()) {
+					  medicalGreivanceList = new ArrayList<>();
+					  medicalGreivanceList = volunteerAssignment.getMedicalandgreivance();
+					  medicalGreivanceList.forEach(p->p.setGreivanceTracking(null));
+				  }
+				  volunteerAssignmentVO1.setMedicalGreivanceList(!volunteerAssignment.getMedicalandgreivance().isEmpty()?medicalGreivanceList:null);
 				  volunteerAssignmentVOList.add(volunteerAssignmentVO1);
 				  
 			}

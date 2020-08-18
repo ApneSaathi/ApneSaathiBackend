@@ -1,5 +1,9 @@
 package com.kef.org.rest.domain.model;
 
+import java.util.List;
+
+import com.kef.org.rest.model.MedicalandGreivance;
+
 public class VolunteerAssignmentVO {
 	
     private Integer callid;
@@ -52,6 +56,8 @@ public class VolunteerAssignmentVO {
 	private String remarks;
 	
 	private String loggeddateTime;
+	
+	private List<MedicalandGreivance> medicalGreivanceList;
 
 	public Integer getCallid() {
 		return callid;
@@ -211,6 +217,14 @@ public class VolunteerAssignmentVO {
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public List<MedicalandGreivance> getMedicalGreivanceList() {
+		return medicalGreivanceList;
+	}
+
+	public void setMedicalGreivanceList(List<MedicalandGreivance> medicalGreivanceList) {
+		this.medicalGreivanceList = medicalGreivanceList;
 	}
 	
 	
