@@ -560,6 +560,8 @@ public class VolunteerController
 				  volunteerAssignmentVO1.setIdvolunteer(volunteerAssignment.getIdvolunteer());
 				  volunteerAssignmentVO1.setLoggeddateTime(volunteerAssignment.getLoggeddateTime().toString());
 				  volunteerAssignmentVO1.setNamesrcitizen(volunteerAssignment.getNamesrcitizen());
+				  volunteerAssignmentVO1.setTalkedwith((null!=volunteerAssignment.getTalkedwith() && !volunteerAssignment.getTalkedwith().equals(""))?(volunteerAssignment.getTalkedwith().equalsIgnoreCase(TalkedWith.SENIOR_CITIZEN.getValue()) ? "1" : volunteerAssignment.getTalkedwith().equalsIgnoreCase(TalkedWith.FAMILY_MEMBER_OF_SR_CITIZEN.getValue()) ? "2" : 
+				  volunteerAssignment.getTalkedwith().equalsIgnoreCase(TalkedWith.COMMUNITY_MEMBER.getValue()) ? "3" : null):null);
 				  volunteerAssignmentVO1.setPhonenosrcitizen(volunteerAssignment.getPhonenosrcitizen());
 				  volunteerAssignmentVO1.setStatesrcitizen(volunteerAssignment.getStatesrcitizen());
 				  volunteerAssignmentVO1.setVillagesrcitizen(volunteerAssignment.getVillagesrcitizen());
@@ -567,6 +569,7 @@ public class VolunteerController
 				  if(!volunteerAssignment.getMedicalandgreivance().isEmpty()) {
 					  medicalGreivanceList = new ArrayList<>();
 					  medicalGreivanceList = volunteerAssignment.getMedicalandgreivance();
+					  medicalGreivanceList = mapMedicalandGreivanceListToEntity(volunteerAssignment);
 					  medicalGreivanceList.forEach(p->p.setGreivanceTracking(null));
 				  }
 				  volunteerAssignmentVO1.setMedicalandgreivance(!volunteerAssignment.getMedicalandgreivance().isEmpty()?medicalGreivanceList:null);
@@ -794,7 +797,7 @@ public class VolunteerController
 				medicalandgreivance.setIsemergencyservicerequired(
 						null != medicalandgreivance.getIsemergencyservicerequired() && !medicalandgreivance.getIsemergencyservicerequired().equals("")?( medicalandgreivance
 								.getIsemergencyservicerequired().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
-				medicalandgreivance.setLackofessentialservices(null != medicalandgreivance.getLackofessentialservices() && medicalandgreivance.getLackofessentialservices().equals("")
+				medicalandgreivance.setLackofessentialservices(null != medicalandgreivance.getLackofessentialservices() && !medicalandgreivance.getLackofessentialservices().equals("")
 						?( medicalandgreivance.getLackofessentialservices().equalsIgnoreCase(InputEnum.YES.name()) ? "1"
 								: "2"):"");
 				medicalandgreivance.setIsSrCitizenAwareOfCovid_19(
