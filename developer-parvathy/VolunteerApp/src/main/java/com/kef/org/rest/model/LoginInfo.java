@@ -18,6 +18,7 @@ public class LoginInfo {
 	Integer LoginOTP;
 	Integer role;
 	Integer districtId;
+	Integer ratingId;
 	List<VolunteerVO> volunteers;
 	List<VolunteerAssignmentVO> srCitizenList;
 	Volunteer volunteer;
@@ -126,6 +127,12 @@ public class LoginInfo {
 	}
 	public void setDistrictId(Integer districtId) {
 		this.districtId = districtId;
+	}
+	public Integer getRatingId() {
+		return ratingId;
+	}
+	public void setRatingId(Integer ratingId) {
+		this.ratingId = ratingId;
 	}
 
 }

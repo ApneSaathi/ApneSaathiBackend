@@ -42,12 +42,14 @@ import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.model.VolunteerRating;
 import com.kef.org.rest.repository.AdminRepository;
 import com.kef.org.rest.repository.DistrictRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.SeniorCitizenRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
+import com.kef.org.rest.repository.VolunteerRatingRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 import com.kef.org.rest.service.AdminService;
 import com.kef.org.rest.service.MedicalandGreivanceService;
@@ -96,6 +98,9 @@ public class VolunteerController
     
     @Autowired
     private SeniorCitizenRepository seniorcitizenRepository;
+    
+    @Autowired
+    private VolunteerRatingRepository volunteerRatingRepostiry;
 	
    //Need to add role to LoginInfo object
     @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -587,6 +592,23 @@ public class VolunteerController
     	
     }
     
+    @RequestMapping(value = "/volunteerRating", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<LoginInfo>  provideRating(@RequestBody VolunteerRating volunteerRating)
+    {
+    	
+    	LoginInfo loginInfo = new LoginInfo();
+    	Integer ratingId = null;
+		if (null != volunteerRating) {
+			ratingId= volunteerRatingRepostiry.save(volunteerRating).getRatingId();
+			loginInfo.setMessage("Success");
+			loginInfo.setStatusCode("0");
+			loginInfo.setRatingId(ratingId);
+		}
+ 		 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+   
+}
+    
     public VolunteerAssignment mapVolunteerAssignmentVOToEntity(VolunteerAssignmentVO volunteerassignementVO) {
     	
     	VolunteerAssignment volunteerassignement = new VolunteerAssignment();
@@ -696,6 +718,10 @@ public class VolunteerController
     
 	public List<VolunteerAssignment> mapVolunteerAssignmentListtoEntity(List<VolunteerAssignment> volAssignment) {
 		List<MedicalandGreivance> medList = new ArrayList<>();
+		if(!volAssignment.isEmpty()) {
+			volAssignment.forEach(v->v.setTalkedwith((null!=v.getTalkedwith() && !v.getTalkedwith().equals(""))?(v.getTalkedwith().equalsIgnoreCase(TalkedWith.SENIOR_CITIZEN.getValue()) ? "1" : v.getTalkedwith().equalsIgnoreCase(TalkedWith.FAMILY_MEMBER_OF_SR_CITIZEN.getValue()) ? "2" : 
+				v.getTalkedwith().equalsIgnoreCase(TalkedWith.COMMUNITY_MEMBER.getValue()) ? "3" : null):null));
+    	}
 		for (VolunteerAssignment vol : volAssignment) {
 			medList = mapMedicalandGreivanceListToEntity(vol);
 		}
