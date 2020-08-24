@@ -31,7 +31,7 @@ public class MedicalandGreivance {
 	  private Integer callid;
 	  
 	  
-	  @Column(name = "IDVOLUNTEER",nullable =false)
+	  @Column(name = "IDVOLUNTEER")
 	  private Integer idvolunteer;
 	  
 	  @Column(name = "admin_id",nullable =false)

@@ -2,8 +2,10 @@ package com.kef.org.rest.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kef.org.rest.enums.BehaviouralChangeNoticed;
+import com.kef.org.rest.enums.InputEnum;
+import com.kef.org.rest.enums.RelatedInfoTalkedAbout;
+import com.kef.org.rest.enums.TalkedWith;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.VolunteerAssignment;
@@ -38,6 +44,7 @@ public class MedicalandGreivanceService {
 	Integer idgreivanceTracking;
 	
 	
+	
 	public static final Logger logger = LoggerFactory.getLogger(MedicalandGreivanceService.class);
 	  
 	@Transactional
@@ -51,11 +58,13 @@ public class MedicalandGreivanceService {
 	
 		
 		String talkedwith;
+		String relatedInfoTalkedAbout;
 		
 		
 		callstatuscode = volunteerassignement.getCallstatusCode();
 		//callstatussubcode = volunteerassignement.getCallstatussubCode();
-		talkedwith = volunteerassignement.getTalkedwith();
+		talkedwith = volunteerassignement.getTalkedwith().equals("1") ? TalkedWith.SENIOR_CITIZEN.getValue() : volunteerassignement.getTalkedwith().equals("2") ? TalkedWith.FAMILY_MEMBER_OF_SR_CITIZEN.getValue() : 
+				volunteerassignement.getTalkedwith().equals("3") ? TalkedWith.COMMUNITY_MEMBER.getValue() : null;
 		
 	
 		
@@ -70,9 +79,9 @@ public class MedicalandGreivanceService {
 			va1.setCallstatusCode(volunteerassignement.getCallstatusCode());
 			//va1.setCallstatussubCode(volunteerassignement.getCallstatussubCode());
 			va1.setLoggeddateTime(LocalDateTime.now());
-			va1.setTalkedwith(volunteerassignement.getTalkedwith());
-			va1.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-			va1.setIdvolunteer(null != volunteerassignement.getIdvolunteer() ? volunteerassignement.getIdvolunteer() :null);
+			va1.setTalkedwith(talkedwith!=null ? talkedwith : va1.getTalkedwith());
+			va1.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+			va1.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 			va1.setRole(null != volunteerassignement.getRole() ? volunteerassignement.getRole() : null);
 			
 			
@@ -85,10 +94,51 @@ public class MedicalandGreivanceService {
 					  while(medicalandgreivanceIterator.hasNext()) { 
 					  medicalandgreivance =  medicalandgreivanceIterator.next();
 					  medicalandgreivance.setCreatedDate(LocalDateTime.now());
+					  medicalandgreivance.setDiabetic(medicalandgreivance.getDiabetic().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setBloodpressure(medicalandgreivance.getBloodpressure().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setLungailment(medicalandgreivance.getLungailment().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setCancer_or_majorsurgery(medicalandgreivance.getCancer_or_majorsurgery().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setOther_ailments(medicalandgreivance.getOther_ailments().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+						String str = medicalandgreivance.getRelated_info_talked_about();
+						StringJoiner str1 = new StringJoiner(",");
+						if (str.contains(",")) {
+							List<String> strList = Arrays.asList(str.split(","));
+							for (String string : strList) {
+								str1.add(string.equals("1") ? RelatedInfoTalkedAbout.PREVENTION.getValue()
+										: string.equals("2") ? RelatedInfoTalkedAbout.ACCESS.getValue()
+												: RelatedInfoTalkedAbout.DETECION.getValue());
+							}
+						}
+
+						medicalandgreivance.setRelated_info_talked_about(
+								str.equals("1") ? RelatedInfoTalkedAbout.PREVENTION.getValue()
+										: str.equals("2") ? RelatedInfoTalkedAbout.ACCESS.getValue()
+												: str.equals("3") ? RelatedInfoTalkedAbout.DETECION.getValue()
+														: str1.toString());
+					  
+						medicalandgreivance.setBehavioural_change_noticed(
+								medicalandgreivance.getBehavioural_change_noticed().equals("1")
+										? BehaviouralChangeNoticed.YES.name()
+										: medicalandgreivance.getBehavioural_change_noticed().equals("2")
+												? BehaviouralChangeNoticed.NO.name()
+												: medicalandgreivance.getBehavioural_change_noticed().equals("3")
+														? BehaviouralChangeNoticed.MAY_BE.name()
+														: medicalandgreivance.getBehavioural_change_noticed().equals(
+																"4") ? BehaviouralChangeNoticed.NOT_APPLICABLE.name()
+																		: null);
+					  medicalandgreivance.setIscovidsymptoms(medicalandgreivance.getIscovidsymptoms().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHas_shortnes_of_breath(medicalandgreivance.getHas_shortnes_of_breath().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHas_sorethroat(medicalandgreivance.getHas_sorethroat().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHascough(medicalandgreivance.getHascough().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHasfever(medicalandgreivance.getHasfever().equals("1") ? InputEnum.Y.name(): InputEnum.N.name()); 
+					  medicalandgreivance.setIsemergencyservicerequired(medicalandgreivance.getIsemergencyservicerequired().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setLackofessentialservices(medicalandgreivance.getLackofessentialservices().equals("1") ? InputEnum.YES.name(): InputEnum.NO.name());
+					  medicalandgreivance.setIsSrCitizenAwareOfCovid_19(medicalandgreivance.getIsSrCitizenAwareOfCovid_19().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setIsSymptomsPreventionTaken(null != medicalandgreivance.getIsSymptomsPreventionTaken() && !medicalandgreivance.getIsSymptomsPreventionTaken().equals("") ?( medicalandgreivance.getIsSymptomsPreventionTaken().equals("1") ? InputEnum.Y.name(): InputEnum.N.name()) : "");
 					  medicalandgreivance.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 					  medicalandgreivance.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
-					  medicalandgreivance.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-					  medicalandgreivance.setIdvolunteer(volunteerassignement.getIdvolunteer());
+					  medicalandgreivance.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+					  medicalandgreivance.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 					  medicalandgreivance.setRole(volunteerassignement.getRole());
 					  medicalandgreivance.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 						  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
@@ -104,10 +154,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking = new GreivanceTracking();
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -139,10 +190,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -173,10 +225,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -197,10 +250,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -231,10 +285,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -265,10 +320,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -299,10 +355,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
@@ -333,10 +390,11 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getAdminId() ? volunteerassignement.getAdminId() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
+							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
+							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
+							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
 							  greivanceTracking.setCreatedBy(null != volunteerassignement.getRole() && volunteerassignement.getRole() == 1 ? "Volunteer" :
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  

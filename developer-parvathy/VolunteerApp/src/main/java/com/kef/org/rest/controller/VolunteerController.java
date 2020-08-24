@@ -7,8 +7,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +29,10 @@ import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.domain.model.VolunteerVO;
+import com.kef.org.rest.enums.BehaviouralChangeNoticed;
+import com.kef.org.rest.enums.InputEnum;
+import com.kef.org.rest.enums.RelatedInfoTalkedAbout;
+import com.kef.org.rest.enums.TalkedWith;
 import com.kef.org.rest.model.Admin;
 import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.GreivanceTracking;
@@ -186,7 +193,8 @@ public class VolunteerController
 			if (v1.isPresent()) {
 				loginInfo.setMessage("Success");
 				loginInfo.setStatusCode("0");
-				loginInfo.setVolunteer(v1.get());
+				Volunteer v = v1.get();
+				loginInfo.setVolunteer(mapVolunteerToEntity(v));
 			}
 		}
 		else if(null!=createdBy && (createdBy.equals("Staff Member") || createdBy.equals("Master Admin"))) {
@@ -204,7 +212,9 @@ public class VolunteerController
 				adminDomain.setMobileNo(a2.getMobileNo());
 				adminDomain.setRole(a2.getRole());
 				adminDomain.setState(a2.getState());
-				adminDomain.setAdminCallList(volunteerAssignmentList);
+				if(!volunteerAssignmentList.isEmpty()) {
+				adminDomain.setAdminCallList(mapVolunteerAssignmentListtoEntity(volunteerAssignmentList));
+				}
 				adminDomain.setDistrictList(null != a2.getDistrictList() ? a2.getDistrictList() : null);
 				
 				loginInfo.setMessage("Success");
@@ -230,7 +240,10 @@ public class VolunteerController
 		  if(v1.isPresent()) {
 		  loginInfo.setMessage("Success");
 		  loginInfo.setStatusCode("0"); 
-		  loginInfo.setVolunteerassignment(v1.get());
+		  VolunteerAssignment volAssignment = new VolunteerAssignment();
+		  volAssignment = v1.get();
+		  volAssignment.setMedicalandgreivance(mapMedicalandGreivanceListToEntity(volAssignment));
+		  loginInfo.setVolunteerassignment(volAssignment);
 		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
 		  
 		  }else { 
@@ -561,9 +574,10 @@ public class VolunteerController
 		  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
 		  
 		  }else { 
-			  loginInfo.setMessage("Failure"); 
-			  loginInfo.setStatusCode("1"); 
-			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+			  loginInfo.setMessage("Success"); 
+			  loginInfo.setStatusCode("0"); 
+			  loginInfo.setSrCitizenList(volunteerAssignmentVOList);
+			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
 		  
 		  }
 		 
@@ -600,6 +614,7 @@ public class VolunteerController
     }
   //khushboo - get volunteer list
     @RequestMapping(value = "/getVolunteerList", method = RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
     public ResponseEntity<LoginInfo> getVolunteerList(){
     	
@@ -642,6 +657,7 @@ public class VolunteerController
     	
     }
     @RequestMapping(value="/getSrCitizenList",method=RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
     public ResponseEntity<SrCitizenResponse> getSrCitizenList(){
     	
@@ -659,6 +675,114 @@ public class VolunteerController
     	
     	}
     
+    public Volunteer mapVolunteerToEntity(Volunteer volunteer) {
+    	
+    	Volunteer volunteer1 = new Volunteer();
+    	volunteer1 = volunteer;
+    	List<VolunteerAssignment> volAssignment = new ArrayList<>();
+    	if(!volunteer.getVolunteercallList().isEmpty()) {
+    		volunteer.getVolunteercallList().forEach(v->v.setTalkedwith((null!=v.getTalkedwith() && !v.getTalkedwith().equals(""))?(v.getTalkedwith().equalsIgnoreCase(TalkedWith.SENIOR_CITIZEN.getValue()) ? "1" : v.getTalkedwith().equalsIgnoreCase(TalkedWith.FAMILY_MEMBER_OF_SR_CITIZEN.getValue()) ? "2" : 
+				v.getTalkedwith().equalsIgnoreCase(TalkedWith.COMMUNITY_MEMBER.getValue()) ? "3" : null):null));
+    	}
+    	volAssignment = volunteer.getVolunteercallList();
+    	if(!volAssignment.isEmpty()) {
+    		volAssignment = mapVolunteerAssignmentListtoEntity(volAssignment);
+    	}
+    	
+    	volunteer1.setVolunteercallList(volAssignment);
+    	
+		return volunteer1;
+    }
     
+	public List<VolunteerAssignment> mapVolunteerAssignmentListtoEntity(List<VolunteerAssignment> volAssignment) {
+		List<MedicalandGreivance> medList = new ArrayList<>();
+		for (VolunteerAssignment vol : volAssignment) {
+			medList = mapMedicalandGreivanceListToEntity(vol);
+		}
+		return volAssignment;
+	}
+    
+	public List<MedicalandGreivance> mapMedicalandGreivanceListToEntity(VolunteerAssignment vol) {
+
+		List<MedicalandGreivance> medList = vol.getMedicalandgreivance();
+		if (!medList.isEmpty()) {
+			for (MedicalandGreivance medicalandgreivance : medList) {
+
+				medicalandgreivance.setDiabetic(null != medicalandgreivance.getDiabetic() && !medicalandgreivance.getDiabetic().equals("")
+						? (medicalandgreivance.getDiabetic().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+				medicalandgreivance.setBloodpressure(null != medicalandgreivance.getBloodpressure() && !medicalandgreivance.getBloodpressure().equals("")
+						?( medicalandgreivance.getBloodpressure().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+				medicalandgreivance.setLungailment(null != medicalandgreivance.getLungailment() && !medicalandgreivance.getLungailment().equals("")
+						?( medicalandgreivance.getLungailment().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+				medicalandgreivance.setCancer_or_majorsurgery(null != medicalandgreivance.getCancer_or_majorsurgery() && !medicalandgreivance.getCancer_or_majorsurgery().equals("")
+						?( medicalandgreivance.getCancer_or_majorsurgery().equalsIgnoreCase(InputEnum.Y.name()) ? "1"
+								: "2"):"");
+				medicalandgreivance.setOther_ailments(null != medicalandgreivance.getOther_ailments() && !medicalandgreivance.getOther_ailments().equals("")
+						?(medicalandgreivance.getOther_ailments().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2"): "");
+				String str = medicalandgreivance.getRelated_info_talked_about();
+				StringJoiner str1 = new StringJoiner(",");
+				if (str.contains(",")) {
+					List<String> strList = Arrays.asList(str.split(","));
+					for (String string : strList) {
+						str1.add(string.equalsIgnoreCase(RelatedInfoTalkedAbout.PREVENTION.getValue()) ? "1"
+								: string.equalsIgnoreCase(RelatedInfoTalkedAbout.ACCESS.getValue()) ? "2" : "3");
+					}
+				}
+
+				medicalandgreivance.setRelated_info_talked_about(
+						str.equalsIgnoreCase(RelatedInfoTalkedAbout.PREVENTION.getValue()) ? "1"
+								: str.equalsIgnoreCase(RelatedInfoTalkedAbout.ACCESS.getValue()) ? "2"
+										: str.equalsIgnoreCase(RelatedInfoTalkedAbout.DETECION.getValue()) ? "3"
+												: str1.toString());
+
+				if(null != medicalandgreivance.getBehavioural_change_noticed() && !medicalandgreivance.getBehavioural_change_noticed().equals("")) {
+				medicalandgreivance.setBehavioural_change_noticed(
+						 medicalandgreivance
+								.getBehavioural_change_noticed().equalsIgnoreCase(BehaviouralChangeNoticed.YES.name())
+										? "1"
+										: medicalandgreivance.getBehavioural_change_noticed()
+												.equalsIgnoreCase(BehaviouralChangeNoticed.NO.name())
+														? "2"
+														: medicalandgreivance.getBehavioural_change_noticed()
+																.equalsIgnoreCase(
+																		BehaviouralChangeNoticed.MAY_BE.name())
+																				? "3"
+																				: medicalandgreivance
+																						.getBehavioural_change_noticed()
+																						.equalsIgnoreCase(
+																								BehaviouralChangeNoticed.NOT_APPLICABLE
+																										.name()) ? "4"
+																												: "");
+				}
+				medicalandgreivance.setIscovidsymptoms(null != medicalandgreivance.getIscovidsymptoms()&& !medicalandgreivance.getIscovidsymptoms().equals("")
+						?(medicalandgreivance.getIscovidsymptoms().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2"):"");
+				medicalandgreivance.setHas_shortnes_of_breath(null != medicalandgreivance.getHas_shortnes_of_breath() && !medicalandgreivance.getHas_shortnes_of_breath().equals("")
+						?(medicalandgreivance.getHas_shortnes_of_breath().equalsIgnoreCase(InputEnum.Y.name()) ? "1"
+								: "2"):"");
+				medicalandgreivance.setHas_sorethroat(null != medicalandgreivance.getHas_sorethroat()&& !medicalandgreivance.getHas_sorethroat().equals("")
+						?( medicalandgreivance.getHas_sorethroat().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2"):"");
+				medicalandgreivance.setHascough(null != medicalandgreivance.getHascough() && !medicalandgreivance.getHascough().equals("")
+						?(medicalandgreivance.getHascough().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2"):"");
+				medicalandgreivance.setHasfever(null != medicalandgreivance.getHasfever() && !medicalandgreivance.getHasfever().equals("")
+						?(medicalandgreivance.getHasfever().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2"):"");
+				medicalandgreivance.setIsemergencyservicerequired(
+						null != medicalandgreivance.getIsemergencyservicerequired() && !medicalandgreivance.getIsemergencyservicerequired().equals("")?( medicalandgreivance
+								.getIsemergencyservicerequired().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+				medicalandgreivance.setLackofessentialservices(null != medicalandgreivance.getLackofessentialservices() && medicalandgreivance.getLackofessentialservices().equals("")
+						?( medicalandgreivance.getLackofessentialservices().equalsIgnoreCase(InputEnum.YES.name()) ? "1"
+								: "2"):"");
+				medicalandgreivance.setIsSrCitizenAwareOfCovid_19(
+						null != medicalandgreivance.getIsSrCitizenAwareOfCovid_19()  && !medicalandgreivance.getIsSrCitizenAwareOfCovid_19().equals("")?( medicalandgreivance
+								.getIsSrCitizenAwareOfCovid_19().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+				medicalandgreivance.setIsSymptomsPreventionTaken(
+						null != medicalandgreivance.getIsSymptomsPreventionTaken() && !medicalandgreivance.getIsSymptomsPreventionTaken().equals("") ?( medicalandgreivance
+								.getIsSymptomsPreventionTaken().equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2") : "");
+
+			}
+		}
+
+		return medList;
+
+	}
 
 }

@@ -37,10 +37,10 @@ public class VolunteerAssignment {
 	@Column(name = "CALL_ID",nullable =false)
     private Integer callid;
 
-	@Column(name = "idvolunteer",nullable =false)
+	@Column(name = "idvolunteer")
 	private Integer idvolunteer;
 	
-	@Column(name = "admin_id",nullable =false)
+	@Column(name = "admin_id")
 	private Integer adminId;
 	
 	@Column(name = "role",nullable =false)

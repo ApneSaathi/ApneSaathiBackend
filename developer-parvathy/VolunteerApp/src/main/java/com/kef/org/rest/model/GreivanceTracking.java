@@ -37,13 +37,13 @@ public class GreivanceTracking {
 	  @Column(name = "TRACKINGID",nullable =false)
 	  private Integer trackingId;
 	  
-	  @Column(name = "CALL_ID",nullable =false)
+	  @Column(name = "CALL_ID")
 	  private Integer callid;
 	  
-	  @Column(name = "IDVOLUNTEER",nullable =false)
+	  @Column(name = "IDVOLUNTEER")
 	  private Integer idvolunteer;
 	  
-	  @Column(name = "admin_id",nullable =false)
+	  @Column(name = "admin_id")
 	  private Integer adminId;
 	  
 	  @Column(name="role")
@@ -63,6 +63,9 @@ public class GreivanceTracking {
 
 	  @Column(name = "type_of_greivance")
 	  private String greivanceType;
+	  
+	  @Column(name = "phoneno_srcitizen")
+	  private String phoneNo;
 	  
 	  @Column(name = "status")
 	  private String status;
@@ -289,6 +292,14 @@ public class GreivanceTracking {
 
 	public void setResolvedby(String resolvedby) {
 		this.resolvedby = resolvedby;
+	}
+
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
 	}
 	  
 	  
