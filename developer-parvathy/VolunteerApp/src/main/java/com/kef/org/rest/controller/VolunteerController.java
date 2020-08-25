@@ -705,10 +705,6 @@ public class VolunteerController
     	Volunteer volunteer1 = new Volunteer();
     	volunteer1 = volunteer;
     	List<VolunteerAssignment> volAssignment = new ArrayList<>();
-    	if(!volunteer.getVolunteercallList().isEmpty()) {
-    		volunteer.getVolunteercallList().forEach(v->v.setTalkedwith((null!=v.getTalkedwith() && !v.getTalkedwith().equals(""))?(v.getTalkedwith().equalsIgnoreCase(TalkedWith.SENIOR_CITIZEN.getValue()) ? "1" : v.getTalkedwith().equalsIgnoreCase(TalkedWith.FAMILY_MEMBER_OF_SR_CITIZEN.getValue()) ? "2" : 
-				v.getTalkedwith().equalsIgnoreCase(TalkedWith.COMMUNITY_MEMBER.getValue()) ? "3" : null):null));
-    	}
     	volAssignment = volunteer.getVolunteercallList();
     	if(!volAssignment.isEmpty()) {
     		volAssignment = mapVolunteerAssignmentListtoEntity(volAssignment);
