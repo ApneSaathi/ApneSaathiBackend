@@ -32,7 +32,8 @@ query = "SELECT v FROM Volunteer v WHERE v.adminId =:adminId "
 ),
 @NamedQuery(name = "Volunteer.findAdminId",
 query = "SELECT v.adminId FROM Volunteer v WHERE v.idvolunteer =:idvolunteer "
-)
+),
+@NamedQuery(name="Volunteer.fetchByStatus",query="SELECT v FROM Volunteer v where v.status=?1")
 }) 
 public class Volunteer  {
 	
@@ -94,7 +95,8 @@ private Integer idvolunteer;
 	@Column(name="role")
 	private Integer role;
 	
-	
+	 @Column(name="STATUS")
+	 private String status;
  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
  @JoinColumn(name = "idvolunteer")
    private List <VolunteerAssignment> volunteercallList;
@@ -244,5 +246,10 @@ public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
 		this.adminId = adminId;
 	}
 	
-	
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 }

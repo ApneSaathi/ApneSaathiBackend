@@ -20,6 +20,6 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Integer> {
 	    Volunteer findbyidvolunteer(Integer idvolunteer);
 	    
 	    List<Volunteer> findAllVolunteerDetailsByAdminId(Integer adminId);
-
+	    List<Volunteer> fetchByStatus(String status);
 }
 

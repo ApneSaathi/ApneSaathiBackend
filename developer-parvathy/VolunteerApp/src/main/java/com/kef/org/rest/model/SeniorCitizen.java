@@ -5,10 +5,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "sr_citizen_info")	
+@Table(name = "sr_citizen_info")
+@NamedQueries({
+	@NamedQuery(name="SeniorCitizen.fetchByStatus",query="SELECT s FROM SeniorCitizen s where s.status=?1")	
+})
 public class SeniorCitizen {
 	
 	@Id
@@ -23,6 +28,17 @@ public class SeniorCitizen {
 	public void setSrCitizenId(Integer srCitizenId) {
 		this.srCitizenId = srCitizenId;
 	}
+	@Column(name="STATUS")
+	 private String status;
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
 
 	public String getFirstName() {
 		return firstName;

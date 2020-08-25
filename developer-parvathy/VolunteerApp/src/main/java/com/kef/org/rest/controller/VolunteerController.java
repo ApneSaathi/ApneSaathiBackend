@@ -638,13 +638,20 @@ public class VolunteerController
 		return volunteerassignement;
     }
   //khushboo - get volunteer list
-    @RequestMapping(value = "/getVolunteerList", method = RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    @RequestMapping(value = "/getVolunteersList", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
-    public ResponseEntity<LoginInfo> getVolunteerList(){
+public ResponseEntity<LoginInfo> getVolunteerList(@RequestBody Volunteer volunteerStatus){
     	
     	LoginInfo loginInfo = new LoginInfo();
-    	List<Volunteer> volunteer1 = volunteerRespository.findAll();
+    	String status=volunteerStatus.getStatus();
+    	List<Volunteer> volunteer1;
+    	if(status.length()<=0) {
+    		volunteer1 = volunteerRespository.findAll();
+    	}
+    	else {
+    		volunteer1=volunteerRespository.fetchByStatus(status);
+    	}
     	List <VolunteerVO> volunteers=new ArrayList<>();
     	if(null!=volunteer1 && !volunteer1.isEmpty()) {
     		
@@ -679,17 +686,25 @@ public class VolunteerController
     				loginInfo.setStatusCode("1"); 
     				return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
     	}
-    	
     }
-    @RequestMapping(value="/getSrCitizenList",method=RequestMethod.GET,consumes = "application/json", produces = "application/json")
+    
+    @RequestMapping(value="/getSrCitizenList",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
-    public ResponseEntity<SrCitizenResponse> getSrCitizenList(){
+ public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SeniorCitizen srCitizenStatus){
     	
     	SrCitizenResponse srCitizen =new SrCitizenResponse();
-    	List<SeniorCitizen> srCitizenList=seniorcitizenRepository.findAll();
-    	
-    	if(null!=srCitizenList && !srCitizenList.isEmpty()) {
+    	String status=srCitizenStatus.getStatus();
+    	List<SeniorCitizen> srCitizenList;
+    	if(status.length()<=0) {
+    		
+    		srCitizenList=seniorcitizenRepository.findAll();
+    		
+    	}
+    	else {
+    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
+    	}
+    		if(null!=srCitizenList && !srCitizenList.isEmpty()) {
     		srCitizen.setSrCitizenList(srCitizenList);
     		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
     	}
@@ -699,6 +714,46 @@ public class VolunteerController
     	}
     	
     	}
+    
+    @RequestMapping(value="/assignSrCitizen",method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @CrossOrigin(origins = "http://15.207.42.209:8080")
+    @ResponseBody
+    public ResponseEntity<LoginInfo> assignSrCitizen(@RequestBody SrCitizenResponse srCitizen){
+    	List<SeniorCitizen> srCitizenList= srCitizen.getSrCitizenList();
+    	LoginInfo loginInfo = new LoginInfo();
+    	if(srCitizenList!=null && !srCitizenList.isEmpty()) {
+    	
+    			for(SeniorCitizen sr:srCitizenList) {
+    		
+    				VolunteerAssignment vo=new VolunteerAssignment();
+    				vo.setIdvolunteer(srCitizen.getIdvolunteer());
+    				vo.setNamesrcitizen(sr.getFirstName());
+		    		vo.setPhonenosrcitizen(sr.getPhoneNo());
+		    		vo.setAgesrcitizen(sr.getAge());
+		    		vo.setGendersrcitizen(String.valueOf(sr.getGender()));
+		    		vo.setAddresssrcitizen(sr.getAddress());
+		    		vo.setEmailsrcitizen(sr.getEmailID());
+		    		vo.setStatesrcitizen(sr.getState());
+		    		vo.setDistrictsrcitizen(sr.getDistrict());
+		    		vo.setBlocknamesrcitizen(sr.getBlockName());
+		    		vo.setVillagesrcitizen(sr.getVillage());
+		    		vo.setCallstatusCode(1);
+		    		vo.setRole(srCitizen.getRole());
+		    		vo.setAdminId(srCitizen.getAdminId());
+		    		volunteerassignmentRespository.save(vo);
+		    		
+		   }
+    			loginInfo.setMessage("Success"); 
+	    		loginInfo.setStatusCode("0");
+	    		return new ResponseEntity<LoginInfo>(loginInfo,HttpStatus.OK);
+    	}
+    	else {
+    		
+    		 loginInfo.setMessage("Failure"); 
+			  loginInfo.setStatusCode("1"); 
+			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+    	}
+    }
     
     public Volunteer mapVolunteerToEntity(Volunteer volunteer) {
     	
