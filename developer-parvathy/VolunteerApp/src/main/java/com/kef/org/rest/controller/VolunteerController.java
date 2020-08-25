@@ -566,6 +566,8 @@ public class VolunteerController
 				  volunteerAssignmentVO1.setStatesrcitizen(volunteerAssignment.getStatesrcitizen());
 				  volunteerAssignmentVO1.setVillagesrcitizen(volunteerAssignment.getVillagesrcitizen());
 				  volunteerAssignmentVO1.setCallstatusCode(volunteerAssignment.getCallstatusCode());
+				  volunteerAssignmentVO1.setRole(volunteerAssignment.getRole());
+				  volunteerAssignmentVO1.setAdminId(volunteerAssignment.getAdminId());
 				  if(!volunteerAssignment.getMedicalandgreivance().isEmpty()) {
 					  medicalGreivanceList = new ArrayList<>();
 					  medicalGreivanceList = volunteerAssignment.getMedicalandgreivance();

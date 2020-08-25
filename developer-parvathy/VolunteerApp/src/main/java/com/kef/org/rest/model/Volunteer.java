@@ -100,6 +100,12 @@ private Integer idvolunteer;
  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
  @JoinColumn(name = "idvolunteer")
    private List <VolunteerAssignment> volunteercallList;
+ 
+ 
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "idvolunteer")
+	private List<VolunteerRating> volunteerRatingList;
+	 
 	
 
 	public Integer getIdvolunteer() {
@@ -251,5 +257,11 @@ public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public List<VolunteerRating> getVolunteerRatingList() {
+		return volunteerRatingList;
+	}
+	public void setVolunteerRatingList(List<VolunteerRating> volunteerRatingList) {
+		this.volunteerRatingList = volunteerRatingList;
 	}
 }
