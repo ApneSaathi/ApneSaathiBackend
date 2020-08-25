@@ -10,4 +10,6 @@ public interface AdminRepository extends JpaRepository<Admin, Integer>{
 	Admin fetchAdminDetails(String mobileNo);
 	
 	Integer fetchByphoneNumber(String mobileNo);
+	
+	String fetchAdminNameByAdminId(Integer adminId);
 }

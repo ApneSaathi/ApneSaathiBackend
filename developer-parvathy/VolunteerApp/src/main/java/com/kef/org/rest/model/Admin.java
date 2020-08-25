@@ -20,6 +20,9 @@ import javax.persistence.CascadeType;
 @NamedQuery(name = "Admin.fetchAdminDetails",
 query = "SELECT A FROM Admin A WHERE A.mobileNo =:mobileNo "
 ),
+@NamedQuery(name = "Admin.fetchAdminNameByAdminId",
+query = "SELECT A.firstName FROM Admin A WHERE A.adminId =:adminId "
+),
 @NamedQuery(name = "Admin.fetchByphoneNumber",
 query = "SELECT a.adminId FROM Admin a WHERE a.mobileNo =:mobileNo "
 )

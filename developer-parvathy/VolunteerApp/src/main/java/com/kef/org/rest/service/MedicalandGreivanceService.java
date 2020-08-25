@@ -20,9 +20,11 @@ import com.kef.org.rest.enums.TalkedWith;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.repository.AdminRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
+import com.kef.org.rest.repository.VolunteerRepository;
 
 @Service("medicalandgreivanceservice")
 public class MedicalandGreivanceService {
@@ -35,6 +37,12 @@ public class MedicalandGreivanceService {
 	
 	@Autowired
 	private GreivanceTrackingRepository greivanceTrackingRepository;
+	
+	@Autowired
+	private VolunteerRepository volunteerRepository;
+	
+	@Autowired
+	private AdminRepository adminRepository;
 
 	
 	private MedicalandGreivance medicalandgreivance;
@@ -84,7 +92,13 @@ public class MedicalandGreivanceService {
 			va1.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 			va1.setRole(null != volunteerassignement.getRole() ? volunteerassignement.getRole() : null);
 			
+			String name = "";
 			
+			if(null!=va1.getIdvolunteer() && va1.getRole().equals(1)) {
+				name = volunteerRepository.fetchVolunteerNameById(va1.getIdvolunteer());
+			}else if(null!=va1.getAdminId() && (va1.getRole().equals(2) || va1.getRole().equals(4))) {
+				name = adminRepository.fetchAdminNameByAdminId(va1.getAdminId());
+			}
 			
 			volunteerassignmentrespository.save(va1);
 			
@@ -154,8 +168,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking = new GreivanceTracking();
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -164,7 +178,6 @@ public class MedicalandGreivanceService {
 							  
 							  greivanceTracking.setIdgrevance(idgreivance);
 							  greivanceTracking.setGreivanceType("Lack of food");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getFoodshortage() ? "RAISED" : 
@@ -172,14 +185,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -190,8 +206,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -199,7 +215,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of access to banking services");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getAceesstobankingissue() ? "RAISED" : 
@@ -207,14 +222,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -225,8 +243,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -234,7 +252,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of hygiene and sanitation");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
@@ -250,8 +267,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -259,7 +276,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of medicine");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getMedicineshortage() ? "RAISED" : 
@@ -267,14 +283,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -285,8 +304,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -294,7 +313,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Phone & Internet services");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getPhoneandinternetissue() ? "RAISED" : 
@@ -302,14 +320,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -320,8 +341,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -329,7 +350,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of Safety");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getSafetyissue() ? "RAISED" : 
@@ -337,14 +357,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -355,8 +378,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -364,7 +387,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of utilities supply");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getUtilitysupplyissue() ? "RAISED" : 
@@ -372,14 +394,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 							  
@@ -390,8 +415,8 @@ public class MedicalandGreivanceService {
 							  greivanceTracking.setCallid(medicalandgreivance.getCallid());
 							  greivanceTracking.setGendersrcitizen(volunteerassignement.getGendersrcitizen());
 							  greivanceTracking.setIdgrevance(idgreivance);
-							  greivanceTracking.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
-							  greivanceTracking.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
+							  greivanceTracking.setAdminId(medicalandgreivance.getAdminId());
+							  greivanceTracking.setIdvolunteer(medicalandgreivance.getIdvolunteer());
 							  greivanceTracking.setRole(volunteerassignement.getRole());
 							  greivanceTracking.setDistrictsrcitizen(va1.getDistrictsrcitizen());
 							  greivanceTracking.setPhoneNo(va1.getPhonenosrcitizen());
@@ -399,7 +424,6 @@ public class MedicalandGreivanceService {
 								  null != volunteerassignement.getRole() && volunteerassignement.getRole() == 2 ? "Staff Member"  : "Master Admin");
 							  
 							  greivanceTracking.setGreivanceType("Lack of access to emergency services");
-							  greivanceTracking.setIdvolunteer(volunteerassignement.getIdvolunteer());
 							  greivanceTracking.setNamesrcitizen(volunteerassignement.getNamesrcitizen());
 							  greivanceTracking.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 							  greivanceTracking.setStatus(1 == medicalandgreivance.getEmergencyserviceissue() ? "RAISED" : 
@@ -407,14 +431,17 @@ public class MedicalandGreivanceService {
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
 								  greivanceTracking.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setCreatedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setRaisedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
 								  greivanceTracking.setUnderReviewRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setUnderReviewDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setReviewedby(name);
 							  }
 							  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
 								  greivanceTracking.setResolvedRemarks(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
 								  greivanceTracking.setResolvedDate(null != medicalandgreivance.getCreatedDate() ? medicalandgreivance.getCreatedDate() : LocalDateTime.now());
+								  greivanceTracking.setResolvedby(name);
 							  }
 							  greivanceTrackingList.add(greivanceTracking);
 						  }
