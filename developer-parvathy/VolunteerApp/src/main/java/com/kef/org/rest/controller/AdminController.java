@@ -66,14 +66,15 @@ public class AdminController {
     					
     				}else {
     					logger.info("Reached here"); 
-    			  		  loginInfo.setMessage("Failure");
+    			  		  loginInfo.setMessage("Wrong Password!!Passwords do not match ");
     			  		  loginInfo.setStatusCode("1"); 
+    			  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK );
     				}
     			}
     		}
     		
 		}
-		return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getMessage().equalsIgnoreCase("Success")? HttpStatus.OK : HttpStatus.CONFLICT);
+		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK );
     }
 	
 	public static String cryptWithMD5(String pass){

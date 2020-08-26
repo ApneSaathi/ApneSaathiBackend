@@ -132,9 +132,10 @@ public class VolunteerController
 				}
 			} else {
 				logger.info("Reached here");
-				loginInfo.setMessage("Failure");
+				loginInfo.setMessage("Phone Number doesn't exist!! Please check");
 				loginInfo.setStatusCode("1");
 				loginInfo.setId(volunteerService.findvolunteerId(phoneNo));
+				return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
 			}
 		} else {
 			logger.info("Reached here");
