@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
+import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.enums.BehaviouralChangeNoticed;
@@ -43,6 +46,7 @@ import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.model.VolunteerRating;
+import com.kef.org.rest.model.VolunteerResponse;
 import com.kef.org.rest.repository.AdminRepository;
 import com.kef.org.rest.repository.DistrictRepository;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
@@ -644,17 +648,36 @@ public class VolunteerController
     @RequestMapping(value = "/getVolunteersList", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
-public ResponseEntity<LoginInfo> getVolunteerList(@RequestBody Volunteer volunteerStatus){
+public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus){
     	
-    	LoginInfo loginInfo = new LoginInfo();
+    	VolunteerResponse vr=new VolunteerResponse();
     	String status=volunteerStatus.getStatus();
+    	Float ratingList;
+    	Integer limit;
+    	Integer pagenumber;
+    	
+    	
+    	if(volunteerStatus.getLimit()==null &&  volunteerStatus.getPagenumber()==null) {
+    			
+    		limit=10;
+    		pagenumber=0;
+    	}
+    	else {
+    		limit=volunteerStatus.getLimit();
+    		pagenumber=volunteerStatus.getPagenumber();
+    	}
     	List<Volunteer> volunteer1;
     	if(status.length()<=0) {
     		volunteer1 = volunteerRespository.findAll();
     	}
     	else {
-    		volunteer1=volunteerRespository.fetchByStatus(status);
+//    		volunteer1=volunteerRespository.fetchByStatus(status);
+    		Pageable ptry=PageRequest.of(pagenumber, limit);
+    		volunteer1=volunteerRespository.findAllByStatus(status,ptry);
     	}
+    	
+    	
+    	
     	List <VolunteerVO> volunteers=new ArrayList<>();
     	if(null!=volunteer1 && !volunteer1.isEmpty()) {
     		
@@ -670,34 +693,60 @@ public ResponseEntity<LoginInfo> getVolunteerList(@RequestBody Volunteer volunte
     			v1.setFirstName(v.getFirstName());
     			v1.setGender(v.getGender());
     			v1.setIdvolunteer(v.getIdvolunteer());
+    			ratingList=volunteerRatingRepostiry.getAvgRating(v.getIdvolunteer());
+    			if(ratingList==null) {
+    				ratingList=0F;
+    			}
+    			v1.setRating(ratingList);
     			v1.setLastName(v.getLastName());
     			v1.setphoneNo(v.getphoneNo());
     			v1.setPic(v.getPic());
     			v1.setRole(v.getRole());
     			v1.setState(v.getState());
     			v1.setVillage(v.getVillage());
+    			List<Object> count_srCitizen=volunteerassignmentRespository.countSrCitizen(v.getIdvolunteer());
+    			v1.setCount_SrCitizen(count_srCitizen.size());
+    				
+    			
     			volunteers.add(v1);
     		}
-    		loginInfo.setMessage("Success"); 
-    		loginInfo.setStatusCode("0");
-    		loginInfo.setVolunteers(volunteers);
-    		 return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
+    		vr.setMessage("Success"); 
+    		vr.setStatusCode(0);
+    		vr.setVolunteers(volunteers);
+    		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
+    		}
+    		
+    		
+    		 
 			
-		}
+		
     	else {
-    			loginInfo.setMessage("Failure");
-    				loginInfo.setStatusCode("1"); 
-    				return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+    			vr.setMessage("Failure");
+    				vr.setStatusCode(1); 
+    				return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
     	}
     }
     
     @RequestMapping(value="/getSrCitizenList",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
- public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SeniorCitizen srCitizenStatus){
+ public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SrCitizenVO srCitizenStatus){
     	
     	SrCitizenResponse srCitizen =new SrCitizenResponse();
     	String status=srCitizenStatus.getStatus();
+    	Integer limit;
+    	Integer pagenumber;
+    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
+    		limit=10;
+    		pagenumber=0;
+    		
+    	}
+    	else {
+    	limit=srCitizenStatus.getLimit();
+    	
+    	pagenumber=srCitizenStatus.getPagenumber();
+    	}
+    	
     	List<SeniorCitizen> srCitizenList;
     	if(status.length()<=0) {
     		
@@ -705,7 +754,9 @@ public ResponseEntity<LoginInfo> getVolunteerList(@RequestBody Volunteer volunte
     		
     	}
     	else {
-    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
+//    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
+    		Pageable ptry=PageRequest.of(pagenumber, limit);
+    		srCitizenList=seniorcitizenRepository.findAllByStatus(status, ptry);
     	}
     		if(null!=srCitizenList && !srCitizenList.isEmpty()) {
     		srCitizen.setSrCitizenList(srCitizenList);

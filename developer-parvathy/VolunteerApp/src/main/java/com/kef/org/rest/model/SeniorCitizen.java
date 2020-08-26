@@ -1,5 +1,7 @@
 package com.kef.org.rest.model;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -30,6 +32,29 @@ public class SeniorCitizen {
 	}
 	@Column(name="STATUS")
 	 private String status;
+
+	 @Column(name = "debordedon", columnDefinition ="TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE")
+	  private LocalDateTime deboardedOn;
+	 
+	 @Column(name="REASONS")
+	 private String reasons;
+	
+
+	 public LocalDateTime getDeboardedOn() {
+		return deboardedOn;
+	}
+
+	public void setDeboardedOn(LocalDateTime deboardedOn) {
+		this.deboardedOn = deboardedOn;
+	}
+
+	public String getReasons() {
+		return reasons;
+	}
+
+	public void setReasons(String reasons) {
+		this.reasons = reasons;
+	}
 
 	public String getStatus() {
 		return status;

@@ -7,8 +7,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NamedQuery;
+
 @Entity
 @Table(name = "volunteer_rating")
+@NamedQuery(name="VolunteerRating.getAvgRating",query="select avg(rating) from VolunteerRating where idvolunteer=?1 group by idvolunteer")
 public class VolunteerRating {
 
 	@Id

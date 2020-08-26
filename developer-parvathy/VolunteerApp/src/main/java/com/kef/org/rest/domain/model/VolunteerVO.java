@@ -37,6 +37,15 @@ public class VolunteerVO {
 
 	private Integer role;
 
+	private Float rating;
+	
+	private Integer count_SrCitizen;
+	
+	private Integer limit;
+	
+	private Integer pagenumber;
+	
+	private String status;
 	// private List <VolunteerAssignment> volunteercallList;
 
 	public Integer getIdvolunteer() {
@@ -173,5 +182,47 @@ public class VolunteerVO {
 	public void setAdminId(Integer adminId) {
 		this.adminId = adminId;
 	}
+
+	public Float getRating() {
+		return rating;
+	}
+
+	public void setRating(Float rating) {
+		this.rating = rating;
+	}
+
+	public Integer getCount_SrCitizen() {
+		return count_SrCitizen;
+	}
+
+	public void setCount_SrCitizen(Integer count_SrCitizen) {
+		this.count_SrCitizen = count_SrCitizen;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
+	}
+
+	public Integer getPagenumber() {
+		return pagenumber;
+	}
+
+	public void setPagenumber(Integer pagenumber) {
+		this.pagenumber = pagenumber;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
+	
 
 }
