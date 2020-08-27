@@ -9,5 +9,7 @@ import com.kef.org.rest.model.EmergencyContacts;
 public interface EmergencyContactsRepository extends JpaRepository<EmergencyContacts, Integer>{
 	
 	List<EmergencyContacts> fetchEmergencyContactsByDistrictId(Integer districtId);
+	
+	List<EmergencyContacts> fetchEmergencyContactsByDistrictName(String districtName);
 
 }

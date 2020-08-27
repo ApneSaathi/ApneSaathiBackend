@@ -15,6 +15,9 @@ import org.hibernate.annotations.NamedQuery;
 @NamedQueries({
 @NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictId",
 query = "SELECT E FROM EmergencyContacts E WHERE E.districtId =:districtId "
+),
+@NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictName",
+query = "SELECT E FROM EmergencyContacts E WHERE E.districtName =:districtName "
 )
 })
 public class EmergencyContacts {
@@ -27,6 +30,9 @@ public class EmergencyContacts {
 	
 	@Column(name = "districtId")
 	private Integer districtId;
+	
+	@Column(name = "DISTRICT_NAME")
+	private String districtName;
 
 	@Column(name = "HOSPITAL")
 	private String hospital;
@@ -119,5 +125,13 @@ public class EmergencyContacts {
 
 	public void setCustomeContact(String customeContact) {
 		this.customeContact = customeContact;
+	}
+
+	public String getDistrictName() {
+		return districtName;
+	}
+
+	public void setDistrictName(String districtName) {
+		this.districtName = districtName;
 	}
 }

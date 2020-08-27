@@ -44,16 +44,36 @@ public class EmergencyContactsController {
 			  emergencyContactsInfo.setEmergencyContactsList(emergencyContactsList);
 		  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.OK);
 		  
-		  }else { 
+		  }
+		  else { 
 			  emergencyContactsInfo.setMessage("Emergency Contacts doesn't exist for this district"); 
 			  emergencyContactsInfo.setStatusCode("1"); 
-			  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.BAD_REQUEST);
+			  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.OK);
 		  
 		  }
-    	}else {
-    		emergencyContactsInfo.setMessage("District Id can't be null"); 
+    	}else if(null != emergencyContacts.getDistrictName() && !emergencyContacts.getDistrictName().equals("")) {
+        	emergencyContactsList = emergencyContactsRepository.fetchEmergencyContactsByDistrictName(emergencyContacts.getDistrictName());
+    		
+  		  if(null != emergencyContactsList && !emergencyContactsList.isEmpty()) {
+  			  emergencyContactsInfo.setMessage("Success");
+  			  emergencyContactsInfo.setStatusCode("0"); 
+  			  emergencyContactsInfo.setEmergencyContactsList(emergencyContactsList);
+  		  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.OK);
+  		  
+  		  }
+  		  else { 
+  			  emergencyContactsInfo.setMessage("Emergency Contacts doesn't exist for this district"); 
+  			  emergencyContactsInfo.setStatusCode("1"); 
+  			  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.OK);
+  		  
+  		  }
+      	}
+    	
+    	
+    	else {
+    		emergencyContactsInfo.setMessage("District Id or District Name can't be null"); 
 			  emergencyContactsInfo.setStatusCode("1"); 
-			  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.BAD_REQUEST);
+			  return new ResponseEntity<EmergencyContactsInfo>(emergencyContactsInfo, HttpStatus.CONFLICT);
 		  
     	}
     	
