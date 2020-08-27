@@ -115,7 +115,7 @@ public class VolunteerController
 		Integer districtId = null;
 		logger.info("phoneNo" + phoneNo);
 		LoginInfo loginInfo = new LoginInfo();
-		if (null != phoneNo) {
+		if (null != phoneNo && !phoneNo.equals("")) {
 			if ((volunteerService.findvolunteerId(phoneNo)) != null) {
 				loginInfo.setMessage("Success");
 				loginInfo.setStatusCode("0");
