@@ -67,13 +67,13 @@ private Integer idvolunteer;
 	private String gender;
 	
 	@Column(name="STATE")
-	private String State;
+	private String state;
 	
 	@Column(name="DISTRICT")
-	private String District;
+	private String district;
 	
 	@Column(name="BLOCK_NAME")
-	private String Block;
+	private String block;
 	
 	@Column(name="ADDRESS")
 	private String address;
@@ -178,32 +178,32 @@ public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
 
 
 	public String getState() {
-		return State;
+		return state;
 	}
 
 
 	public void setState(String state) {
-		State = state;
+		this.state = state;
 	}
 
 
 	public String getDistrict() {
-		return District;
+		return district;
 	}
 
 
 	public void setDistrict(String district) {
-		District = district;
+		this.district = district;
 	}
 
 
 	public String getBlock() {
-		return Block;
+		return block;
 	}
 
 
 	public void setBlock(String block) {
-		Block = block;
+		this.block = block;
 	}
 
 
