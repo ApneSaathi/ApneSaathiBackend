@@ -8,6 +8,7 @@ public class SrCitizenResponse {
 	List<SeniorCitizen> srCitizenList;
 	private Integer role;
 	private Integer adminId;
+	private String message;
 	
 	public List<SeniorCitizen> getSrCitizenList() {
 		return srCitizenList;
@@ -41,6 +42,16 @@ public class SrCitizenResponse {
 	public void setAdminId(Integer adminId) {
 		this.adminId = adminId;
 	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+
 	
 	
 }

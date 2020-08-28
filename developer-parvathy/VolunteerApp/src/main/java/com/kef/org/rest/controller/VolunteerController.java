@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -57,6 +55,7 @@ import com.kef.org.rest.repository.VolunteerRatingRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 import com.kef.org.rest.service.AdminService;
 import com.kef.org.rest.service.MedicalandGreivanceService;
+import com.kef.org.rest.service.SeniorCitizenService;
 import com.kef.org.rest.service.VolunteerService;
 
 @RestController
@@ -106,6 +105,8 @@ public class VolunteerController
     @Autowired
     private VolunteerRatingRepository volunteerRatingRepostiry;
 	
+ @Autowired
+   SeniorCitizenService srCitizenService;
    //Need to add role to LoginInfo object
     @RequestMapping(value = "/loginVolunteerOrAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
@@ -650,45 +651,26 @@ public class VolunteerController
     @ResponseBody
 public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus){
     	
-    	VolunteerResponse vr=new VolunteerResponse();
-    	String status=volunteerStatus.getStatus();
     	Float ratingList;
-    	Integer limit;
-    	Integer pagenumber;
-    	
-    	
-    	if(volunteerStatus.getLimit()==null &&  volunteerStatus.getPagenumber()==null) {
-    			
-    		limit=10;
-    		pagenumber=0;
-    	}
-    	else {
-    		limit=volunteerStatus.getLimit();
-    		pagenumber=volunteerStatus.getPagenumber();
-    	}
-    	List<Volunteer> volunteer1;
-    	if(status.length()<=0) {
-    		volunteer1 = volunteerRespository.findAll();
-    	}
-    	else {
-//    		volunteer1=volunteerRespository.fetchByStatus(status);
-    		Pageable ptry=PageRequest.of(pagenumber, limit);
-    		volunteer1=volunteerRespository.findAllByStatus(status,ptry);
-    	}
-    	
-    	
-    	
+    	VolunteerResponse vr=new VolunteerResponse();
     	List <VolunteerVO> volunteers=new ArrayList<>();
-    	if(null!=volunteer1 && !volunteer1.isEmpty()) {
+    	List<Volunteer> volunteerList;
+    	volunteerList=volunteerService.getVolunteerList(volunteerStatus);
+    	
+    	if(volunteerList!=null && !volunteerList.isEmpty()) {
     		
-    		for (Volunteer v:volunteer1) {
+    		
+    	
+//    	if(null!=volunteerList && !volunteerList.isEmpty()) {
+    		
+    		for (Volunteer v:volunteerList) {
     			VolunteerVO v1=new VolunteerVO();
     			v1.setAddress(v.getAddress());
     			v1.setAdminId(v.getAdminId());
     			v1.setAssignedtoFellow(v.getAssignedtoFellow());
     			v1.setAssignedtoFellowContact(v.getAssignedtoFellowContact());
     			v1.setBlock(v.getBlock());
-    			v1.setDistrict(v.getBlock());
+    			v1.setDistrict(v.getDistrict());
     			v1.setEmail(v.getEmail());
     			v1.setFirstName(v.getFirstName());
     			v1.setGender(v.getGender());
@@ -733,40 +715,49 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
  public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SrCitizenVO srCitizenStatus){
     	
     	SrCitizenResponse srCitizen =new SrCitizenResponse();
-    	String status=srCitizenStatus.getStatus();
-    	Integer limit;
-    	Integer pagenumber;
-    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
-    		limit=10;
-    		pagenumber=0;
-    		
-    	}
-    	else {
-    	limit=srCitizenStatus.getLimit();
-    	
-    	pagenumber=srCitizenStatus.getPagenumber();
-    	}
-    	
     	List<SeniorCitizen> srCitizenList;
-    	if(status.length()<=0) {
-    		
-    		srCitizenList=seniorcitizenRepository.findAll();
-    		
-    	}
-    	else {
-//    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
-    		Pageable ptry=PageRequest.of(pagenumber, limit);
-    		srCitizenList=seniorcitizenRepository.findAllByStatus(status, ptry);
-    	}
-    		if(null!=srCitizenList && !srCitizenList.isEmpty()) {
+    	srCitizenList=srCitizenService.getSeniorCitizen(srCitizenStatus);
+    	
+    	if(null!=srCitizenList && !srCitizenList.isEmpty()) {
     		srCitizen.setSrCitizenList(srCitizenList);
+    		srCitizen.setMessage("Success");
     		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
     	}
     	else {
-    		
+    		srCitizen.setMessage("Failure");
     		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.CONFLICT);
     	}
-    	
+//    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
+//    		limit=10;
+//    		pagenumber=0;
+//    		
+//    	}
+//    	else {
+//    	limit=srCitizenStatus.getLimit();
+//    	
+//    	pagenumber=srCitizenStatus.getPagenumber();
+//    	}
+//    	
+//    	List<SeniorCitizen> srCitizenList;
+//    	if(status.length()<=0) {
+//    		
+//    		srCitizenList=seniorcitizenRepository.findAll();
+//    		
+//    	}
+//    	else {
+////    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
+//    		Pageable ptry=PageRequest.of(pagenumber, limit);
+//    		srCitizenList=seniorcitizenRepository.findAllByStatus(status, ptry);
+//    	}
+//    		if(null!=srCitizenList && !srCitizenList.isEmpty()) {
+//    		srCitizen.setSrCitizenList(srCitizenList);
+//    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
+//    	}
+//    	else {
+//    		
+//    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.CONFLICT);
+//    	}
+//    	
     	}
     
     @RequestMapping(value="/assignSrCitizen",method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -775,10 +766,19 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
     public ResponseEntity<LoginInfo> assignSrCitizen(@RequestBody SrCitizenResponse srCitizen){
     	List<SeniorCitizen> srCitizenList= srCitizen.getSrCitizenList();
     	LoginInfo loginInfo = new LoginInfo();
+   
+ 
     	if(srCitizenList!=null && !srCitizenList.isEmpty()) {
     	
     			for(SeniorCitizen sr:srCitizenList) {
     		
+    				Integer idsrcitizen=sr.getSrCitizenId();
+    				if(sr.getStatus().equalsIgnoreCase("UnAssigned") && idsrcitizen!=null) {
+    						
+    					srCitizenService.updateStatus("Assigned",idsrcitizen);
+    					
+    				}
+    				
     				VolunteerAssignment vo=new VolunteerAssignment();
     				vo.setIdvolunteer(srCitizen.getIdvolunteer());
     				vo.setNamesrcitizen(sr.getFirstName());
@@ -799,6 +799,7 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 		   }
     			loginInfo.setMessage("Success"); 
 	    		loginInfo.setStatusCode("0");
+	    		
 	    		return new ResponseEntity<LoginInfo>(loginInfo,HttpStatus.OK);
     	}
     	else {
@@ -809,6 +810,7 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
     	}
     }
     
+
     public Volunteer mapVolunteerToEntity(Volunteer volunteer) {
     	
     	Volunteer volunteer1 = new Volunteer();

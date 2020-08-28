@@ -46,6 +46,11 @@ public class VolunteerVO {
 	private Integer pagenumber;
 	
 	private String status;
+	
+	 private String filterState;
+	 private String filterDistrict;
+	 private String filterBlock;
+	 private String sortBy;
 	// private List <VolunteerAssignment> volunteercallList;
 
 	public Integer getIdvolunteer() {
@@ -221,6 +226,38 @@ public class VolunteerVO {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public String getFilterState() {
+		return filterState;
+	}
+
+	public void setFilterState(String filterState) {
+		this.filterState = filterState;
+	}
+
+	public String getFilterDistrict() {
+		return filterDistrict;
+	}
+
+	public void setFilterDistrict(String filterDistrict) {
+		this.filterDistrict = filterDistrict;
+	}
+
+	public String getFilterBlock() {
+		return filterBlock;
+	}
+
+	public void setFilterBlock(String filterBlock) {
+		this.filterBlock = filterBlock;
+	}
+
+	public String getSortBy() {
+		return sortBy;
+	}
+
+	public void setSortBy(String sortBy) {
+		this.sortBy = sortBy;
 	}
 	
 	

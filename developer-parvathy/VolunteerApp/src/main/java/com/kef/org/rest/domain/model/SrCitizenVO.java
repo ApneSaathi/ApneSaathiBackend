@@ -24,8 +24,10 @@ public class SrCitizenVO {
 	 private Integer pagenumber;
 	 
 	 //sorting and filter by
-	 private String filterBy;
-	 private String filterByData;
+	 private String filterState;
+	 private String filterDistrict;
+	 private String filterBlock;
+	 
 	 
 	public Integer getSrCitizenId() {
 		return srCitizenId;
@@ -123,6 +125,26 @@ public class SrCitizenVO {
 	public void setPagenumber(Integer pagenumber) {
 		this.pagenumber = pagenumber;
 	}
+	public String getFilterState() {
+		return filterState;
+	}
+	public void setFilterState(String filterState) {
+		this.filterState = filterState;
+	}
+	public String getFilterDistrict() {
+		return filterDistrict;
+	}
+	public void setFilterDistrict(String filterDistrict) {
+		this.filterDistrict = filterDistrict;
+	}
+	public String getFilterBlock() {
+		return filterBlock;
+	}
+	public void setFilterBlock(String filterBlock) {
+		this.filterBlock = filterBlock;
+	}
+	
+	
 
 	 
 }
