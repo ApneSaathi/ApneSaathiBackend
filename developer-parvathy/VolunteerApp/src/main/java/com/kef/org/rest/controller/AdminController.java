@@ -77,6 +77,40 @@ public class AdminController {
 		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK );
     }
 	
+	@RequestMapping(value = "/verifyAdmin", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<LoginInfo>  verifyAdmin(@RequestBody Admin admin)
+    { 
+		LoginInfo loginInfo = new LoginInfo();
+		com.kef.org.rest.model.Admin adminDAO = new com.kef.org.rest.model.Admin();
+		String encryptedPwd = null != admin.getPassword() ? cryptWithMD5(admin.getPassword()) : null;
+		
+		if(null != admin) {
+    		if(null!= admin.getUserName()) {
+    			adminDAO = adminRespository.fetchAdminByUserName(admin.getUserName());
+    			if(null != adminDAO) {
+    				if(null != adminDAO.getPassword() &&  encryptedPwd.equals(new String(adminDAO.getPassword()))) {
+    					loginInfo.setMessage("Success"); 
+    		    		loginInfo.setStatusCode("0");
+    					
+    				}else {
+    					logger.info("Reached here"); 
+    			  		  loginInfo.setMessage("Wrong Password!!Passwords do not match ");
+    			  		  loginInfo.setStatusCode("1"); 
+    			  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.BAD_REQUEST );
+    				}
+    			}else {
+    				logger.info("Reached here"); 
+			  		  loginInfo.setMessage("User doesn't exist");
+			  		  loginInfo.setStatusCode("1"); 
+			  		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.BAD_REQUEST );
+    			}
+    		}
+    		
+		}
+		return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK );
+    }
+	
 	public static String cryptWithMD5(String pass){
 	    try {
 	        md = MessageDigest.getInstance("MD5");

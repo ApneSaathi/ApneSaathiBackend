@@ -8,7 +8,9 @@ import com.kef.org.rest.model.VolunteerAssignment;
 public class Admin {
 
 	private Integer adminId;
-
+	
+	private String userName;
+	
 	private String mobileNo;
 
 	private String firstName;
@@ -145,6 +147,14 @@ public class Admin {
 
 	public void setGender(String gender) {
 		this.gender = gender;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 }

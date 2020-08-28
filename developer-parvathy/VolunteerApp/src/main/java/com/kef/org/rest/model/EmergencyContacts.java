@@ -13,24 +13,19 @@ import org.hibernate.annotations.NamedQuery;
 @Entity
 @Table(name = "emergency_contacts")
 @NamedQueries({
-@NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictId",
-query = "SELECT E FROM EmergencyContacts E WHERE E.districtId =:districtId "
-),
-@NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictName",
-query = "SELECT E FROM EmergencyContacts E WHERE E.districtName =:districtName "
-)
-})
+		@NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictId", query = "SELECT E FROM EmergencyContacts E WHERE E.districtId =:districtId "),
+		@NamedQuery(name = "EmergencyContacts.fetchEmergencyContactsByDistrictName", query = "SELECT E FROM EmergencyContacts E WHERE E.districtName =:districtName ") })
 public class EmergencyContacts {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "EMERGENCY_ID")
 
 	private Integer emergencyId;
-	
+
 	@Column(name = "districtId")
 	private Integer districtId;
-	
+
 	@Column(name = "DISTRICT_NAME")
 	private String districtName;
 
@@ -42,7 +37,7 @@ public class EmergencyContacts {
 
 	@Column(name = "AMBULANCE")
 	private String ambulance;
-	
+
 	@Column(name = "COVID_CTRL_ROOM")
 	private String covidCtrlRoom;
 
@@ -54,6 +49,18 @@ public class EmergencyContacts {
 
 	@Column(name = "CUSTOM_CONTACT")
 	private String customeContact;
+
+	@Column(name = "HOSPITAL_NAME")
+	private String hospitalName;
+
+	@Column(name = "POLICE_REGION")
+	private String policeRegion;
+
+	@Column(name = "CTRL_ROOM_REGION")
+	private String ctrlRoomRegion;
+
+	@Column(name = "CONTACT_NAME")
+	private String contactName;
 
 	public Integer getEmergencyId() {
 		return emergencyId;
@@ -133,5 +140,37 @@ public class EmergencyContacts {
 
 	public void setDistrictName(String districtName) {
 		this.districtName = districtName;
+	}
+
+	public String getHospitalName() {
+		return hospitalName;
+	}
+
+	public void setHospitalName(String hospitalName) {
+		this.hospitalName = hospitalName;
+	}
+
+	public String getPoliceRegion() {
+		return policeRegion;
+	}
+
+	public void setPoliceRegion(String policeRegion) {
+		this.policeRegion = policeRegion;
+	}
+
+	public String getCtrlRoomRegion() {
+		return ctrlRoomRegion;
+	}
+
+	public void setCtrlRoomRegion(String ctrlRoomRegion) {
+		this.ctrlRoomRegion = ctrlRoomRegion;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
 	}
 }

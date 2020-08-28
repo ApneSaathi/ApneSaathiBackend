@@ -23,6 +23,9 @@ query = "SELECT A FROM Admin A WHERE A.mobileNo =:mobileNo "
 @NamedQuery(name = "Admin.fetchAdminNameByAdminId",
 query = "SELECT A.firstName FROM Admin A WHERE A.adminId =:adminId "
 ),
+@NamedQuery(name = "Admin.fetchAdminByUserName",
+query = "SELECT a FROM Admin a WHERE a.userName =:userName"
+),
 @NamedQuery(name = "Admin.fetchByphoneNumber",
 query = "SELECT a.adminId FROM Admin a WHERE a.mobileNo =:mobileNo "
 )
@@ -55,6 +58,9 @@ public class Admin {
 	
 	@Column(name="ROLE")
 	private Integer role;
+	
+	@Column(name="USERNAME")
+	private String userName;
 	
 	@Column(name="PASSWORD")
 	private char[] password;
@@ -175,6 +181,14 @@ public class Admin {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 
