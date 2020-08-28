@@ -90,6 +90,19 @@ public class AdminController {
     			adminDAO = adminRespository.fetchAdminByUserName(admin.getUserName());
     			if(null != adminDAO) {
     				if(null != adminDAO.getPassword() &&  encryptedPwd.equals(new String(adminDAO.getPassword()))) {
+    					Admin admin1 = new Admin();
+    					admin1.setAddress(adminDAO.getAddress());
+    					admin1.setAdminId(adminDAO.getAdminId());
+    					admin1.setDistrict(adminDAO.getDistrict());
+    					admin1.setEmail(adminDAO.getEmail());
+    					admin1.setFirstName(adminDAO.getFirstName());
+    					admin1.setGender(adminDAO.getGender());
+    					admin1.setLastName(adminDAO.getLastName());
+    					admin1.setMobileNo(adminDAO.getMobileNo());
+    					admin1.setRole(adminDAO.getRole());
+    					admin1.setState(adminDAO.getState());
+    					admin1.setUserName(adminDAO.getUserName());
+    					loginInfo.setAdminDomain(admin1);
     					loginInfo.setMessage("Success"); 
     		    		loginInfo.setStatusCode("0");
     					
