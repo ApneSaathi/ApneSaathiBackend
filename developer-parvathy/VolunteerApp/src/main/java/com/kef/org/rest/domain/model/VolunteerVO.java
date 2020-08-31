@@ -50,7 +50,8 @@ public class VolunteerVO {
 	 private String filterState;
 	 private String filterDistrict;
 	 private String filterBlock;
-	 private String sortBy;
+	 private  String sortBy;
+	 private String sortType;
 	// private List <VolunteerAssignment> volunteercallList;
 
 	public Integer getIdvolunteer() {
@@ -258,6 +259,14 @@ public class VolunteerVO {
 
 	public void setSortBy(String sortBy) {
 		this.sortBy = sortBy;
+	}
+
+	public String getSortType() {
+		return sortType;
+	}
+
+	public void setSortType(String sortType) {
+		this.sortType = sortType;
 	}
 	
 	

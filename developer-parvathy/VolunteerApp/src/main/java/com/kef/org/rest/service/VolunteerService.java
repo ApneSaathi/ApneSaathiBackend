@@ -1,10 +1,13 @@
 package com.kef.org.rest.service;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.domain.model.SrCitizenVO;
@@ -38,17 +41,21 @@ public class VolunteerService implements VolunteerInterface{
 		return volunteerRespository.findAllVolunteerDetailsByAdminId(adminId);
 	}
 	
-	
-	public List<Volunteer> getVolunteerList(VolunteerVO volunteerStatus){
+
+
+	public List<VolunteerVO> getVolunteerListByQuery(VolunteerVO volunteerStatus){
 		
-		List<Volunteer> result=null;
+		
+		List<VolunteerVO> result=new ArrayList<VolunteerVO>();
 		String status=volunteerStatus.getStatus();
 		String filterState=volunteerStatus.getFilterState();
 		String filterDistrict=volunteerStatus.getFilterDistrict();
 		String filterBlock=volunteerStatus.getFilterBlock();
-//		String sortBy=volunteerStatus.getSortBy();
+		String sortBy=volunteerStatus.getSortBy();
+		String sortType=volunteerStatus.getSortType();
 		Integer limit;
     	Integer pagenumber;
+    	List<Object> resultList;
     	
     	if(volunteerStatus.getLimit()==null && volunteerStatus.getPagenumber()==null) {
     		limit=10;
@@ -61,45 +68,84 @@ public class VolunteerService implements VolunteerInterface{
     	pagenumber=volunteerStatus.getPagenumber();
     	}
     	
-    	Pageable ptry=PageRequest.of(pagenumber, limit);
-		
-    	if(filterState!=null && filterDistrict==null && filterBlock==null) {
-    		result=volunteerRespository.findByStatusAndStateIgnoreCase(status, filterState, ptry);
-
-    	}
-    	else if(filterDistrict!=null && filterState==null && filterBlock==null ) {
-    		result=volunteerRespository.findByStatusAndDistrictIgnoreCase(status, filterDistrict, ptry);
-    	}
-    	else if(filterDistrict==null && filterState==null && filterBlock!=null) {
-    		result=volunteerRespository.findByStatusAndBlockIgnoreCase(status, filterBlock, ptry);
-    	}
-    	else if(filterState!=null && filterDistrict!=null && filterBlock==null) {
-    		result=volunteerRespository.findByStatusAndStateAndDistrictIgnoreCase(status, filterState, filterDistrict,ptry);
+    	Pageable ptry;
+    	if(sortBy!=null && sortType!=null) {
+    		Direction direction=sortType.equalsIgnoreCase("DESC") && sortType!=null?Sort.Direction.DESC 
+    			: Sort.Direction.ASC;
+ 
+    	
     		
-    	}
-    	else if(filterState!=null && filterDistrict==null && filterBlock!=null) {
-    		result=volunteerRespository.findByStatusAndStateAndBlockIgnoreCase(status, filterState, filterBlock, ptry);
+    	
+    		 if (sortBy.equalsIgnoreCase("rating")&& sortBy!=null) {
     		
-    	}
-    	else if(filterState==null && filterDistrict!=null && filterBlock!=null) {
-    		result=volunteerRespository.findByStatusAndDistrictAndBlockIgnoreCase(status, filterDistrict, filterBlock, ptry);
+    			ptry=PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction,"(average_rating)"));
+    			}
+    	
+    		else if(sortBy.equalsIgnoreCase("assignedSrCitizen") && sortBy!=null) {
     		
-    	}
-    	else if (filterState!=null && filterDistrict!=null && filterBlock!=null){
-    		
-    		result=volunteerRespository.findByStatusAndStateAndDistrictAndBlockIgnoreCase(status, filterState, filterDistrict, filterBlock, ptry);
+    			ptry=PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction, "(countsr)"));
+    			}
+    		else {
+    			ptry=PageRequest.of(pagenumber, limit);
+    		}
     	}
     	else {
-    		result=volunteerRespository.findAllByStatusIgnoreCase(status,ptry);
+    		ptry=PageRequest.of(pagenumber, limit);
+    	}
+    	if(filterState!=null && filterDistrict==null && filterBlock==null) {
+    		resultList=volunteerRespository.fetchByStatusAndState(status, filterState, ptry);
+
+    	}
+
+    	else if(filterState!=null && filterDistrict!=null && filterBlock==null) {
+    		resultList=volunteerRespository.fetchByStatusAndStateAndDistrict(status, filterState, filterDistrict, ptry);
+    		
+    	}
+ 
+    	else if (filterState!=null && filterDistrict!=null && filterBlock!=null){
+    		
+    		resultList=volunteerRespository.fetchByStatusAndStateAndDistrictAndBlock(status, filterState, filterDistrict, filterBlock, ptry);
+    	}
+    	else {
+    		resultList=volunteerRespository.queryFunction(status, ptry);
     	}
 		
-    	
-    	
-		return result;
+		if(resultList!=null && !resultList.isEmpty()) {
+				
+				for(int i=0;i<resultList.size();i++){
+				Object[] row=(Object[]) resultList.get(i);
+				VolunteerVO vo=new VolunteerVO();
+				vo.setIdvolunteer(Integer.valueOf(String.valueOf(row[0])));
+				vo.setFirstName(String.valueOf(row[1]));
+				vo.setLastName(String.valueOf(row[2]));
+				vo.setphoneNo(String.valueOf(row[3]));
+				vo.setEmail(String.valueOf(row[4]));
+				vo.setGender(String.valueOf(row[5]));
+				vo.setState(String.valueOf(row[6]));
+				vo.setDistrict(String.valueOf(row[7]));
+				vo.setBlock(String.valueOf(row[8]));
+				vo.setAddress(String.valueOf(row[9]));
+				vo.setVillage(String.valueOf(row[10]));
+				vo.setAssignedtoFellow(String.valueOf(row[11]));
+				vo.setAssignedtoFellowContact(String.valueOf(row[12]));
+//				vo.setPic((String.valueOf(row[13]).getBytes()));
+				vo.setRole(Integer.valueOf(String.valueOf(row[14])));
+				vo.setAdminId(Integer.valueOf(String.valueOf(row[15])));
+				vo.setStatus(String.valueOf(row[16]));
+				vo.setRating(Float.valueOf(String.valueOf(row[17])));
+				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
+				
+				result.add(vo);
+			}
+				
+		}
+		return result; 
+	}
+}
+
+
 	
 		
-	}
-	
 	
 	
 	
@@ -118,5 +164,4 @@ public class VolunteerService implements VolunteerInterface{
 	 * 
 	 * }
 	 */
-	
-}
+		

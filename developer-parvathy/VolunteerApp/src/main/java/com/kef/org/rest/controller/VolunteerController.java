@@ -651,62 +651,25 @@ public class VolunteerController
     @ResponseBody
 public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus){
     	
-    	Float ratingList;
     	VolunteerResponse vr=new VolunteerResponse();
     	List <VolunteerVO> volunteers=new ArrayList<>();
-    	List<Volunteer> volunteerList;
-    	volunteerList=volunteerService.getVolunteerList(volunteerStatus);
-    	
-    	if(volunteerList!=null && !volunteerList.isEmpty()) {
-    		
-    		
-    	
-//    	if(null!=volunteerList && !volunteerList.isEmpty()) {
-    		
-    		for (Volunteer v:volunteerList) {
-    			VolunteerVO v1=new VolunteerVO();
-    			v1.setAddress(v.getAddress());
-    			v1.setAdminId(v.getAdminId());
-    			v1.setAssignedtoFellow(v.getAssignedtoFellow());
-    			v1.setAssignedtoFellowContact(v.getAssignedtoFellowContact());
-    			v1.setBlock(v.getBlock());
-    			v1.setDistrict(v.getDistrict());
-    			v1.setEmail(v.getEmail());
-    			v1.setFirstName(v.getFirstName());
-    			v1.setGender(v.getGender());
-    			v1.setIdvolunteer(v.getIdvolunteer());
-    			ratingList=volunteerRatingRepostiry.getAvgRating(v.getIdvolunteer());
-    			if(ratingList==null) {
-    				ratingList=0F;
-    			}
-    			v1.setRating(ratingList);
-    			v1.setLastName(v.getLastName());
-    			v1.setphoneNo(v.getphoneNo());
-    			v1.setPic(v.getPic());
-    			v1.setRole(v.getRole());
-    			v1.setState(v.getState());
-    			v1.setVillage(v.getVillage());
-    			List<Object> count_srCitizen=volunteerassignmentRespository.countSrCitizen(v.getIdvolunteer());
-    			v1.setCount_SrCitizen(count_srCitizen.size());
-    				
+    		volunteers=volunteerService.getVolunteerListByQuery(volunteerStatus);
+        	if(!volunteers.isEmpty() && volunteers!=null) {
+        		
+        		vr.setMessage("Success"); 
+	    		vr.setStatusCode(0);
+	    		vr.setVolunteers(volunteers);
+	    		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
+        	}
     			
-    			volunteers.add(v1);
-    		}
-    		vr.setMessage("Success"); 
-    		vr.setStatusCode(0);
-    		vr.setVolunteers(volunteers);
-    		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
-    		}
-    		
-    		
-    		 
-			
-		
-    	else {
-    			vr.setMessage("Failure");
+    				
+    			else {
+    				
+    				vr.setMessage("Failure");
     				vr.setStatusCode(1); 
     				return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
-    	}
+    			}
+
     }
     
     @RequestMapping(value="/getSrCitizenList",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")

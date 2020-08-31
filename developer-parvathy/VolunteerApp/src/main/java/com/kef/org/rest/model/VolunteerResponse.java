@@ -11,7 +11,6 @@ public class VolunteerResponse {
 	private String message;
 	private Integer statusCode;
 	
-	private List<Volunteer> volList;
 	public List<VolunteerVO> getVolunteers() {
 		return volunteers;
 	}
@@ -30,11 +29,7 @@ public class VolunteerResponse {
 	public void setStatusCode(Integer statusCode) {
 		this.statusCode = statusCode;
 	}
-	public List<Volunteer> getVolList() {
-		return volList;
-	}
-	public void setVolList(List<Volunteer> volList) {
-		this.volList = volList;
-	}
+	
+	
 	
 }
