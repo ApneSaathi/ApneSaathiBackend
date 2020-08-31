@@ -2,6 +2,7 @@ package com.kef.org.rest.controller;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -155,6 +156,7 @@ public class AdminController {
 		List<Volunteer> volunteerList = new ArrayList<Volunteer>();
 		List<VolunteerVO> volunteerVOList = new ArrayList<>();
 		Float ratingList = null;
+		String formattedStr = null;
 		
 		if(null != admin && null != admin.getAdminId()) {
 		volunteerList = volunteerService.findAllVolunteerDetailsByAdminId(admin.getAdminId());
@@ -172,8 +174,10 @@ public class AdminController {
 			volunteerVO.setIdvolunteer(null != volunteer.getIdvolunteer() ? volunteer.getIdvolunteer() : null);
 			if(null != volunteer.getIdvolunteer()) {
 			ratingList=volunteerRatingRepostiry.getAvgRating(volunteer.getIdvolunteer());
+			DecimalFormat form = new DecimalFormat("0.0");
+			formattedStr=null != ratingList ? form.format(ratingList) : null;
 			}
-			volunteerVO.setRating(ratingList);
+			volunteerVO.setRating(null != formattedStr?Float.valueOf(formattedStr):null);
 			volunteerVO.setLastName(null != volunteer.getLastName() ? volunteer.getLastName() : null);
 			volunteerVO.setphoneNo(null!= volunteer.getphoneNo() ? volunteer.getphoneNo() :null);
 			volunteerVO.setRole(null!= volunteer.getRole() ? volunteer.getRole() :null);

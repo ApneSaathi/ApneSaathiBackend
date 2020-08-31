@@ -2,6 +2,7 @@ package com.kef.org.rest.controller;
 
 
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -890,6 +891,8 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 	
 	public VolunteerVO mapEntityToVoluntnteerVO(Volunteer v) {
 		VolunteerVO v1=new VolunteerVO();
+		Float ratingList = null;
+		String formattedStr = null;
 		v1.setAddress(v.getAddress());
 		v1.setAdminId(v.getAdminId());
 		v1.setAssignedtoFellow(v.getAssignedtoFellow());
@@ -902,11 +905,12 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 		v1.setIdvolunteer(v.getIdvolunteer());
 		v1.setAssignedtoFellow(null != v.getAssignedtoFellow()&& !v.getAssignedtoFellow().equals("")?v.getAssignedtoFellow():null);
 		v1.setAssignedtoFellowContact(null != v.getAssignedtoFellowContact() && !v.getAssignedtoFellowContact().equals("") ? v.getAssignedtoFellowContact():null);
-		Float ratingList=volunteerRatingRepostiry.getAvgRating(v.getIdvolunteer());
-		if(ratingList==null) {
-			ratingList=0F;
+		if (null != v.getIdvolunteer()) {
+			ratingList = volunteerRatingRepostiry.getAvgRating(v.getIdvolunteer());
+			DecimalFormat form = new DecimalFormat("0.0");
+			formattedStr = null != ratingList ? form.format(ratingList) : null;
 		}
-		v1.setRating(ratingList);
+		v1.setRating(null != formattedStr?Float.valueOf(formattedStr):null);
 		v1.setLastName(v.getLastName());
 		v1.setphoneNo(v.getphoneNo());
 		v1.setPic(v.getPic());
