@@ -23,6 +23,7 @@ import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.model.LoginInfo;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.repository.AdminRepository;
+import com.kef.org.rest.repository.VolunteerRatingRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 import com.kef.org.rest.service.AdminService;
 import com.kef.org.rest.service.VolunteerService;
@@ -43,6 +44,9 @@ public class AdminController {
 	
 	@Autowired
     VolunteerService volunteerService; 
+	
+	@Autowired
+	private VolunteerRatingRepository volunteerRatingRepostiry;
 	
 	private static MessageDigest md;
 	
@@ -150,6 +154,8 @@ public class AdminController {
 		LoginInfo loginInfo = new LoginInfo();
 		List<Volunteer> volunteerList = new ArrayList<Volunteer>();
 		List<VolunteerVO> volunteerVOList = new ArrayList<>();
+		Float ratingList = null;
+		
 		if(null != admin && null != admin.getAdminId()) {
 		volunteerList = volunteerService.findAllVolunteerDetailsByAdminId(admin.getAdminId());
 		for (Volunteer volunteer : volunteerList) {
@@ -164,6 +170,10 @@ public class AdminController {
 			volunteerVO.setFirstName(null != volunteer.getFirstName() ? volunteer.getFirstName() : null);
 			volunteerVO.setGender(null != volunteer.getGender() ? volunteer.getGender() : null);
 			volunteerVO.setIdvolunteer(null != volunteer.getIdvolunteer() ? volunteer.getIdvolunteer() : null);
+			if(null != volunteer.getIdvolunteer()) {
+			ratingList=volunteerRatingRepostiry.getAvgRating(volunteer.getIdvolunteer());
+			}
+			volunteerVO.setRating(ratingList);
 			volunteerVO.setLastName(null != volunteer.getLastName() ? volunteer.getLastName() : null);
 			volunteerVO.setphoneNo(null!= volunteer.getphoneNo() ? volunteer.getphoneNo() :null);
 			volunteerVO.setRole(null!= volunteer.getRole() ? volunteer.getRole() :null);
