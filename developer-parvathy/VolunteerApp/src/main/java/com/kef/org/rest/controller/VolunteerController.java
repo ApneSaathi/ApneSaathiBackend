@@ -39,6 +39,7 @@ import com.kef.org.rest.model.District;
 import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.LoginInfo;
 import com.kef.org.rest.model.MedicalandGreivance;
+import com.kef.org.rest.model.ProfileResponse;
 import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
@@ -153,39 +154,43 @@ public class VolunteerController
     
     @RequestMapping(value = "/VolunteerorAdminData", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public ResponseEntity<LoginInfo>  VolunteerDetailsbymobile(@RequestBody Volunteer volunteer)
+    public ResponseEntity<ProfileResponse>  VolunteerDetailsbymobile(@RequestBody Volunteer volunteer)
 	{
-		LoginInfo loginInfo = new LoginInfo();
+    	ProfileResponse profileResponse = new ProfileResponse();
 		String phoneNo = volunteer.getphoneNo();
 		if (null != phoneNo) {
 			if ((volunteerService.findvolunteerId(phoneNo)) != null) {
-				loginInfo.setMessage("Success");
-				loginInfo.setStatusCode("0");
+				profileResponse.setMessage("Success");
+				profileResponse.setStatusCode("0");
 				Volunteer v = new Volunteer();
+				VolunteerVO vo = new VolunteerVO();
 				v = volunteerService.findvolunteerDetails(phoneNo);
-				loginInfo.setVolunteer(v);
+				if(null != v) {
+					vo=mapEntityToVoluntnteerVO(v);
+				}
+				profileResponse.setVolunteer(vo);
 			} else if (null != adminService.findAdminId(phoneNo)) {
-				loginInfo.setMessage("Success");
-				loginInfo.setStatusCode("0");
+				profileResponse.setMessage("Success");
+				profileResponse.setStatusCode("0");
 				Admin a = new Admin();
 				a = adminService.fetchAdminDetails(phoneNo);
 				a.setVolunteerList(null);
 				a.setPassword(null);
 				a.setDistrictList(null);
-				loginInfo.setAdmin(a);
+				profileResponse.setAdmin(a);
 			}else {
-				loginInfo.setMessage("Failure");
-				loginInfo.setStatusCode("1");
+				profileResponse.setMessage("Failure");
+				profileResponse.setStatusCode("1");
 			}
 			
 		} else {
-			loginInfo.setMessage("Failure");
-			loginInfo.setStatusCode("1");
+			profileResponse.setMessage("Failure");
+			profileResponse.setStatusCode("1");
 
 		}
 
-		return new ResponseEntity<LoginInfo>(loginInfo,
-				loginInfo.getStatusCode().equals("0") ? HttpStatus.OK : HttpStatus.CONFLICT);
+		return new ResponseEntity<ProfileResponse>(profileResponse,
+				profileResponse.getStatusCode().equals("0") ? HttpStatus.OK : HttpStatus.CONFLICT);
 
 	}
 
@@ -919,6 +924,35 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 
 		return medList;
 
+	}
+	
+	public VolunteerVO mapEntityToVoluntnteerVO(Volunteer v) {
+		VolunteerVO v1=new VolunteerVO();
+		v1.setAddress(v.getAddress());
+		v1.setAdminId(v.getAdminId());
+		v1.setAssignedtoFellow(v.getAssignedtoFellow());
+		v1.setAssignedtoFellowContact(v.getAssignedtoFellowContact());
+		v1.setBlock(v.getBlock());
+		v1.setDistrict(v.getDistrict());
+		v1.setEmail(v.getEmail());
+		v1.setFirstName(v.getFirstName());
+		v1.setGender(v.getGender());
+		v1.setIdvolunteer(v.getIdvolunteer());
+		v1.setAssignedtoFellow(null != v.getAssignedtoFellow()&& !v.getAssignedtoFellow().equals("")?v.getAssignedtoFellow():null);
+		v1.setAssignedtoFellowContact(null != v.getAssignedtoFellowContact() && !v.getAssignedtoFellowContact().equals("") ? v.getAssignedtoFellowContact():null);
+		Float ratingList=volunteerRatingRepostiry.getAvgRating(v.getIdvolunteer());
+		if(ratingList==null) {
+			ratingList=0F;
+		}
+		v1.setRating(ratingList);
+		v1.setLastName(v.getLastName());
+		v1.setphoneNo(v.getphoneNo());
+		v1.setPic(v.getPic());
+		v1.setRole(v.getRole());
+		v1.setState(v.getState());
+		v1.setVillage(null != v.getVillage()&& !v.getVillage().equals("")?v.getVillage():null);
+		
+		return v1;
 	}
 
 }
