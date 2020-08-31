@@ -53,6 +53,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Integer>, 
 				+ " VolunteerAssignment va on va.idvolunteer=vr.idvolunteer where v.status=?1  and v.state=?2 and v.district=?3 group by v.idvolunteer")
 		List<Object> fetchByStatusAndStateAndDistrict(String status,String state,String district,Pageable pageable);
 		
+		
 		@Query(value="SELECT v.idvolunteer,v.firstName,v.lastName,v.phoneNo,v.email,v.gender,v.state,v.district,v.block,v.address,"
 				+ "v.Village, v.assignedtoFellow,v.assignedtoFellowContact,v.pic,v.role,v.adminId,v.status,"
 				+ "avg(COALESCE(vr.rating,0)) as average_rating,count(distinct va.phonenosrcitizen) as countsr FROM "

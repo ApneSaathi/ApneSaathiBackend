@@ -79,8 +79,7 @@ public class VolunteerService implements VolunteerInterface{
     		 if (sortBy.equalsIgnoreCase("rating")&& sortBy!=null) {
     		
     			ptry=PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction,"(average_rating)"));
-    			}
-    	
+    			}	
     		else if(sortBy.equalsIgnoreCase("assignedSrCitizen") && sortBy!=null) {
     		
     			ptry=PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction, "(countsr)"));

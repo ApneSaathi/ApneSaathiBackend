@@ -667,7 +667,6 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 	    		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
         	}
     			
-    				
     			else {
     				
     				vr.setMessage("Failure");
