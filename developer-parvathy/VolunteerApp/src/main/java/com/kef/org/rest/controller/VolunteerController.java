@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -778,6 +779,106 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
     	}
     }
     
+    @RequestMapping(value="/distributeSrCitizen",method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public ResponseEntity<LoginInfo> distributeSrCitizen(@RequestBody SrCitizenResponse srCitizen){
+    	List<SeniorCitizen> srCitizenList= srCitizen.getSrCitizenList();
+    	List<VolunteerVO> volList = srCitizen.getVolunteerList();
+    	LoginInfo loginInfo = new LoginInfo();
+    	Collection<List<SeniorCitizen>> srCitizenListChunks;
+    	
+    	Integer volListSize = volList.size();
+    	
+    	if(volListSize.equals(1)) {
+    		assignSrCitizen(srCitizen);
+    	}
+		if (srCitizenList != null && !srCitizenList.isEmpty() && null != volList && !volList.isEmpty()) {
+			srCitizenListChunks = chopIntoParts(srCitizen.getSrCitizenList(), volListSize);
+			System.out.println(srCitizenListChunks.size() + srCitizenListChunks.toString());
+			for (int i = 0; i<volList.size() ; i++) {
+				for(List<SeniorCitizen> sr :srCitizenListChunks) {
+					List<SeniorCitizen> sr1 = new ArrayList<>();
+					sr1=sr;
+					if(sr1!=null && !sr1.isEmpty()) {
+				    	
+		    			for(SeniorCitizen sr2:sr1) {
+		    		
+		    				Integer idsrcitizen=sr2.getSrCitizenId();
+		    				if(sr2.getStatus().equalsIgnoreCase("UnAssigned") && idsrcitizen!=null) {
+		    						
+		    					srCitizenService.updateStatus("Assigned",idsrcitizen);
+		    					
+		    				}
+		    				
+		    				VolunteerAssignment vo=new VolunteerAssignment();
+		    				vo.setIdvolunteer( volList.get(i).getIdvolunteer());
+		    				vo.setNamesrcitizen(sr2.getFirstName());
+				    		vo.setPhonenosrcitizen(sr2.getPhoneNo());
+				    		vo.setAgesrcitizen(sr2.getAge());
+				    		vo.setGendersrcitizen(String.valueOf(sr2.getGender()));
+				    		vo.setAddresssrcitizen(sr2.getAddress());
+				    		vo.setEmailsrcitizen(sr2.getEmailID());
+				    		vo.setStatesrcitizen(sr2.getState());
+				    		vo.setDistrictsrcitizen(sr2.getDistrict());
+				    		vo.setBlocknamesrcitizen(sr2.getBlockName());
+				    		vo.setVillagesrcitizen(sr2.getVillage());
+				    		vo.setCallstatusCode(1);
+				    		vo.setRole(volList.get(i).getRole());
+				    		vo.setAdminId(volList.get(i).getAdminId());
+				    		volunteerassignmentRespository.save(vo);
+				    		
+				   }
+		    			
+		    	}
+					srCitizenListChunks.remove(sr);
+					break;
+					
+				}
+			}
+			loginInfo.setMessage("Success"); 
+    		loginInfo.setStatusCode("0");
+    		
+    		return new ResponseEntity<LoginInfo>(loginInfo,HttpStatus.OK);
+		}
+    	
+   
+ 
+    	
+    	else {
+    		
+    		 loginInfo.setMessage("Failure"); 
+			  loginInfo.setStatusCode("1"); 
+			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+    	}
+    }
+    
+    
+    //Divide Senior citizen list to chunks which needs to be distributed among list of volunteers
+    public static <T>List<List<T>> chopIntoParts( final List<T> ls, final int iParts )
+	{
+	    final List<List<T>> lsParts = new ArrayList<List<T>>();
+	    final int iChunkSize = ls.size() / iParts;
+	    int iLeftOver = ls.size() % iParts;
+	    int iTake = iChunkSize;
+
+	    for( int i = 0, iT = ls.size(); i < iT; i += iTake )
+	    {
+	        if( iLeftOver > 0 )
+	        {
+	            iLeftOver--;
+
+	            iTake = iChunkSize + 1;
+	        }
+	        else
+	        {
+	            iTake = iChunkSize;
+	        }
+
+	        lsParts.add( new ArrayList<T>( ls.subList( i, Math.min( iT, i + iTake ) ) ) );
+	    }
+
+	    return lsParts;
+	}
 
     public Volunteer mapVolunteerToEntity(Volunteer volunteer) {
     	

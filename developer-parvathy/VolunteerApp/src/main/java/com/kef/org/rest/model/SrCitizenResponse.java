@@ -2,6 +2,8 @@ package com.kef.org.rest.model;
 
 import java.util.List;
 
+import com.kef.org.rest.domain.model.VolunteerVO;
+
 public class SrCitizenResponse {
 
 	private Integer idvolunteer;
@@ -9,6 +11,7 @@ public class SrCitizenResponse {
 	private Integer role;
 	private Integer adminId;
 	private String message;
+	List<VolunteerVO> volunteerList;
 	
 	public List<SeniorCitizen> getSrCitizenList() {
 		return srCitizenList;
@@ -17,6 +20,14 @@ public class SrCitizenResponse {
 
 	public void setSrCitizenList(List<SeniorCitizen> srCitizenList) {
 		this.srCitizenList = srCitizenList;
+	}
+
+	public List<VolunteerVO> getVolunteerList() {
+		return volunteerList;
+	}
+
+	public void setVolunteerList(List<VolunteerVO> volunteerList) {
+		this.volunteerList = volunteerList;
 	}
 
 	public Integer getIdvolunteer() {
