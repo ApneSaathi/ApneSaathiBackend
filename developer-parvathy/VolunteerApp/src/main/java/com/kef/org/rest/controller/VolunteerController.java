@@ -2,6 +2,7 @@ package com.kef.org.rest.controller;
 
 
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,8 +25,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
@@ -1021,5 +1024,48 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 		
 		return v1;
 	}
+	
+	@RequestMapping(value = "/getCSVFile")
+    @ResponseBody
+public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file) throws IOException {
+    
+    	VolunteerResponse vr=new VolunteerResponse();
+    	String fileType = "text/csv";
+    	Boolean flag;
+    	if(!fileType.equals(file.getContentType())) {
+    		flag=false;
+    		
+    	}
+    	else {
+    		flag=true;
+    	}
+   
+    	if (!file.isEmpty() && flag.equals(true)) {
+     
+                byte[] bytes = file.getBytes();
+                String completeData = new String(bytes);
+                String[] rows = completeData.split("\r\n");
+                String[] columns = rows[0].split(",");
+                List<String> rowsList = Arrays.asList(rows);
+                List<String> columnList=Arrays.asList(columns);
+                vr.setColsList(columnList);
+                vr.setRowsList(rowsList);
+    	}
+    	
+//    	VolunteerVO vo= new ObjectMapper().readValue(user,VolunteerVO.class);
+    if(flag.equals(true)) {
+    	vr.setMessage("Success");
+    	vr.setStatusCode(0);
+    	return new ResponseEntity<VolunteerResponse>(vr,HttpStatus.OK);
+    }
+    else {
+    	vr.setMessage("Failure");
+		vr.setStatusCode(1); 
+		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
+    }
+    	
+    }
+    
+
 
 }
