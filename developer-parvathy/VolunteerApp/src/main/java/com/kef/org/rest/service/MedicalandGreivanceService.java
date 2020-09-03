@@ -140,17 +140,17 @@ public class MedicalandGreivanceService {
 														: medicalandgreivance.getBehavioural_change_noticed().equals(
 																"4") ? BehaviouralChangeNoticed.NOT_APPLICABLE.name()
 																		: null);
-					  medicalandgreivance.setIscovidsymptoms(medicalandgreivance.getIscovidsymptoms().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
-					  medicalandgreivance.setHas_shortnes_of_breath(medicalandgreivance.getHas_shortnes_of_breath().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
-					  medicalandgreivance.setHas_sorethroat(medicalandgreivance.getHas_sorethroat().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
-					  medicalandgreivance.setHascough(medicalandgreivance.getHascough().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
-					  medicalandgreivance.setHasfever(medicalandgreivance.getHasfever().equals("1") ? InputEnum.Y.name(): InputEnum.N.name()); 
-					  medicalandgreivance.setIsemergencyservicerequired(medicalandgreivance.getIsemergencyservicerequired().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
-					  medicalandgreivance.setLackofessentialservices(medicalandgreivance.getLackofessentialservices().equals("1") ? InputEnum.YES.name(): InputEnum.NO.name());
-					  medicalandgreivance.setIsSrCitizenAwareOfCovid_19(medicalandgreivance.getIsSrCitizenAwareOfCovid_19().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setIscovidsymptoms(null != medicalandgreivance.getIscovidsymptoms() && medicalandgreivance.getIscovidsymptoms().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHas_shortnes_of_breath(null != medicalandgreivance.getHas_shortnes_of_breath() && medicalandgreivance.getHas_shortnes_of_breath().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHas_sorethroat(null != medicalandgreivance.getHas_sorethroat() && medicalandgreivance.getHas_sorethroat().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHascough(null != medicalandgreivance.getHascough() && medicalandgreivance.getHascough().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setHasfever(null != medicalandgreivance.getHasfever() && medicalandgreivance.getHasfever().equals("1") ? InputEnum.Y.name(): InputEnum.N.name()); 
+					  medicalandgreivance.setIsemergencyservicerequired(null != medicalandgreivance.getIsemergencyservicerequired() && medicalandgreivance.getIsemergencyservicerequired().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
+					  medicalandgreivance.setLackofessentialservices(null != medicalandgreivance.getLackofessentialservices() && medicalandgreivance.getLackofessentialservices().equals("1") ? InputEnum.YES.name(): InputEnum.NO.name());
+					  medicalandgreivance.setIsSrCitizenAwareOfCovid_19(null != medicalandgreivance.getIsSrCitizenAwareOfCovid_19() && medicalandgreivance.getIsSrCitizenAwareOfCovid_19().equals("1") ? InputEnum.Y.name(): InputEnum.N.name());
 					  medicalandgreivance.setIsSymptomsPreventionTaken(null != medicalandgreivance.getIsSymptomsPreventionTaken() && !medicalandgreivance.getIsSymptomsPreventionTaken().equals("") ?( medicalandgreivance.getIsSymptomsPreventionTaken().equals("1") ? InputEnum.Y.name(): InputEnum.N.name()) : "");
 					  medicalandgreivance.setDescription(null != medicalandgreivance.getDescription() ? medicalandgreivance.getDescription() : null);
-					  medicalandgreivance.setPriority("Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
+					  medicalandgreivance.setPriority(null != medicalandgreivance.getIsemergencyservicerequired() && "Y".equalsIgnoreCase(medicalandgreivance.getIsemergencyservicerequired()) ? "Emergency" : "Regular");
 					  medicalandgreivance.setAdminId(null != volunteerassignement.getRole() & (volunteerassignement.getRole().equals(2) || volunteerassignement.getRole().equals(4)) ?  volunteerassignement.getIdvolunteer() : va1.getAdminId());
 					  medicalandgreivance.setIdvolunteer(null != volunteerassignement.getRole() & volunteerassignement.getRole().equals(1) ? volunteerassignement.getIdvolunteer() :null);
 					  medicalandgreivance.setRole(volunteerassignement.getRole());
