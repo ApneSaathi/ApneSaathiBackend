@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.SrCitizenVO;
@@ -1027,35 +1028,47 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 	
 	@RequestMapping(value = "/getCSVFile")
     @ResponseBody
-public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file) throws IOException {
+public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file, @RequestParam("adminId") Integer adminId, @RequestParam("adminRole") Integer adminRole) throws IOException {
     
     	VolunteerResponse vr=new VolunteerResponse();
-    	String fileType = "text/csv";
-    	Boolean flag;
-    	if(!fileType.equals(file.getContentType())) {
+    	List<Volunteer> volunteers=new ArrayList<Volunteer>();
+    	Boolean flag=false;
+    	String type="csv";
+    	String extension=file.getOriginalFilename().split("\\.")[1];
+    	if(!extension.equals(type)) {
     		flag=false;
     		
     	}
     	else {
     		flag=true;
     	}
-   
+
+    	
     	if (!file.isEmpty() && flag.equals(true)) {
      
                 byte[] bytes = file.getBytes();
                 String completeData = new String(bytes);
                 String[] rows = completeData.split("\r\n");
                 String[] columns = rows[0].split(",");
-                List<String> rowsList = Arrays.asList(rows);
-                List<String> columnList=Arrays.asList(columns);
-                vr.setColsList(columnList);
-                vr.setRowsList(rowsList);
+      
+                volunteers=csvToVolunteer(rows, columns, adminId,adminRole);
+          
     	}
+    	if(!volunteers.isEmpty() && volunteers!=null) {
+//    		
+    		volunteerRespository.saveAll(volunteers);
+//    		for(Volunteer v:volunteers) {
+//    			
+//    			volunteerRespository.save(v);
+//    		}
+    	}
+    	
     	
 //    	VolunteerVO vo= new ObjectMapper().readValue(user,VolunteerVO.class);
     if(flag.equals(true)) {
     	vr.setMessage("Success");
     	vr.setStatusCode(0);
+  
     	return new ResponseEntity<VolunteerResponse>(vr,HttpStatus.OK);
     }
     else {
@@ -1065,6 +1078,62 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
     }
     	
     }
+	
+	public List<Volunteer> csvToVolunteer(String[] rows,String[] columns, Integer adminId, Integer role) {
+	
+		List<Volunteer> volunteerList=new ArrayList<Volunteer>();
+		for(int k=1;k<rows.length;k++) {
+			Volunteer vv=new Volunteer();
+			String[]attributes=rows[k].split(",");
+			for(int i=0;i<columns.length;i++) {
+				if(columns[i].equalsIgnoreCase("firstname")) {
+					vv.setFirstName(attributes[i]);
+					
+				}
+				else if(columns[i].equalsIgnoreCase("LASTNAME")) {
+					vv.setLastName(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("MOBILENO")) {
+					vv.setphoneNo(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("EMAIL")) {
+					vv.setEmail(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("GENDER")) {
+					vv.setGender(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("STATE_NAME")) {
+					vv.setState(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("DISTRICT_NAME")) {
+					vv.setDistrict(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW")) {
+					vv.setAssignedtoFellow(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW_CONTACT")) {
+					vv.setAssignedtoFellowContact(attributes[i]);
+				}
+		
+				else if(columns[i].equalsIgnoreCase("status")) {
+					vv.setStatus(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("BLOCK_NAME")) {
+					vv.setBlock(attributes[i]);
+				}
+				else if(columns[i].equalsIgnoreCase("VILLAGE")) {
+					vv.setVillage(attributes[i]);
+				}
+				vv.setRole(role);
+				vv.setAdminId(adminId);
+				
+			}
+			
+			volunteerList.add(vv);
+			
+	        }
+		return volunteerList;
+	}
     
 
 
