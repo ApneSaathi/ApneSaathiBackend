@@ -1,6 +1,7 @@
 package com.kef.org.rest.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -27,6 +28,8 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Integer>, 
 	    List<Volunteer> findAllVolunteerDetailsByAdminId(Integer adminId);
 	    
 	    List<Volunteer> fetchByStatus(String status);
+	    
+	    Optional<Volunteer> findByPhoneNo(String phoneNo);
 	   
 	   String fetchVolunteerNameById(Integer idvolunteer);
 	   

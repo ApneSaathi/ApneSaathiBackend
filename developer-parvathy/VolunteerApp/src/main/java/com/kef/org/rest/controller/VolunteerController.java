@@ -11,11 +11,16 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import javax.validation.ValidationException;
+
+import org.hibernate.validator.internal.constraintvalidators.hv.ISBNValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +34,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.server.ResponseStatusException;
 
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
@@ -1028,113 +1033,177 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 	
 	@RequestMapping(value = "/getCSVFile")
     @ResponseBody
-public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file, @RequestParam("adminId") Integer adminId, @RequestParam("adminRole") Integer adminRole) throws IOException {
+public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file, @RequestParam("adminId") Integer adminId, @RequestParam("adminRole") Integer adminRole) throws IOException,ValidationException{
     
     	VolunteerResponse vr=new VolunteerResponse();
     	List<Volunteer> volunteers=new ArrayList<Volunteer>();
+    	List<Volunteer> volunteerList=new ArrayList<Volunteer>();
+		List<String>error = new ArrayList<String>();
+        Set<String> hash_Set = new HashSet<String>();
     	Boolean flag=false;
-    	String type="csv";
-    	String extension=file.getOriginalFilename().split("\\.")[1];
-    	if(!extension.equals(type)) {
-    		flag=false;
-    		
-    	}
-    	else {
-    		flag=true;
-    	}
-
+    	List<Volunteer> mobileNo=new ArrayList<Volunteer>();
+    	Set<String> mobile_set=new HashSet<String>();
+    	String[] rows=null;
+    	String[] columns=null;
     	
-    	if (!file.isEmpty() && flag.equals(true)) {
+    	
+    	if (!file.isEmpty() && isCsv(file)) {
      
                 byte[] bytes = file.getBytes();
                 String completeData = new String(bytes);
-                String[] rows = completeData.split("\r\n");
-                String[] columns = rows[0].split(",");
-      
-                volunteers=csvToVolunteer(rows, columns, adminId,adminRole);
-          
+                 rows = completeData.split("\r\n");
+                columns = rows[0].split(",");
+              try {
+        			for(int k=1;k<rows.length;k++) {
+        				Volunteer vv=new Volunteer();
+        				String[]attributes=rows[k].split(",");
+        				for(int i=0;i<columns.length;i++) {
+        					if(columns[i].equalsIgnoreCase("firstname")) {
+        						error=ValidateCsv(attributes[i],columns[i]);
+        						error.forEach(x->hash_Set.add(x));
+        						vv.setFirstName(attributes[i]);
+        						
+        					}
+        					else if(columns[i].equalsIgnoreCase("LASTNAME")) {
+        						error=ValidateCsv(attributes[i],columns[i]);
+        						error.forEach(x->hash_Set.add(x));
+        						vv.setLastName(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("MOBILENO")) {
+        						error=ValidateCsv(attributes[i],columns[i]);
+        						mobileNo=ValidateMobile(attributes[i]);
+        						mobileNo.forEach(v->mobile_set.add(v.getphoneNo()));
+        						error.forEach(x->hash_Set.add(x));
+        						vv.setphoneNo(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("EMAIL")) {
+        						error=ValidateCsv(attributes[i],columns[i]);
+        						error.forEach(x->hash_Set.add(x));
+        						vv.setEmail(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("GENDER")) {
+        						error=ValidateCsv(attributes[i],columns[i]);
+        						error.forEach(x->hash_Set.add(x));
+        						vv.setGender(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("STATE_NAME")) {
+        						vv.setState(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("DISTRICT_NAME")) {
+        						vv.setDistrict(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW")) {
+        						vv.setAssignedtoFellow(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW_CONTACT")) {
+        						vv.setAssignedtoFellowContact(attributes[i]);
+        					}
+        			
+        					else if(columns[i].equalsIgnoreCase("status")) {
+        						if(!attributes[i].isBlank()){
+        							vv.setStatus(attributes[i]);
+        							}
+        						else{
+        							vv.setStatus("Active");
+        						}
+        							
+        						
+        					}
+        					else if(columns[i].equalsIgnoreCase("BLOCK_NAME")) {
+        						vv.setBlock(attributes[i]);
+        					}
+        					else if(columns[i].equalsIgnoreCase("VILLAGE")) {
+        						vv.setVillage(attributes[i]);
+        					}
+
+        					vv.setRole(adminRole);
+
+        					vv.setAdminId(adminId);
+        					
+        				}
+        				
+        				volunteerList.add(vv);
+        			}
+        			
+        			
+              if(isCsv(file) && hash_Set.size()<=0 && mobile_set.size()<=0 && volunteerList.size()>0) {
+            	  flag=true;
+            	  volunteerRespository.saveAll(volunteerList);
+   
+   				 
+   				 	
+   			    }
+   			 else if(hash_Set.size()>0) {
+   				 flag=false;
+   				 throw new ValidationException(hash_Set+" "+"Cannot contain null values");
+   			 }
+   			 else if(mobile_set.size()>0) {
+   				 throw new ValidationException(mobile_set+" "+"phone numbers are already present");
+   			 }
+   			    else {
+   			    	flag=false;
+   			    	
+   			    }
+              }catch(ValidationException ex) {
+        				logger.error(ex.getMessage());
+        				vr.setMessage(ex.getMessage());
+        				vr.setStatusCode(1);
+        				return new ResponseEntity<VolunteerResponse>(vr,HttpStatus.OK);
+        			}
     	}
-    	if(!volunteers.isEmpty() && volunteers!=null) {
-//    		
-    		volunteerRespository.saveAll(volunteers);
-//    		for(Volunteer v:volunteers) {
-//    			
-//    			volunteerRespository.save(v);
-//    		}
+              if(flag) {
+            	  vr.setMessage("Success");
+ 			    	vr.setStatusCode(0);
+ 			  
+ 			    	return new ResponseEntity<VolunteerResponse>(vr,HttpStatus.OK);
+              }
+              else {
+            	  vr.setMessage("Failure");
+ 					vr.setStatusCode(1); 
+ 					return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
+              }
     	}
-    	
-    	
-//    	VolunteerVO vo= new ObjectMapper().readValue(user,VolunteerVO.class);
-    if(flag.equals(true)) {
-    	vr.setMessage("Success");
-    	vr.setStatusCode(0);
-  
-    	return new ResponseEntity<VolunteerResponse>(vr,HttpStatus.OK);
-    }
-    else {
-    	vr.setMessage("Failure");
-		vr.setStatusCode(1); 
-		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
-    }
-    	
-    }
-	
-	public List<Volunteer> csvToVolunteer(String[] rows,String[] columns, Integer adminId, Integer role) {
-	
-		List<Volunteer> volunteerList=new ArrayList<Volunteer>();
-		for(int k=1;k<rows.length;k++) {
-			Volunteer vv=new Volunteer();
-			String[]attributes=rows[k].split(",");
-			for(int i=0;i<columns.length;i++) {
-				if(columns[i].equalsIgnoreCase("firstname")) {
-					vv.setFirstName(attributes[i]);
-					
-				}
-				else if(columns[i].equalsIgnoreCase("LASTNAME")) {
-					vv.setLastName(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("MOBILENO")) {
-					vv.setphoneNo(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("EMAIL")) {
-					vv.setEmail(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("GENDER")) {
-					vv.setGender(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("STATE_NAME")) {
-					vv.setState(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("DISTRICT_NAME")) {
-					vv.setDistrict(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW")) {
-					vv.setAssignedtoFellow(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("ASSIGNED_TO_FELLOW_CONTACT")) {
-					vv.setAssignedtoFellowContact(attributes[i]);
-				}
-		
-				else if(columns[i].equalsIgnoreCase("status")) {
-					vv.setStatus(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("BLOCK_NAME")) {
-					vv.setBlock(attributes[i]);
-				}
-				else if(columns[i].equalsIgnoreCase("VILLAGE")) {
-					vv.setVillage(attributes[i]);
-				}
-				vv.setRole(role);
-				vv.setAdminId(adminId);
-				
-			}
-			
-			volunteerList.add(vv);
-			
-	        }
-		return volunteerList;
+   
+	public Boolean isCsv(MultipartFile file) {
+		String type="csv";
+   
+    	String extension=file.getOriginalFilename().split("\\.")[1];
+    	if(extension.equals(type)) {
+    		return true;
+    		
+    	}
+    	else {
+    		return false;
+    	}
 	}
-    
+	public List<String> ValidateCsv(String attribute,String column) {
+		List<String>errorColumn=new ArrayList<String>();
+	
+		if(attribute.length()<=0) {
+			errorColumn.add(column);
+//			throw new ValidationException("Column"+" "+column+" cannot take value null");
+		}
+		
+		if(column.equalsIgnoreCase("gender") && attribute.length()>0) {
+			if(!(attribute.equalsIgnoreCase("M")||attribute.equalsIgnoreCase("F"))) {
+				throw new ValidationException("Gender must be M or F");
+			}
+		}
+		
+		return errorColumn;
+	}
+	public List<Volunteer> ValidateMobile(String attribute){
+		List<Volunteer> volunteer=new ArrayList<Volunteer>();
+		Optional<Volunteer> vo;
+		if(attribute.length()>0) {
+		
+			 vo=volunteerRespository.findByPhoneNo(attribute);
+			if(vo.isPresent()) {
+			volunteer=vo.stream().collect(Collectors.toList());
+			}
+		}
+		return volunteer;
+	}
 
 
 }
