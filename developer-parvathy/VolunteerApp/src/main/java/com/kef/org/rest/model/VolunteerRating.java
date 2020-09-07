@@ -1,5 +1,7 @@
 package com.kef.org.rest.model;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,6 +36,9 @@ public class VolunteerRating {
 	
 	@Column(name="RATING")
 	private String rating;
+	
+	@Column(name = "CREATED_DATE",columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+	private LocalDateTime ratedOn;
 
 	public Integer getRatingId() {
 		return ratingId;
@@ -81,6 +86,14 @@ public class VolunteerRating {
 
 	public void setRating(String rating) {
 		this.rating = rating;
+	}
+
+	public LocalDateTime getRatedOn() {
+		return ratedOn;
+	}
+
+	public void setRatedOn(LocalDateTime ratedOn) {
+		this.ratedOn = ratedOn;
 	}
 	
 

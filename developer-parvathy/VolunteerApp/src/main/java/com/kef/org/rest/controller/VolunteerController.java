@@ -1100,12 +1100,12 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
         					}
         			
         					else if(columns[i].equalsIgnoreCase("status")) {
-        						if(!attributes[i].isBlank()){
+//        						if(!attributes[i].isBlank()){
         							vv.setStatus(attributes[i]);
-        							}
-        						else{
-        							vv.setStatus("Active");
-        						}
+//        							}
+//        						else{
+//        							vv.setStatus("Active");
+//        						}
         							
         						
         					}
@@ -1195,15 +1195,61 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
 	public List<Volunteer> ValidateMobile(String attribute){
 		List<Volunteer> volunteer=new ArrayList<Volunteer>();
 		Optional<Volunteer> vo;
+		Volunteer vv=new Volunteer();
 		if(attribute.length()>0) {
 		
 			 vo=volunteerRespository.findByPhoneNo(attribute);
 			if(vo.isPresent()) {
-			volunteer=vo.stream().collect(Collectors.toList());
+				vv=vo.get();
+				volunteer.add(vv);
 			}
 		}
 		return volunteer;
 	}
 
-
+    
+    @RequestMapping(value = "/getVolunteerDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+    @ResponseBody
+    public  ResponseEntity<LoginInfo>  getVolunteerDetails(@RequestBody InputVO inputVO)
+    {
+    	LoginInfo loginInfo = new LoginInfo();
+		Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
+			if (v1.isPresent()) {
+				loginInfo.setMessage("Success");
+				loginInfo.setStatusCode("0");
+				Volunteer v = v1.get();
+				loginInfo.setVolunteer(mapVolunteerToEntity1(v));
+			}
+    	else {
+    		loginInfo.setMessage("Failure");
+			loginInfo.setStatusCode("1"); 
+    	}
+		return new ResponseEntity<LoginInfo>(loginInfo, loginInfo.getStatusCode().equals("0") ? HttpStatus.OK :HttpStatus.CONFLICT);
+}
+    
+public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
+    	
+    	Volunteer volunteer1 = new Volunteer();
+    	volunteer1 = volunteer;
+    	List<VolunteerAssignment> volAssignment = new ArrayList<>();
+    	List<VolunteerRating> volRating = new ArrayList<>();
+    	List<VolunteerRating> volRating1 = new ArrayList<>();
+    	volAssignment = volunteer.getVolunteercallList();
+    	volAssignment.stream().forEach(p->p.setMedicalandgreivance(null));
+    	volRating = volunteer.getVolunteerRatingList();
+    	//Need to add logic for taking cumulative of rating and show all reviews given by different admins
+		/*
+		 * if(null != volRating && !volRating.isEmpty()) { int i=0; for(int
+		 * j=i+1;j<volRating.size();j++) {
+		 * if(volRating.get(i).getAdminId().equals(volRating.get(j).getAdminId())) {
+		 * float i1 = Float.parseFloat(volRating.get(i).getRating()); float i2 =
+		 * Float.parseFloat(volRating.get(j).getRating()); float i3= (i1+i2)/2;
+		 * 
+		 * volRating.get(i).setRating(String.valueOf(i3)); volRating.remove(j); } } }
+		 */
+    	volunteer1.setVolunteercallList(volAssignment);
+    	volunteer1.setVolunteerRatingList(volRating);
+    	
+		return volunteer1;
+    }
 }
