@@ -53,6 +53,15 @@ public class VolunteerVO {
 	 private  String sortBy;
 	 private String sortType;
 	// private List <VolunteerAssignment> volunteercallList;
+	 private Integer totalVolunteer;
+	 
+	public Integer getTotalVolunteer() {
+		return totalVolunteer;
+	}
+
+	public void setTotalVolunteer(Integer totalVolunteer) {
+		this.totalVolunteer = totalVolunteer;
+	}
 
 	public Integer getIdvolunteer() {
 		return idvolunteer;

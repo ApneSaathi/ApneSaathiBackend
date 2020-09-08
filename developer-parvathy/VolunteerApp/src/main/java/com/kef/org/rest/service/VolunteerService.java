@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -69,6 +70,8 @@ public class VolunteerService implements VolunteerInterface{
     	}
     	
     	Pageable ptry;
+    	Page <Object> page;
+    	Integer totalVolunteer=0;
     	if(sortBy!=null && sortType!=null) {
     		Direction direction=sortType.equalsIgnoreCase("DESC") && sortType!=null?Sort.Direction.DESC 
     			: Sort.Direction.ASC;
@@ -83,6 +86,7 @@ public class VolunteerService implements VolunteerInterface{
     		else if(sortBy.equalsIgnoreCase("assignedSrCitizen") && sortBy!=null) {
     		
     			ptry=PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction, "(countsr)"));
+    		
     			}
     		else {
     			ptry=PageRequest.of(pagenumber, limit);
@@ -92,21 +96,28 @@ public class VolunteerService implements VolunteerInterface{
     		ptry=PageRequest.of(pagenumber, limit);
     	}
     	if(filterState!=null && filterDistrict==null && filterBlock==null) {
-    		resultList=volunteerRespository.fetchByStatusAndState(status, filterState, ptry);
-
+    		page=volunteerRespository.fetchByStatusAndState(status, filterState, ptry);
+    		resultList=page.getContent();
+    		totalVolunteer=(int) page.getTotalElements();
     	}
 
     	else if(filterState!=null && filterDistrict!=null && filterBlock==null) {
-    		resultList=volunteerRespository.fetchByStatusAndStateAndDistrict(status, filterState, filterDistrict, ptry);
-    		
+    		page=volunteerRespository.fetchByStatusAndStateAndDistrict(status, filterState, filterDistrict, ptry);
+    		resultList=page.getContent();
+    		totalVolunteer=(int) page.getTotalElements();
     	}
  
     	else if (filterState!=null && filterDistrict!=null && filterBlock!=null){
     		
-    		resultList=volunteerRespository.fetchByStatusAndStateAndDistrictAndBlock(status, filterState, filterDistrict, filterBlock, ptry);
+    		page=volunteerRespository.fetchByStatusAndStateAndDistrictAndBlock(status, filterState, filterDistrict, filterBlock, ptry);
+    		resultList=page.getContent();
+    		totalVolunteer=(int) page.getTotalElements();
     	}
     	else {
-    		resultList=volunteerRespository.queryFunction(status, ptry);
+    		page=volunteerRespository.queryFunction(status, ptry);
+    		resultList=page.getContent();
+    		totalVolunteer=(int) page.getTotalElements();
+//    		resultList=volunteerRespository.queryFunction(status, ptry);
     	}
 		
 		if(resultList!=null && !resultList.isEmpty()) {
@@ -133,13 +144,16 @@ public class VolunteerService implements VolunteerInterface{
 				vo.setStatus(String.valueOf(row[16]));
 				vo.setRating(Float.valueOf(String.valueOf(row[17])));
 				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
-				
+				vo.setTotalVolunteer(totalVolunteer);
 				result.add(vo);
 			}
+				
 				
 		}
 		return result; 
 	}
+	
+	
 }
 
 
