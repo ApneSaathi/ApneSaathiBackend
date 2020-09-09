@@ -16,6 +16,7 @@ import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.interfaces.VolunteerInterface;
 import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.Volunteer;
+import com.kef.org.rest.model.VolunteerResponse;
 import com.kef.org.rest.repository.VolunteerRepository;
 
 
@@ -44,7 +45,7 @@ public class VolunteerService implements VolunteerInterface{
 	
 
 
-	public List<VolunteerVO> getVolunteerListByQuery(VolunteerVO volunteerStatus){
+	public VolunteerResponse getVolunteerListByQuery(VolunteerVO volunteerStatus){
 		
 		
 		List<VolunteerVO> result=new ArrayList<VolunteerVO>();
@@ -57,7 +58,7 @@ public class VolunteerService implements VolunteerInterface{
 		Integer limit;
     	Integer pagenumber;
     	List<Object> resultList;
-    	
+    	VolunteerResponse volResponse=new VolunteerResponse();
     	if(volunteerStatus.getLimit()==null && volunteerStatus.getPagenumber()==null) {
     		limit=10;
     		pagenumber=0;
@@ -144,13 +145,15 @@ public class VolunteerService implements VolunteerInterface{
 				vo.setStatus(String.valueOf(row[16]));
 				vo.setRating(Float.valueOf(String.valueOf(row[17])));
 				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
-				vo.setTotalVolunteer(totalVolunteer);
+				
 				result.add(vo);
 			}
 				
 				
 		}
-		return result; 
+		volResponse.setVolunteers(result);
+		volResponse.setTotalVolunteers(totalVolunteer);
+		return volResponse; 
 	}
 	
 	

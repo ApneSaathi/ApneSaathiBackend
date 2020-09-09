@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.model.SeniorCitizen;
+import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.repository.SeniorCitizenRepository;
 
 
@@ -19,62 +21,56 @@ public class SeniorCitizenService {
 	@Autowired
 	private SeniorCitizenRepository srCitizenRespository;
 	
-	public List<SeniorCitizen> getSeniorCitizen(SrCitizenVO srCitizenStatus){
+	public SrCitizenResponse getSeniorCitizen(SrCitizenVO srCitizenStatus){
 	
 		String status=srCitizenStatus.getStatus();
-    	Integer limit;
-    	Integer pagenumber;
-    	
-    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
-    		limit=10;
-    		pagenumber=0;
-    		
-    	}
-    	else {
-    	limit=srCitizenStatus.getLimit();
-    	
-    	pagenumber=srCitizenStatus.getPagenumber();
-    	}
-    	
-    	
+    	Integer limit=null;
+    	Integer pagenumber=null;
+    	Integer totalSrCitizen;
     	String filterState=srCitizenStatus.getFilterState();
     	String filterDistrict=srCitizenStatus.getFilterDistrict();
     	String filterBlock=srCitizenStatus.getFilterBlock();
-    	
+    	SrCitizenResponse SrCitizenresponse=new SrCitizenResponse();
 		List<SeniorCitizen> result;
+		Page<SeniorCitizen> page = null;
+		Pageable ptry;
+		if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
+			ptry=null;
+		}
+		else {
+			limit=srCitizenStatus.getLimit();
+			pagenumber=srCitizenStatus.getPagenumber();
+			ptry=PageRequest.of(pagenumber, limit);
+		}
 		
-		Pageable ptry=PageRequest.of(pagenumber, limit);
+	
+		
 		if(filterState!=null && filterDistrict==null && filterBlock==null) {
-    		result=srCitizenRespository.findByStatusAndStateIgnoreCase(status, filterState, ptry);
-
+    		page=srCitizenRespository.findByStatusAndStateIgnoreCase(status, filterState, ptry);
+    		result=page.getContent();
+    		totalSrCitizen=(int) page.getTotalElements();
     	}
-    	else if(filterDistrict!=null && filterState==null && filterBlock==null ) {
-    		result=srCitizenRespository.findByStatusAndDistrictIgnoreCase(status, filterDistrict, ptry);
-    	}
-    	else if(filterDistrict==null && filterState==null && filterBlock!=null) {
-    		result=srCitizenRespository.findByStatusAndBlockNameIgnoreCase(status, filterBlock, ptry);
-    	}
+    
     	else if(filterState!=null && filterDistrict!=null && filterBlock==null) {
-    		result=srCitizenRespository.findByStatusAndStateAndDistrictIgnoreCase(status, filterState, filterDistrict,ptry);
-    		
+    		page=srCitizenRespository.findByStatusAndStateAndDistrictIgnoreCase(status, filterState, filterDistrict,ptry);
+    		result=page.getContent();
+    		totalSrCitizen=(int) page.getTotalElements();
     	}
-    	else if(filterState!=null && filterDistrict==null && filterBlock!=null) {
-    		result=srCitizenRespository.findByStatusAndStateAndBlockNameIgnoreCase(status, filterState, filterBlock, ptry);
-    		
-    	}
-    	else if(filterState==null && filterDistrict!=null && filterBlock!=null) {
-    		result=srCitizenRespository.findByStatusAndDistrictAndBlockNameIgnoreCase(status, filterDistrict, filterBlock, ptry);
-    		
-    	}
+    	
     	else if (filterState!=null && filterDistrict!=null && filterBlock!=null){
     		
-    		result=srCitizenRespository.findByStatusAndStateAndDistrictAndBlockNameIgnoreCase(status, filterState, filterDistrict, filterBlock, ptry);
+    		page=srCitizenRespository.findByStatusAndStateAndDistrictAndBlockNameIgnoreCase(status, filterState, filterDistrict, filterBlock, ptry);
+    		result=page.getContent();
+    		totalSrCitizen=(int) page.getTotalElements();
     	}
     	else {
-    		result=srCitizenRespository.findAllByStatusIgnoreCase(status,ptry);
+    		page=srCitizenRespository.findAllByStatusIgnoreCase(status,ptry);
+    		result=page.getContent();
+    		totalSrCitizen=(int) page.getTotalElements();
     	}
-		
-		return result;
+		SrCitizenresponse.setSrCitizenList(result);
+		SrCitizenresponse.setTotalSrCitizen(totalSrCitizen);
+		return SrCitizenresponse;
 	}
 	
 	public void updateStatus(String status, Integer id) {

@@ -9,11 +9,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NamedQueries;
 import org.hibernate.annotations.NamedQuery;
 
 @Entity
 @Table(name = "volunteer_rating")
-@NamedQuery(name="VolunteerRating.getAvgRating",query="select avg(rating) from VolunteerRating where idvolunteer=?1 group by idvolunteer")
+@NamedQueries({
+@NamedQuery(name="VolunteerRating.getAvgRating",query="select avg(rating) from VolunteerRating where idvolunteer=?1 group by idvolunteer"),
+@NamedQuery(name="VolunteerRating.getRatingByAdmin_id",query="select v from VolunteerRating v where v.idvolunteer=?1 and v.adminId=?2 order By ratedOn desc ")
+})
 public class VolunteerRating {
 
 	@Id

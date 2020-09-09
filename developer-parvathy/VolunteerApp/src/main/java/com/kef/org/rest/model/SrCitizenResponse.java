@@ -12,7 +12,16 @@ public class SrCitizenResponse {
 	private Integer adminId;
 	private String message;
 	List<VolunteerVO> volunteerList;
+	Integer totalSrCitizen;
 	
+	public Integer getTotalSrCitizen() {
+		return totalSrCitizen;
+	}
+
+	public void setTotalSrCitizen(Integer totalSrCitizen) {
+		this.totalSrCitizen = totalSrCitizen;
+	}
+
 	public List<SeniorCitizen> getSrCitizenList() {
 		return srCitizenList;
 		

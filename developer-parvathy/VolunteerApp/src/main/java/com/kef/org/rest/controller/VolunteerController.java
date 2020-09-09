@@ -668,13 +668,11 @@ public class VolunteerController
 public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus){
     	
     	VolunteerResponse vr=new VolunteerResponse();
-    	List <VolunteerVO> volunteers=new ArrayList<>();
-    		volunteers=volunteerService.getVolunteerListByQuery(volunteerStatus);
-        	if(!volunteers.isEmpty() && volunteers!=null) {
+    		vr=volunteerService.getVolunteerListByQuery(volunteerStatus);
+        	if(!vr.getVolunteers().isEmpty() && vr.getVolunteers()!=null) {
         		
         		vr.setMessage("Success"); 
 	    		vr.setStatusCode(0);
-	    		vr.setVolunteers(volunteers);
 	    	
 	    		return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
         	}
@@ -694,11 +692,9 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
  public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SrCitizenVO srCitizenStatus){
     	
     	SrCitizenResponse srCitizen =new SrCitizenResponse();
-    	List<SeniorCitizen> srCitizenList;
-    	srCitizenList=srCitizenService.getSeniorCitizen(srCitizenStatus);
+    	srCitizen=srCitizenService.getSeniorCitizen(srCitizenStatus);
     	
-    	if(null!=srCitizenList && !srCitizenList.isEmpty()) {
-    		srCitizen.setSrCitizenList(srCitizenList);
+    	if(null!=srCitizen.getSrCitizenList() && !srCitizen.getSrCitizenList().isEmpty()) {
     		srCitizen.setMessage("Success");
     		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
     	}
@@ -1211,22 +1207,27 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
     
     @RequestMapping(value = "/getVolunteerDetails", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @ResponseBody
-    public  ResponseEntity<LoginInfo>  getVolunteerDetails(@RequestBody InputVO inputVO)
+    public  ResponseEntity<VolunteerResponse>  getVolunteerDetails(@RequestBody InputVO inputVO)
     {
     	LoginInfo loginInfo = new LoginInfo();
+    	VolunteerResponse volunteerResponse=new VolunteerResponse();
 		Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
-		
+		List<VolunteerAssignment> volAssignment = new ArrayList<>();
 			if (v1.isPresent()) {
-				loginInfo.setMessage("Success");
-				loginInfo.setStatusCode("0");
+				volunteerResponse.setMessage("Success");
+				volunteerResponse.setStatusCode(0);
 				Volunteer v = v1.get();
-				loginInfo.setVolunteer(mapVolunteerToEntity1(v));
+				volAssignment = v.getVolunteercallList();
+				volAssignment.stream().forEach(p->p.setMedicalandgreivance(null));
+				volunteerResponse.setSrCitizenList(volAssignment);
+				volunteerResponse.setVolunteer(mapVolunteerToEntity1(v));
+				volunteerResponse.setAvgRating(volunteerRatingRepostiry.getAvgRating(inputVO.getId()));
 			}
     	else {
     		loginInfo.setMessage("Failure");
 			loginInfo.setStatusCode("1"); 
     	}
-		return new ResponseEntity<LoginInfo>(loginInfo, loginInfo.getStatusCode().equals("0") ? HttpStatus.OK :HttpStatus.CONFLICT);
+		return new ResponseEntity<VolunteerResponse>(volunteerResponse, volunteerResponse.getStatusCode()==0 ? HttpStatus.OK :HttpStatus.CONFLICT);
 }
     
 public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
@@ -1234,10 +1235,19 @@ public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
     	Volunteer volunteer1 = new Volunteer();
     	volunteer1 = volunteer;
     	List<VolunteerAssignment> volAssignment = new ArrayList<>();
+    	List<VolunteerAssignment> srCitizenList=new ArrayList<>();
     	List<VolunteerRating> volRating = new ArrayList<>();
     	List<VolunteerRating> volRating1 = new ArrayList<>();
+    	List<VolunteerRating>finalList=new ArrayList<>();
     	volAssignment = volunteer.getVolunteercallList();
+    	Set<Integer> admin_Id=new HashSet<Integer>();
     	volAssignment.stream().forEach(p->p.setMedicalandgreivance(null));
+    	
+    	for(VolunteerAssignment va:volAssignment) {
+    		if(!va.getCallstatusCode().equals(1)) {
+    			srCitizenList.add(va);
+    		}
+    	}
     	volRating = volunteer.getVolunteerRatingList();
     	//Need to add logic for taking cumulative of rating and show all reviews given by different admins
 		/*
@@ -1249,8 +1259,20 @@ public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
 		 * 
 		 * volRating.get(i).setRating(String.valueOf(i3)); volRating.remove(j); } } }
 		 */
-    	volunteer1.setVolunteercallList(volAssignment);
-    	volunteer1.setVolunteerRatingList(volRating);
+    	if(null != volRating && !volRating.isEmpty()) {
+    		
+    		for(VolunteerRating vr:volRating) {
+    			admin_Id.add(vr.getAdminId());
+    		}
+    		
+    		for(Integer a:admin_Id) {
+    		volRating1=volunteerRatingRepostiry.getRatingByAdmin_id(volunteer.getIdvolunteer(), a);
+    		finalList.add(volRating1.get(0));
+    			}
+    		}
+    	
+    	volunteer1.setVolunteercallList(srCitizenList);
+    	volunteer1.setVolunteerRatingList(finalList);
     	
 		return volunteer1;
     }
