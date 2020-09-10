@@ -841,6 +841,7 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 					
 				}
 			}
+//			idvolunteer
 			loginInfo.setMessage("Success"); 
     		loginInfo.setStatusCode("0");
     		
@@ -1033,7 +1034,6 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartFile file, @RequestParam("adminId") Integer adminId, @RequestParam("adminRole") Integer adminRole) throws IOException,ValidationException{
     
     	VolunteerResponse vr=new VolunteerResponse();
-    	List<Volunteer> volunteers=new ArrayList<Volunteer>();
     	List<Volunteer> volunteerList=new ArrayList<Volunteer>();
 		List<String>error = new ArrayList<String>();
         Set<String> hash_Set = new HashSet<String>();
@@ -1212,16 +1212,12 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
     	LoginInfo loginInfo = new LoginInfo();
     	VolunteerResponse volunteerResponse=new VolunteerResponse();
 		Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
-		List<VolunteerAssignment> volAssignment = new ArrayList<>();
 			if (v1.isPresent()) {
 				volunteerResponse.setMessage("Success");
 				volunteerResponse.setStatusCode(0);
 				Volunteer v = v1.get();
-				volAssignment = v.getVolunteercallList();
-				volAssignment.stream().forEach(p->p.setMedicalandgreivance(null));
-				volunteerResponse.setSrCitizenList(volAssignment);
-				volunteerResponse.setVolunteer(mapVolunteerToEntity1(v));
-				volunteerResponse.setAvgRating(volunteerRatingRepostiry.getAvgRating(inputVO.getId()));
+				volunteerResponse.setVolunteerVO(mapVolunteerToEntity1(v));				
+		
 			}
     	else {
     		loginInfo.setMessage("Failure");
@@ -1230,10 +1226,31 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
 		return new ResponseEntity<VolunteerResponse>(volunteerResponse, volunteerResponse.getStatusCode()==0 ? HttpStatus.OK :HttpStatus.CONFLICT);
 }
     
-public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
+public VolunteerVO mapVolunteerToEntity1(Volunteer volunteer) {
     	
-    	Volunteer volunteer1 = new Volunteer();
-    	volunteer1 = volunteer;
+    	VolunteerVO volunteer1 = new VolunteerVO();
+    	volunteer1.setAddress(volunteer.getAddress());
+    	volunteer1.setAdminId(volunteer.getAdminId());
+    	volunteer1.setAssignedtoFellow(volunteer.getAssignedtoFellow());
+    	volunteer1.setAssignedtoFellowContact(volunteer.getAssignedtoFellowContact());
+    	volunteer1.setBlock(volunteer.getBlock());
+    	volunteer1.setDistrict(volunteer.getDistrict());
+    	volunteer1.setEmail(volunteer.getEmail());
+    	volunteer1.setFirstName(volunteer.getFirstName());
+    	volunteer1.setGender(volunteer.getGender());
+    	volunteer1.setIdvolunteer(volunteer.getIdvolunteer());
+    	volunteer1.setLastName(volunteer.getLastName());
+    	volunteer1.setphoneNo(volunteer.getphoneNo());
+     	volunteer1.setRole(volunteer.getRole());
+    	volunteer1.setPic(volunteer.getPic());
+    	volunteer1.setState(volunteer.getState());
+    	volunteer1.setStatus(volunteer.getStatus());
+    	volunteer1.setVillage(volunteer.getVillage());
+    	volunteer1.setRating(volunteerRatingRepostiry.getAvgRating(volunteer.getIdvolunteer()));
+    	
+    	
+    	
+//    	volunteer1 = volunteer;
     	List<VolunteerAssignment> volAssignment = new ArrayList<>();
     	List<VolunteerAssignment> srCitizenList=new ArrayList<>();
     	List<VolunteerRating> volRating = new ArrayList<>();
@@ -1273,7 +1290,37 @@ public Volunteer mapVolunteerToEntity1(Volunteer volunteer) {
     	
     	volunteer1.setVolunteercallList(srCitizenList);
     	volunteer1.setVolunteerRatingList(finalList);
+    	volunteer1.setSrCitizenList(volAssignment);
     	
 		return volunteer1;
     }
+
+@RequestMapping(value = "/transferVolunteer", method = RequestMethod.PUT,consumes = "application/json", produces = "application/json")
+@ResponseBody
+public  ResponseEntity<LoginInfo>  getTransferDetails(@RequestBody VolunteerVO volunteerVO)
+{
+	LoginInfo loginInfo = new LoginInfo();
+	Optional<Volunteer> volunteer1 = volunteerRespository.findById(volunteerVO.getIdvolunteer());
+	if(volunteer1.isPresent()) {
+		Volunteer vol = new Volunteer();
+		vol = volunteer1.get();
+		vol.setState(null != volunteerVO.getState() ? volunteerVO.getState(): vol.getState());
+		vol.setDistrict(null != volunteerVO.getDistrict() ? volunteerVO.getDistrict() : vol.getDistrict());
+		vol.setBlock(null != volunteerVO.getBlock() ? volunteerVO.getBlock() : vol.getBlock());
+		
+		volunteerRespository.save(vol);
+	
+	loginInfo.setMessage("Success"); 
+	loginInfo.setStatusCode("0");
+	 
+	}else {
+		  loginInfo.setMessage("Failure"); 
+		  loginInfo.setStatusCode("1"); 
+	}
+	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+
+	
+	}
+
+
 }

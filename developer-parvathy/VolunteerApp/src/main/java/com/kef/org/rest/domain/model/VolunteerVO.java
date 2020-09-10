@@ -1,5 +1,9 @@
 package com.kef.org.rest.domain.model;
 
+import java.util.List;
+
+import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.model.VolunteerRating;
 
 public class VolunteerVO {
 
@@ -53,7 +57,34 @@ public class VolunteerVO {
 	 private  String sortBy;
 	 private String sortType;
 	// private List <VolunteerAssignment> volunteercallList;
+	 private List <VolunteerAssignment> volunteercallList;
+	 private List<VolunteerRating> volunteerRatingList;
+	 private List<VolunteerAssignment> srCitizenList;
 	 
+
+	public List<VolunteerAssignment> getSrCitizenList() {
+		return srCitizenList;
+	}
+
+	public void setSrCitizenList(List<VolunteerAssignment> srCitizenList) {
+		this.srCitizenList = srCitizenList;
+	}
+
+	public List<VolunteerAssignment> getVolunteercallList() {
+		return volunteercallList;
+	}
+
+	public void setVolunteercallList(List<VolunteerAssignment> volunteercallList) {
+		this.volunteercallList = volunteercallList;
+	}
+
+	public List<VolunteerRating> getVolunteerRatingList() {
+		return volunteerRatingList;
+	}
+
+	public void setVolunteerRatingList(List<VolunteerRating> volunteerRatingList) {
+		this.volunteerRatingList = volunteerRatingList;
+	}
 
 	public Integer getIdvolunteer() {
 		return idvolunteer;
