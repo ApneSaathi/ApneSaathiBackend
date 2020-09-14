@@ -741,7 +741,9 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
     public ResponseEntity<LoginInfo> assignSrCitizen(@RequestBody SrCitizenResponse srCitizen){
     	List<SeniorCitizen> srCitizenList= srCitizen.getSrCitizenList();
     	LoginInfo loginInfo = new LoginInfo();
-   
+    	Optional<Volunteer> volunteer=volunteerRespository.findByidvolunteer(srCitizen.getIdvolunteer());
+    	
+    	if(volunteer.isPresent()) {
  
     	if(srCitizenList!=null && !srCitizenList.isEmpty()) {
     	
@@ -769,20 +771,23 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 		    		vo.setCallstatusCode(1);
 		    		vo.setRole(srCitizen.getRole());
 		    		vo.setAdminId(srCitizen.getAdminId());
+		    		vo.setStatus("Assigned");
 		    		volunteerassignmentRespository.save(vo);
 		    		
 		   }
     			loginInfo.setMessage("Success"); 
 	    		loginInfo.setStatusCode("0");
 	    		
-	    		return new ResponseEntity<LoginInfo>(loginInfo,HttpStatus.OK);
+    		}
     	}
     	else {
     		
     		 loginInfo.setMessage("Failure"); 
 			  loginInfo.setStatusCode("1"); 
-			  return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
+			  
     	}
+    	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+
     }
     
     @RequestMapping(value="/distributeSrCitizen",method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
@@ -814,6 +819,8 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 		    						
 		    					srCitizenService.updateStatus("Assigned",idsrcitizen);
 		    					
+		    					
+		    					
 		    				}
 		    				
 		    				VolunteerAssignment vo=new VolunteerAssignment();
@@ -831,7 +838,20 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 				    		vo.setCallstatusCode(1);
 				    		vo.setRole(volList.get(i).getRole());
 				    		vo.setAdminId(volList.get(i).getAdminId());
+				    		vo.setStatus("Assigned");
 				    		volunteerassignmentRespository.save(vo);
+				    		
+				    		//set previous status to unassigned
+				    		Integer idvolunteer=srCitizen.getIdvolunteer();
+				    		List<VolunteerAssignment> volAss=new ArrayList<VolunteerAssignment>();
+				    		for(SeniorCitizen ss:srCitizenList) {
+				    			
+				    			volAss=volunteerassignmentRespository.findByVolAndSrCitizen(idvolunteer, ss.getPhoneNo());
+				    			for(VolunteerAssignment vv:volAss) {
+				    			vv.setStatus("UnAssigned");
+				    			}
+				    			volunteerassignmentRespository.saveAll(volAss);
+				    		}
 				    		
 				   }
 		    			
@@ -841,7 +861,7 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
 					
 				}
 			}
-//			idvolunteer
+
 			loginInfo.setMessage("Success"); 
     		loginInfo.setStatusCode("0");
     		
@@ -1209,10 +1229,12 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
     @ResponseBody
     public  ResponseEntity<VolunteerResponse>  getVolunteerDetails(@RequestBody InputVO inputVO)
     {
-    	LoginInfo loginInfo = new LoginInfo();
     	VolunteerResponse volunteerResponse=new VolunteerResponse();
+    
 		Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
-			if (v1.isPresent()) {
+	
+		if (v1.isPresent()) {
+	
 				volunteerResponse.setMessage("Success");
 				volunteerResponse.setStatusCode(0);
 				Volunteer v = v1.get();
@@ -1220,8 +1242,9 @@ public ResponseEntity<VolunteerResponse> getCSV(@RequestParam("file") MultipartF
 		
 			}
     	else {
-    		loginInfo.setMessage("Failure");
-			loginInfo.setStatusCode("1"); 
+   
+    		volunteerResponse.setMessage("Failure");
+    		volunteerResponse.setStatusCode(1); 
     	}
 		return new ResponseEntity<VolunteerResponse>(volunteerResponse, volunteerResponse.getStatusCode()==0 ? HttpStatus.OK :HttpStatus.CONFLICT);
 }
@@ -1259,10 +1282,11 @@ public VolunteerVO mapVolunteerToEntity1(Volunteer volunteer) {
     	volAssignment = volunteer.getVolunteercallList();
     	Set<Integer> admin_Id=new HashSet<Integer>();
     	volAssignment.stream().forEach(p->p.setMedicalandgreivance(null));
-    	
     	for(VolunteerAssignment va:volAssignment) {
-    		if(!va.getCallstatusCode().equals(1)) {
+    		if(va.getCallstatusCode()!=null) {
+    		if(!va.getCallstatusCode().equals(1) && !va.getStatus().equalsIgnoreCase("UnAssigned")) {
     			srCitizenList.add(va);
+    		}
     		}
     	}
     	volRating = volunteer.getVolunteerRatingList();
@@ -1276,20 +1300,25 @@ public VolunteerVO mapVolunteerToEntity1(Volunteer volunteer) {
 		 * 
 		 * volRating.get(i).setRating(String.valueOf(i3)); volRating.remove(j); } } }
 		 */
+    	
     	if(null != volRating && !volRating.isEmpty()) {
     		
     		for(VolunteerRating vr:volRating) {
+    			
     			admin_Id.add(vr.getAdminId());
     		}
     		
     		for(Integer a:admin_Id) {
     		volRating1=volunteerRatingRepostiry.getRatingByAdmin_id(volunteer.getIdvolunteer(), a);
+    	
     		finalList.add(volRating1.get(0));
     			}
     		}
     	
     	volunteer1.setVolunteercallList(srCitizenList);
+    	
     	volunteer1.setVolunteerRatingList(finalList);
+    
     	volunteer1.setSrCitizenList(volAssignment);
     	
 		return volunteer1;
@@ -1322,5 +1351,82 @@ public  ResponseEntity<LoginInfo>  getTransferDetails(@RequestBody VolunteerVO v
 	
 	}
 
+@RequestMapping(value = "/deboardVolunteer", method = RequestMethod.PUT,consumes = "application/json", produces = "application/json")
+@ResponseBody
+public  ResponseEntity<LoginInfo>  deboardVolunteer(@RequestBody VolunteerVO volunteerVO)
+{
+	LoginInfo loginInfo = new LoginInfo();
+	Optional<Volunteer> volunteer1 = volunteerRespository.findById(volunteerVO.getIdvolunteer());
+	if(volunteer1.isPresent()) {
+		Volunteer vol = new Volunteer();
+		vol = volunteer1.get();
+		vol.setStatus("Deboarded");
+		
+		volunteerRespository.save(vol);
+	
+	loginInfo.setMessage("Success"); 
+	loginInfo.setStatusCode("0");
+	 
+	}else {
+		  loginInfo.setMessage("Failure"); 
+		  loginInfo.setStatusCode("1"); 
+	}
+	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
 
+	
+	}
+
+@RequestMapping(value="/UnassignSrCitizen",method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+@ResponseBody
+public ResponseEntity<LoginInfo> UnassignSrCitizen(@RequestBody SrCitizenResponse srCitizen){
+
+	List<SeniorCitizen> srCitizenList= srCitizen.getSrCitizenList();
+	LoginInfo loginInfo = new LoginInfo();
+	Integer idVolunteer=srCitizen.getIdvolunteer();
+	List<VolunteerAssignment> volAss=new ArrayList<>();
+	if(srCitizenList!=null && !srCitizenList.isEmpty()) {
+			for(SeniorCitizen s:srCitizenList) {
+				
+			s.setStatus("UnAssigned");
+			seniorcitizenRepository.save(s);
+			}
+			if(idVolunteer!=null) {
+				
+				for(SeniorCitizen ss:srCitizenList) {
+					
+					volAss=volunteerassignmentRespository.findByVolAndSrCitizen(idVolunteer, ss.getPhoneNo());
+				if(!volAss.isEmpty() && volAss!=null) {
+					for(VolunteerAssignment va:volAss) {
+						va.setStatus("UnAssigned");
+						volunteerassignmentRespository.save(va);
+					}
+					
+				}
+				else {
+						loginInfo.setMessage("Failure"); 
+						  loginInfo.setStatusCode("1"); 
+					}
+				}
+			}
+			else {
+				
+					loginInfo.setMessage("Failure"); 
+					  loginInfo.setStatusCode("1"); 
+				
+			}
+			loginInfo.setMessage("Success"); 
+    		loginInfo.setStatusCode("0");
+    		
+    		
+	}
+	else {
+		
+		loginInfo.setMessage("Failure"); 
+		  loginInfo.setStatusCode("1"); 
+		 
+	}
+	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+
+
+}
 }

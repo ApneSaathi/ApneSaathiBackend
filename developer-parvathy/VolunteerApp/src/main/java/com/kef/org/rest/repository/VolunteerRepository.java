@@ -30,6 +30,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Integer>, 
 	    
 	    List<Volunteer> fetchByStatus(String status);
 	   
+	    Optional<Volunteer> findByidvolunteer(Integer idvolunteer);
 	    
 	    Optional<Volunteer> findByPhoneNo(String phoneNo);
 	   

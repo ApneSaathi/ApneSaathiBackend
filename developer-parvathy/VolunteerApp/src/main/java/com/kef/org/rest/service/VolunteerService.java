@@ -16,7 +16,9 @@ import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.interfaces.VolunteerInterface;
 import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.Volunteer;
+import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.model.VolunteerResponse;
+import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 
 
@@ -25,6 +27,9 @@ import com.kef.org.rest.repository.VolunteerRepository;
 public class VolunteerService implements VolunteerInterface{
 	@Autowired
 	private VolunteerRepository volunteerRespository;
+	
+	@Autowired
+	private VolunteerAssignmentRepository volunteerAssignmentRepository;
 	
 	public Integer findvolunteerId(String phoneNo) {
 		
@@ -144,8 +149,10 @@ public class VolunteerService implements VolunteerInterface{
 				vo.setAdminId(Integer.valueOf(String.valueOf(row[15])));
 				vo.setStatus(String.valueOf(row[16]));
 				vo.setRating(Float.valueOf(String.valueOf(row[17])));
-				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
-				
+//				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
+				Integer idvolunteer=Integer.valueOf(String.valueOf(row[0]));
+				Integer countsr=getSrCitizenCount(idvolunteer);
+				vo.setCount_SrCitizen(countsr);
 				result.add(vo);
 			}
 				
@@ -156,7 +163,22 @@ public class VolunteerService implements VolunteerInterface{
 		return volResponse; 
 	}
 	
-	
+		public Integer getSrCitizenCount(Integer idvolunteer) {
+		
+		List<VolunteerAssignment> vol=new ArrayList<>();
+		Integer countsrCitizen=0;
+		vol=volunteerAssignmentRepository.findAllByIdVolunteer(idvolunteer);
+			if(vol!=null && !vol.isEmpty()) {
+				for(VolunteerAssignment va:vol) {
+					if(!va.getStatus().equalsIgnoreCase("UnAssigned")) {
+						
+						countsrCitizen+=1;
+					}
+				}
+				
+			}		
+					return countsrCitizen;
+				}
 }
 
 
