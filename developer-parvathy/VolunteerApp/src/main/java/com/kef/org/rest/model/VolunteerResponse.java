@@ -11,9 +11,16 @@ public class VolunteerResponse {
 	private String message;
 	private Integer statusCode;
 	private Integer totalVolunteers;
+	private List<VolunteerVO> excludedVolunteers;
 
 
-
+	
+	public List<VolunteerVO> getExcludedVolunteers() {
+		return excludedVolunteers;
+	}
+	public void setExcludedVolunteers(List<VolunteerVO> excludedVolunteers) {
+		this.excludedVolunteers = excludedVolunteers;
+	}
 	private VolunteerVO volunteerVO;
 	
 	

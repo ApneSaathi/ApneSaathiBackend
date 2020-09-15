@@ -2,6 +2,7 @@ package com.kef.org.rest.service;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,10 +12,9 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
-import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.interfaces.VolunteerInterface;
-import com.kef.org.rest.model.SeniorCitizen;
+
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.model.VolunteerResponse;
@@ -30,6 +30,9 @@ public class VolunteerService implements VolunteerInterface{
 	
 	@Autowired
 	private VolunteerAssignmentRepository volunteerAssignmentRepository;
+	
+
+
 	
 	public Integer findvolunteerId(String phoneNo) {
 		
@@ -63,6 +66,7 @@ public class VolunteerService implements VolunteerInterface{
 		Integer limit;
     	Integer pagenumber;
     	List<Object> resultList;
+    	List<VolunteerVO> excludedVolunteers =new ArrayList<VolunteerVO>();
     	VolunteerResponse volResponse=new VolunteerResponse();
     	if(volunteerStatus.getLimit()==null && volunteerStatus.getPagenumber()==null) {
     		limit=10;
@@ -155,11 +159,15 @@ public class VolunteerService implements VolunteerInterface{
 				vo.setCount_SrCitizen(countsr);
 				result.add(vo);
 			}
-				
-				
-		}
+				if(volunteerStatus.getExcludeIds()!=null && !volunteerStatus.getExcludeIds().isEmpty()) {
+					excludedVolunteers=excludeVolunteer(volunteerStatus.getExcludeIds(),result);
+					volResponse.setExcludedVolunteers(excludedVolunteers);
+					}
+				}
 		volResponse.setVolunteers(result);
 		volResponse.setTotalVolunteers(totalVolunteer);
+		
+		
 		return volResponse; 
 	}
 	
@@ -179,6 +187,24 @@ public class VolunteerService implements VolunteerInterface{
 			}		
 					return countsrCitizen;
 				}
+		
+		public List<VolunteerVO> excludeVolunteer(List<Integer> exclude,List<VolunteerVO> resultList){
+			
+			List<VolunteerVO> results=new ArrayList<>();
+			
+			
+				
+				for(VolunteerVO t:resultList) {
+				if(exclude.contains(t.getIdvolunteer())) {
+					
+				
+				}
+				else {
+					results.add(t);
+				}
+			}
+			return results;
+		}
 }
 
 
