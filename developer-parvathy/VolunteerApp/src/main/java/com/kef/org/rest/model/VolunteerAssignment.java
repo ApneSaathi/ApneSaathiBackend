@@ -28,7 +28,8 @@ query = "SELECT DISTINCT v FROM VolunteerAssignment v WHERE v.idvolunteer =:idvo
 ),
 @NamedQuery(name = "VolunteerAssignment.findAllByAdminId",
 query = "SELECT v FROM VolunteerAssignment v WHERE v.adminId =:adminId and role =:role"
-)
+),
+@NamedQuery(name="VolunteerAssignment.findByVolAndSrCitizen",query="SELECT v FROM VolunteerAssignment v where v.idvolunteer=?1 and v.phonenosrcitizen=?2")
 })
 public class VolunteerAssignment {
 	
@@ -122,6 +123,9 @@ public class VolunteerAssignment {
 	
 	@Column(name = "loggeddatetime",columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private LocalDateTime loggeddateTime;
+	
+	 @Column(name="STATUS",columnDefinition="varchar(255) default 'Assigned'")
+	 private String status;
 	
 	
 	 @OneToMany(cascade = CascadeType.ALL ,  fetch = FetchType.EAGER)
@@ -271,6 +275,14 @@ public class VolunteerAssignment {
 
 	public void setAdminId(Integer adminId) {
 		this.adminId = adminId;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 

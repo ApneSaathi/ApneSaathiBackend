@@ -2,6 +2,7 @@ package com.kef.org.rest.service;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,12 +12,13 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
-import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerVO;
 import com.kef.org.rest.interfaces.VolunteerInterface;
-import com.kef.org.rest.model.SeniorCitizen;
+
 import com.kef.org.rest.model.Volunteer;
+import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.model.VolunteerResponse;
+import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 
 
@@ -25,6 +27,12 @@ import com.kef.org.rest.repository.VolunteerRepository;
 public class VolunteerService implements VolunteerInterface{
 	@Autowired
 	private VolunteerRepository volunteerRespository;
+	
+	@Autowired
+	private VolunteerAssignmentRepository volunteerAssignmentRepository;
+	
+
+
 	
 	public Integer findvolunteerId(String phoneNo) {
 		
@@ -58,6 +66,7 @@ public class VolunteerService implements VolunteerInterface{
 		Integer limit;
     	Integer pagenumber;
     	List<Object> resultList;
+    	List<VolunteerVO> excludedVolunteers =new ArrayList<VolunteerVO>();
     	VolunteerResponse volResponse=new VolunteerResponse();
     	if(volunteerStatus.getLimit()==null && volunteerStatus.getPagenumber()==null) {
     		limit=10;
@@ -144,19 +153,58 @@ public class VolunteerService implements VolunteerInterface{
 				vo.setAdminId(Integer.valueOf(String.valueOf(row[15])));
 				vo.setStatus(String.valueOf(row[16]));
 				vo.setRating(Float.valueOf(String.valueOf(row[17])));
-				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
-				
+//				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
+				Integer idvolunteer=Integer.valueOf(String.valueOf(row[0]));
+				Integer countsr=getSrCitizenCount(idvolunteer);
+				vo.setCount_SrCitizen(countsr);
 				result.add(vo);
 			}
-				
-				
-		}
+				if(volunteerStatus.getExcludeIds()!=null && !volunteerStatus.getExcludeIds().isEmpty()) {
+					excludedVolunteers=excludeVolunteer(volunteerStatus.getExcludeIds(),result);
+					volResponse.setExcludedVolunteers(excludedVolunteers);
+					}
+				}
 		volResponse.setVolunteers(result);
 		volResponse.setTotalVolunteers(totalVolunteer);
+		
+		
 		return volResponse; 
 	}
 	
-	
+		public Integer getSrCitizenCount(Integer idvolunteer) {
+		
+		List<VolunteerAssignment> vol=new ArrayList<>();
+		Integer countsrCitizen=0;
+		vol=volunteerAssignmentRepository.findAllByIdVolunteer(idvolunteer);
+			if(vol!=null && !vol.isEmpty()) {
+				for(VolunteerAssignment va:vol) {
+					if(!va.getStatus().equalsIgnoreCase("UnAssigned")) {
+						
+						countsrCitizen+=1;
+					}
+				}
+				
+			}		
+					return countsrCitizen;
+				}
+		
+		public List<VolunteerVO> excludeVolunteer(List<Integer> exclude,List<VolunteerVO> resultList){
+			
+			List<VolunteerVO> results=new ArrayList<>();
+			
+			
+				
+				for(VolunteerVO t:resultList) {
+				if(exclude.contains(t.getIdvolunteer())) {
+					
+				
+				}
+				else {
+					results.add(t);
+				}
+			}
+			return results;
+		}
 }
 
 

@@ -18,5 +18,7 @@ public interface VolunteerAssignmentRepository  extends JpaRepository<VolunteerA
 	
 	@Query("select distinct va.namesrcitizen, va.phonenosrcitizen from VolunteerAssignment va where va.idvolunteer=?1")
 	List<Object> countSrCitizen(Integer idvolunteer);
+	
+	List<VolunteerAssignment> findByVolAndSrCitizen(Integer idvolunteer,String phoneNo);
 
 }

@@ -60,7 +60,17 @@ public class VolunteerVO {
 	 private List <VolunteerAssignment> volunteercallList;
 	 private List<VolunteerRating> volunteerRatingList;
 	 private List<VolunteerAssignment> srCitizenList;
+	 private List<Integer> excludeIds; 
 	 
+	 
+
+	public List<Integer> getExcludeIds() {
+		return excludeIds;
+	}
+
+	public void setExcludeIds(List<Integer> excludeIds) {
+		this.excludeIds = excludeIds;
+	}
 
 	public List<VolunteerAssignment> getSrCitizenList() {
 		return srCitizenList;
