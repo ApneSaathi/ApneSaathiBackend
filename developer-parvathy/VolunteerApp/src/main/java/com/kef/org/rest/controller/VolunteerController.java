@@ -1322,5 +1322,24 @@ public  ResponseEntity<LoginInfo>  getTransferDetails(@RequestBody VolunteerVO v
 	
 	}
 
-
+@RequestMapping(value = "/volunteerQueries", method = RequestMethod.POST,consumes = "application/json", produces = "application/json")
+@ResponseBody
+public  ResponseEntity<VolunteerResponse>  getVolunteersIssues(@RequestBody InputVO inputVO)
+{
+	LoginInfo loginInfo = new LoginInfo();
+	VolunteerResponse volunteerResponse=new VolunteerResponse();
+	Optional<Volunteer> v1 = volunteerRespository.findById(inputVO.getId());
+		if (v1.isPresent()) {
+			volunteerResponse.setMessage("Success");
+			volunteerResponse.setStatusCode(0);
+			Volunteer v = v1.get();
+			volunteerResponse.setVolunteerVO(mapVolunteerToEntity1(v));				
+	
+		}
+	else {
+		loginInfo.setMessage("Failure");
+		loginInfo.setStatusCode("1"); 
+	}
+	return new ResponseEntity<VolunteerResponse>(volunteerResponse, volunteerResponse.getStatusCode()==0 ? HttpStatus.OK :HttpStatus.CONFLICT);
+}
 }

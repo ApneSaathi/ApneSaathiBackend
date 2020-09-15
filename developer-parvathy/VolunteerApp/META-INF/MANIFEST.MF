@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: VolunteerApp
+Bundle-SymbolicName: VolunteerApp
+Bundle-Version: 1.0.0.qualifier
+Export-Package: com.kef.org.rest,
+ com.kef.org.rest.controller,
+ com.kef.org.rest.dao,
+ com.kef.org.rest.domain.model,
+ com.kef.org.rest.enums,
+ com.kef.org.rest.exception,
+ com.kef.org.rest.interfaces,
+ com.kef.org.rest.model,
+ com.kef.org.rest.repository,
+ com.kef.org.rest.service
