@@ -37,6 +37,11 @@ public class VolunteerAssignmentVO {
 	private String villagesrcitizen;
 	
 	
+	private String status;
+	
+	private Integer idSrCitizen;
+	
+	
 	// 1.Pending 2.Not Picked 3.Not Reachable 4.Number Busy 5.Call Later 6.Call Dropped  7.Wrong Number 8.Number doesn't exist 9.Disconnected 10.Connected
 	
 	private Integer callstatusCode;
@@ -224,6 +229,22 @@ public class VolunteerAssignmentVO {
 
 	public void setMedicalandgreivance(List<MedicalandGreivance> medicalandgreivance) {
 		this.medicalandgreivance = medicalandgreivance;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public Integer getIdSrCitizen() {
+		return idSrCitizen;
+	}
+
+	public void setIdSrCitizen(Integer idSrCitizen) {
+		this.idSrCitizen = idSrCitizen;
 	}
 
 
