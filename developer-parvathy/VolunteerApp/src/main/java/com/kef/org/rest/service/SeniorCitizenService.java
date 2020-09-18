@@ -91,37 +91,31 @@ public class SeniorCitizenService {
 		srCitizenRespository.updateStatus(status, id);
 	}
 	
-public List<VolunteerAssignmentVO> srCitizenAssignedToVol(Integer idvolunteer) {
+public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		
 		List<VolunteerAssignment> vol=new ArrayList<>();
 		List<VolunteerAssignmentVO> result=new ArrayList<>();
 		Optional<SeniorCitizen> srCitizen;
 		SeniorCitizen sr=new SeniorCitizen();
-		vol=volunteerassignmentRespository.findAllByIdVolunteer(idvolunteer);
+		List<SeniorCitizen> srCitizenList=new ArrayList<>();
+		vol=volunteerassignmentRespository.findAllByIdvolunteerAndStatus(idvolunteer,"Assigned");
 
 			if(vol!=null && !vol.isEmpty()) {
 
 				for(VolunteerAssignment va:vol) {
 		
-					if(!va.getStatus().equalsIgnoreCase("UnAssigned")) {
-						VolunteerAssignmentVO volAss=new VolunteerAssignmentVO();
-			
-						logger.info(va.getCallid().toString());
+
 						srCitizen=srCitizenRespository.findAllByPhoneNoAndFirstNameIgnoreCase(va.getPhonenosrcitizen(),va.getNamesrcitizen());
 						
 						
 						if(srCitizen.isPresent()) {
 							sr=srCitizen.get();
-						volAss=mapVoluntereAssignmentToEntity(va,sr.getSrCitizenId());
-						result.add(volAss);
+							srCitizenList.add(sr);
 						}
-						
-						
-					}
 				}
 				
 			}		
-					return result;
+					return srCitizenList;
 				}
 	
 	public VolunteerAssignmentVO mapVoluntereAssignmentToEntity(VolunteerAssignment vol, Integer srCitizenId){

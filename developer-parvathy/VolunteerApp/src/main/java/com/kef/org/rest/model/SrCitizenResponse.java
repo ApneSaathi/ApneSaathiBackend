@@ -11,9 +11,20 @@ public class SrCitizenResponse {
 	private Integer role;
 	private Integer adminId;
 	private String message;
-	List<VolunteerVO> volunteerList;
-	Integer totalSrCitizen;
+	private List<VolunteerVO> volunteerList;
+	private Integer totalSrCitizen;
+	private String statusCode;
 	
+	
+	
+	public String getStatusCode() {
+		return statusCode;
+	}
+
+	public void setStatusCode(String statusCode) {
+		this.statusCode = statusCode;
+	}
+
 	public Integer getTotalSrCitizen() {
 		return totalSrCitizen;
 	}

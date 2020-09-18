@@ -1,6 +1,7 @@
 package com.kef.org.rest.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.transaction.Transactional;
 
@@ -30,5 +31,7 @@ public interface SeniorCitizenRepository extends JpaRepository<SeniorCitizen, In
 	@Modifying
 	@Query(value="update SeniorCitizen sc set sc.status=?1 where sc.srCitizenId=?2")
 	void updateStatus(String status,Integer id);
+	
+	Optional<SeniorCitizen> findAllByPhoneNoAndFirstNameIgnoreCase(String phoneNo,String firstName);
 	
 }

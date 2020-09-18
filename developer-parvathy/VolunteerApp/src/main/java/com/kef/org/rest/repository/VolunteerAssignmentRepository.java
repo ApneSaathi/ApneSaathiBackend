@@ -13,6 +13,7 @@ import com.kef.org.rest.model.VolunteerAssignment;
 public interface VolunteerAssignmentRepository  extends JpaRepository<VolunteerAssignment, Integer>{
 	
 	List<VolunteerAssignment> findAllByIdVolunteer(Integer idvolunteer);
+	List<VolunteerAssignment> findAllByIdvolunteerAndStatus(Integer idvolunteer,String status);
 	
 	List<VolunteerAssignment> findAllByAdminId(Integer adminId, Integer role);
 	

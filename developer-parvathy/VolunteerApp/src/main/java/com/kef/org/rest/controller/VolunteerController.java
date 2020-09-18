@@ -1434,23 +1434,24 @@ public ResponseEntity<LoginInfo> UnassignSrCitizen(@RequestBody SrCitizenRespons
 @RequestMapping(value="/srCitizenByVolunteer",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")
 @CrossOrigin(origins = "http://15.207.42.209:8080")
 @ResponseBody
-public ResponseEntity<LoginInfo> getSrCitizenByVolunteer(@RequestBody InputVO inputVO){
-	List<VolunteerAssignmentVO> result=new ArrayList<>();
-	LoginInfo loginInfo=new LoginInfo();
+public ResponseEntity<SrCitizenResponse> getSrCitizenByVolunteer(@RequestBody InputVO inputVO){
+	List<SeniorCitizen> result=new ArrayList<>();
+	SrCitizenResponse srCitizenRes=new SrCitizenResponse();
 	result=srCitizenService.srCitizenAssignedToVol(inputVO.getId());
 	if(result!=null && !result.isEmpty()) {
 		
-		loginInfo.setMessage("Success"); 
-		loginInfo.setStatusCode("0");
-		loginInfo.setSrCitizenList(result);
+		srCitizenRes.setMessage("Success"); 
+		srCitizenRes.setStatusCode("0");
+		srCitizenRes.setSrCitizenList(result);
+//		loginInfo.setSrCitizenList(result);
 	}
 	else {
 		
-		loginInfo.setMessage("Failure"); 
-		  loginInfo.setStatusCode("1");
+		srCitizenRes.setMessage("Failure"); 
+		srCitizenRes.setStatusCode("1");
 	}
 	
-	return new ResponseEntity<LoginInfo>(loginInfo,loginInfo.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+	return new ResponseEntity<SrCitizenResponse>(srCitizenRes,srCitizenRes.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
 }
 
 }
