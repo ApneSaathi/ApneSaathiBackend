@@ -65,6 +65,7 @@ public class SeniorCitizenService {
     	SrCitizenResponse SrCitizenresponse=new SrCitizenResponse();
 		List<SeniorCitizen> result;
 		Page<SeniorCitizen> page = null;
+		List<SrCitizenVO> srCitizenVOList;
 		Pageable ptry;
 		if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
 			ptry=null;
@@ -100,7 +101,14 @@ public class SeniorCitizenService {
     		result=page.getContent();
     		totalSrCitizen=(int) page.getTotalElements();
     	}
-		SrCitizenresponse.setSrCitizenList(result);
+//		SrCitizenresponse.setSrCitizenList(result);
+		srCitizenVOList=SrCitizenToSrCitizenVO(result);
+		if(!srCitizenVOList.isEmpty() && srCitizenVOList!=null) {
+		SrCitizenresponse.setListsrCitizen(srCitizenVOList);
+		}
+		else {
+			SrCitizenresponse.setListsrCitizen(null);
+		}
 		SrCitizenresponse.setTotalSrCitizen(totalSrCitizen);
 		return SrCitizenresponse;
 	}
@@ -217,5 +225,38 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 			
 		return srCitizenResponse ;
 		
+	}
+	public List<SrCitizenVO> SrCitizenToSrCitizenVO(List<SeniorCitizen> srCitizen){
+		List<SrCitizenVO> result=new ArrayList<>();
+		List<VolunteerAssignment>volAssigned=new ArrayList<VolunteerAssignment>() ;
+		Volunteer volunteer;
+		if(srCitizen!=null && !srCitizen.isEmpty()) {
+			for(SeniorCitizen sr:srCitizen) {
+				SrCitizenVO seniorCitizen =new SrCitizenVO();
+				seniorCitizen.setSrCitizenId(sr.getSrCitizenId());
+				seniorCitizen.setStatus(sr.getStatus());
+				seniorCitizen.setDeboardedOn(sr.getDeboardedOn());
+				seniorCitizen.setReasons(sr.getReasons());
+				seniorCitizen.setFirstName(sr.getFirstName());
+				seniorCitizen.setAge(sr.getAge());
+				seniorCitizen.setGender(sr.getGender());
+				seniorCitizen.setPhoneNo(sr.getPhoneNo());
+				seniorCitizen.setState(sr.getState());
+				seniorCitizen.setDistrict(sr.getDistrict());
+				seniorCitizen.setAddress(sr.getAddress());
+				seniorCitizen.setBlockName(sr.getBlockName());
+				seniorCitizen.setVillage(sr.getVillage());
+				seniorCitizen.setEmailID(sr.getEmailID());
+				volAssigned=volunteerassignmentRespository.findByPhonenosrcitizenAndStatusIgnoreCase(sr.getPhoneNo(),"Assigned");
+							if(!volAssigned.isEmpty() && volAssigned!=null) {
+					volunteer=volunteerRepository.findbyidvolunteer(volAssigned.get(0).getIdvolunteer());
+				
+				seniorCitizen.setAssignedVolunteer(volunteer.getIdvolunteer());
+				seniorCitizen.setAssignedVolunteerName(volunteer.getFirstName() + " "+volunteer.getLastName());
+			}
+			result.add(seniorCitizen);		
+			}
+	}
+		return result;
 	}
 }

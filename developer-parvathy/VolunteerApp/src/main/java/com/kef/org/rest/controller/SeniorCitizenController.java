@@ -14,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
-import com.kef.org.rest.model.LoginInfo;
-import com.kef.org.rest.model.SrCitizenResponse;
+
 import com.kef.org.rest.service.SeniorCitizenService;
 
 @RestController

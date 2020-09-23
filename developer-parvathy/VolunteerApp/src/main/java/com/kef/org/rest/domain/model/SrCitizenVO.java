@@ -1,5 +1,7 @@
 package com.kef.org.rest.domain.model;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 
 public class SrCitizenVO {
@@ -19,6 +21,11 @@ public class SrCitizenVO {
 	 private Integer volunteerId;
 	 private String refferedby;
 	 private String emailID;
+	 private String reasons;
+	 private LocalDateTime deboardedOn;
+	 private Integer assignedVolunteer;
+	 private String assignedVolunteerName;
+	 
 	 //for pagination
 	 private Integer limit;
 	 private Integer pagenumber;
@@ -142,6 +149,30 @@ public class SrCitizenVO {
 	}
 	public void setFilterBlock(String filterBlock) {
 		this.filterBlock = filterBlock;
+	}
+	public String getReasons() {
+		return reasons;
+	}
+	public void setReasons(String reasons) {
+		this.reasons = reasons;
+	}
+	public LocalDateTime getDeboardedOn() {
+		return deboardedOn;
+	}
+	public void setDeboardedOn(LocalDateTime deboardedOn) {
+		this.deboardedOn = deboardedOn;
+	}
+	public Integer getAssignedVolunteer() {
+		return assignedVolunteer;
+	}
+	public void setAssignedVolunteer(Integer assignedVolunteer) {
+		this.assignedVolunteer = assignedVolunteer;
+	}
+	public String getAssignedVolunteerName() {
+		return assignedVolunteerName;
+	}
+	public void setAssignedVolunteerName(String assignedVolunteerName) {
+		this.assignedVolunteerName = assignedVolunteerName;
 	}
 	
 	
