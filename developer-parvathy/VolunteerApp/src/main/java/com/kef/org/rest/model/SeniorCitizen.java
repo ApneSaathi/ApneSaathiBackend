@@ -36,10 +36,11 @@ public class SeniorCitizen {
 	 @Column(name = "debordedon", columnDefinition ="TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE")
 	  private LocalDateTime deboardedOn;
 	 
+	 
 	 @Column(name="REASONS")
 	 private String reasons;
 	
-
+	 
 	 public LocalDateTime getDeboardedOn() {
 		return deboardedOn;
 	}
@@ -160,9 +161,19 @@ public class SeniorCitizen {
 	public void setEmailID(String emailID) {
 		this.emailID = emailID;
 	}
+	
+	public String getLastName() {
+		return lastName;
+	}
 
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
 	@Column(name = "FIRSTNAME",nullable =false)
 	 private String firstName;
+	
+	@Column(name = "LASTNAME",nullable =false)
+	 private String lastName;
 	
 	 @Column(name = "AGE",nullable =false)
 	 private Integer age;
@@ -170,7 +181,7 @@ public class SeniorCitizen {
 	 @Column(name = "GENDER",nullable =false)
 	 private char gender;
 	 
-	 @Column(name = "MOBILENO",nullable =false)
+	 @Column(name = "MOBILENO",nullable =false, unique = true)
 	 private String phoneNo;
 	 
 	 @Column(name = "STATE",nullable =false)
@@ -196,5 +207,7 @@ public class SeniorCitizen {
 	
 	 @Column(name = "EMAIL")
 	 private String emailID;
+	 
+	 
 	 
 }

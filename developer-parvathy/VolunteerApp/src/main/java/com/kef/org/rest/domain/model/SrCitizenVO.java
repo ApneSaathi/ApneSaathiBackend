@@ -25,6 +25,7 @@ public class SrCitizenVO {
 	 private LocalDateTime deboardedOn;
 	 private Integer assignedVolunteer;
 	 private String assignedVolunteerName;
+	 private String lastName;
 	 
 	 //for pagination
 	 private Integer limit;
@@ -173,6 +174,12 @@ public class SrCitizenVO {
 	}
 	public void setAssignedVolunteerName(String assignedVolunteerName) {
 		this.assignedVolunteerName = assignedVolunteerName;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 	
 	

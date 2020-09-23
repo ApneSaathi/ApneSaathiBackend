@@ -190,6 +190,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 				if(!volAssigned.isEmpty() && volAssigned!=null) {
 					
 					idvolunteer=volAssigned.get(0).getIdvolunteer();
+					srCitizenResponse.setTalked_with(volAssigned.get(0).getTalkedwith());
 					volunteer=volunteerRepository.findbyidvolunteer(idvolunteer);
 //					medicalList=medicalRepository.findByCallid(volAssigned.get(0).getCallid());
 					medicalList=volAssigned.get(0).getMedicalandgreivance();
@@ -220,6 +221,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 				srCitizenResponse.setEmailID(srCiti.getEmailID());
 				srCitizenResponse.setStatus(srCiti.getStatus());
 				srCitizenResponse.setGender(srCiti.getGender());
+				srCitizenResponse.setLastName(srCiti.getLastName());
 				
 				}
 			
@@ -247,6 +249,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 				seniorCitizen.setBlockName(sr.getBlockName());
 				seniorCitizen.setVillage(sr.getVillage());
 				seniorCitizen.setEmailID(sr.getEmailID());
+				seniorCitizen.setLastName(sr.getLastName());
 				volAssigned=volunteerassignmentRespository.findByPhonenosrcitizenAndStatusIgnoreCase(sr.getPhoneNo(),"Assigned");
 							if(!volAssigned.isEmpty() && volAssigned!=null) {
 					volunteer=volunteerRepository.findbyidvolunteer(volAssigned.get(0).getIdvolunteer());

@@ -22,10 +22,12 @@ public class SrCitizenDetailsResponse {
 	 private Integer volunteerId;
 	 private String refferedby;
 	 private String emailID;
+	 private String lastName;
 	 private String volunteerFirstName;
 	 private String volunteerLastName;
 	 private String volunteerContact;
 	 private Float volunteerRating;
+	 private String talked_with;
 	 private String statusCode;
 	 private String message;
 	 private List <MedicalandGreivance> medicalGreivanceList ;
@@ -163,6 +165,18 @@ public class SrCitizenDetailsResponse {
 	}
 	public void setGreivanceList(List<GreivanceTracking> greivanceList) {
 		this.greivanceList = greivanceList;
+	}
+	public String getLastName() {
+		return lastName;
+	}
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+	public String getTalked_with() {
+		return talked_with;
+	}
+	public void setTalked_with(String talked_with) {
+		this.talked_with = talked_with;
 	}
 	
 	 
