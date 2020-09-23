@@ -17,5 +17,8 @@ public interface GreivanceTrackingRepository extends JpaRepository<GreivanceTrac
 	GreivanceTracking findbytrackingid(Integer trackingId);
 	
 	List<GreivanceTracking> findAllbyDistrictName(String districtName);
+	
+	List<GreivanceTracking> findByCallid(Integer callid);
+	
 
 }

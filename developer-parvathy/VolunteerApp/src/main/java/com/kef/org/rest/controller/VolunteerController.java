@@ -1270,7 +1270,7 @@ public VolunteerVO mapVolunteerToEntity1(Volunteer volunteer) {
     	volunteer1.setStatus(volunteer.getStatus());
     	volunteer1.setVillage(volunteer.getVillage());
     	volunteer1.setRating(volunteerRatingRepostiry.getAvgRating(volunteer.getIdvolunteer()));
-    	
+    	volunteer1.setCount_SrCitizen(volunteerService.getSrCitizenCount(volunteer.getIdvolunteer()));
     	
     	
 //    	volunteer1 = volunteer;

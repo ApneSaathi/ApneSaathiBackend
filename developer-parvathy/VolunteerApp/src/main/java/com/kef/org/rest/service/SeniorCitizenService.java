@@ -12,13 +12,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.controller.VolunteerController;
+import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
+import com.kef.org.rest.model.GreivanceTracking;
+import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.SrCitizenResponse;
+import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.repository.GreivanceTrackingRepository;
+import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.SeniorCitizenRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
+import com.kef.org.rest.repository.VolunteerRatingRepository;
+import com.kef.org.rest.repository.VolunteerRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +39,17 @@ public class SeniorCitizenService {
 	  @Autowired
 	   	private VolunteerAssignmentRepository volunteerassignmentRespository;
 	  
+	  @Autowired 
+	  private VolunteerRepository volunteerRepository;
+	  
+	  @Autowired
+	  private VolunteerRatingRepository volunteerRatingRepository;
+	  
+	  @Autowired 
+	  private MedicalandGreivanceRepository medicalRepository;
+	  
+	  @Autowired
+	  private GreivanceTrackingRepository greivanceRepository;
 		public static final Logger logger = LoggerFactory.getLogger(SeniorCitizenService.class);
 
 	
@@ -143,5 +162,60 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		volAss.setIdSrCitizen(srCitizenId);
 		
 		return volAss;
+	}
+	
+	public SrCitizenDetailsResponse getSrCitizenPersonalInfo(Integer id) {
+			
+		Optional<SeniorCitizen> srCitizen=srCitizenRespository.findById(id);
+		SeniorCitizen srCiti=new SeniorCitizen();
+		Integer idvolunteer;
+		Volunteer volunteer;
+		SrCitizenDetailsResponse srCitizenResponse= new SrCitizenDetailsResponse();
+		List<VolunteerAssignment>volAssigned=new ArrayList<VolunteerAssignment>() ;
+		List<MedicalandGreivance> medicalList=new ArrayList<>();
+		
+			if(srCitizen.isPresent()) {
+			
+				srCiti=srCitizen.get();
+				volAssigned=volunteerassignmentRespository.findByPhonenosrcitizenAndStatusIgnoreCase(srCiti.getPhoneNo(),"Assigned");
+				
+				if(!volAssigned.isEmpty() && volAssigned!=null) {
+					
+					idvolunteer=volAssigned.get(0).getIdvolunteer();
+					volunteer=volunteerRepository.findbyidvolunteer(idvolunteer);
+//					medicalList=medicalRepository.findByCallid(volAssigned.get(0).getCallid());
+					medicalList=volAssigned.get(0).getMedicalandgreivance();
+					
+				if(!medicalList.isEmpty() && medicalList!=null) {
+						srCitizenResponse.setMedicalGreivanceList(medicalList);
+									
+					}
+				
+//					srCitizenResponse.setGreivanceTracking();
+//					volunteer.getVolunteercallList();
+					srCitizenResponse.setVolunteerId(idvolunteer);
+					srCitizenResponse.setVolunteerFirstName(volunteer.getFirstName());
+					srCitizenResponse.setVolunteerLastName(volunteer.getLastName());
+					srCitizenResponse.setVolunteerContact(volunteer.getphoneNo());
+					srCitizenResponse.setVolunteerRating(volunteerRatingRepository.getAvgRating(idvolunteer));
+					
+				}
+				srCitizenResponse.setSrCitizenId(srCiti.getSrCitizenId());
+				srCitizenResponse.setFirstName(srCiti.getFirstName());
+				srCitizenResponse.setAge(srCiti.getAge());
+				srCitizenResponse.setPhoneNo(srCiti.getPhoneNo());
+				srCitizenResponse.setState(srCiti.getState());
+				srCitizenResponse.setDistrict(srCiti.getDistrict());
+				srCitizenResponse.setBlockName(srCiti.getBlockName());
+				srCitizenResponse.setAddress(srCiti.getAddress());
+				srCitizenResponse.setVillage(srCiti.getVillage());
+				srCitizenResponse.setEmailID(srCiti.getEmailID());
+				srCitizenResponse.setStatus(srCiti.getStatus());
+				srCitizenResponse.setGender(srCiti.getGender());
+				
+				}
+			
+		return srCitizenResponse ;
+		
 	}
 }
