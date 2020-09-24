@@ -52,8 +52,16 @@
 		<dependency>
  <groupId>org.hibernate</groupId>
  <artifactId>hibernate-core</artifactId>
- <version>5.2.1.Final</version>
-</dependency>
+ </dependency>
+ 		<dependency>
+ 			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20190722</version>
+		</dependency>
+		<dependency>
+        	<groupId>org.hibernate</groupId>
+        	<artifactId>hibernate-jpamodelgen</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -62,6 +70,32 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId> 
 			</plugin>
+			<plugin>
+            <groupId>org.bsc.maven</groupId>
+            <artifactId>maven-processor-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <id>process</id>
+                    <goals>
+                        <goal>process</goal>
+                    </goals>
+                    <phase>generate-sources</phase>
+                    <configuration>
+                        <processors>
+                            <processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
+                        </processors>
+                    </configuration>
+                </execution>
+            </executions>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hibernate</groupId>
+                    <artifactId>hibernate-jpamodelgen</artifactId>
+                    <version>5.4.3.Final</version>
+                </dependency>
+            </dependencies>
+        </plugin>
 		</plugins>
 	</build>
 	

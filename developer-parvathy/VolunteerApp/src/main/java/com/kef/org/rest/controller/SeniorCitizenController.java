@@ -1,18 +1,22 @@
 package com.kef.org.rest.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kef.org.rest.domain.model.InputVO;
+import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 
 import com.kef.org.rest.service.SeniorCitizenService;
@@ -44,5 +48,17 @@ public class SeniorCitizenController {
 			}
 		
 			return new ResponseEntity<SrCitizenDetailsResponse>(response,response.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+	}
+	
+	/****
+	 * API for Senior Citizen Queries
+	 * @param requestJson
+	 * @return
+	 */
+	@PostMapping(value="/srCitizenQueries")
+	@ResponseStatus(HttpStatus.OK)
+	public @ResponseBody List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(@RequestBody String requestJson) {
+		
+		return srCitizenService.getSeniorCitizenQueries(requestJson);
 	}
 }

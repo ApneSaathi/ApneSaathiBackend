@@ -3,15 +3,25 @@ package com.kef.org.rest.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.kef.org.rest.controller.VolunteerController;
+import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
@@ -27,9 +37,6 @@ import com.kef.org.rest.repository.SeniorCitizenRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRatingRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 @Service("srCitizenService")
 public class SeniorCitizenService {
 	
@@ -50,9 +57,10 @@ public class SeniorCitizenService {
 	  
 	  @Autowired
 	  private GreivanceTrackingRepository greivanceRepository;
-		public static final Logger logger = LoggerFactory.getLogger(SeniorCitizenService.class);
-
-	
+	  public static final Logger logger = LoggerFactory.getLogger(SeniorCitizenService.class);
+	  @Autowired
+	  private EntityManager em;
+	  
 	public SrCitizenResponse getSeniorCitizen(SrCitizenVO srCitizenStatus){
 	
 		String status=srCitizenStatus.getStatus();
@@ -261,5 +269,84 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 			}
 	}
 		return result;
+	}
+	
+	public List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(String request) {
+		JSONObject json = new JSONObject(request);
+		String queryType = json.has("queryType") && json.getString("queryType")!=null 
+				? json.getString("queryType").trim() : "";
+		String state = json.has("state") && json.getString("state")!=null
+						? json.getString("state").trim() : "";
+		String district = json.has("district") && json.getString("district")!=null
+				? json.getString("district").trim() : "";
+		String block = json.has("block") && json.getString("block")!=null
+						? json.getString("block").trim() : "";
+		String sortBy = json.has("sortBy") && json.getString("sortBy")!=null
+				? json.getString("sortBy").trim() : "";
+		String sortType = json.has("sortType") && json.getString("sortType")!=null
+				? json.getString("sortType").trim() : "";
+		Integer pageNumber = json.has("pageNumber")? json.getInt("pageNumber"): 1;
+		Integer limit = json.has("limit")? json.getInt("limit"): 10;
+		if(queryType.equalsIgnoreCase("pending"))
+			queryType="RAISED";
+		else if(queryType.equalsIgnoreCase("In progress"))
+			queryType = "UNDER REVIEW";
+		else if(queryType.equalsIgnoreCase("Resolved"))
+			queryType = "RESOLVED";
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Tuple> gtQuery = builder.createTupleQuery();
+		Root<GreivanceTracking> gtRoot = gtQuery.from(GreivanceTracking.class);
+		Root<SeniorCitizen> scRoot = gtQuery.from(SeniorCitizen.class);
+		List<Predicate> conditions = new ArrayList<>();
+		conditions.add(builder.equal(gtRoot.get("phoneNo"),scRoot.get("phoneNo")));
+		conditions.add(builder.equal(gtRoot.get("status"), queryType));
+		if(!state.isEmpty())
+			conditions.add(builder.equal(scRoot.get("state"), state));
+		if(!district.isEmpty())
+			conditions.add(builder.equal(scRoot.get("district"), district));
+		if(!block.isEmpty())
+			conditions.add(builder.equal(scRoot.get("blockName"), block));
+		
+		gtQuery.multiselect(gtRoot.get("namesrcitizen").alias("name"),gtRoot.get("adminId").alias("issueId"),gtRoot.get("greivanceType").alias("issueRaised"),
+				scRoot.get("state"),scRoot.get("district"),scRoot.get("blockName").alias("block"),gtRoot.get("createdDate").alias("createdOn"),
+				gtRoot.get("priority"),gtRoot.get("lastUpdatedOn"),gtRoot.get("resolvedDate").alias("resolvedOn"));
+		TypedQuery<Tuple> typedQuery;
+		if(!sortBy.isEmpty()) {
+			sortType = sortType.isEmpty() ? "asc" : sortType;
+			if(sortType.equalsIgnoreCase("asc")) {
+				typedQuery = em.createQuery(gtQuery
+						.where(conditions.toArray(new Predicate[] {}))
+						.orderBy(builder.asc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
+			}else{
+				typedQuery = em.createQuery(gtQuery
+						.where(conditions.toArray(new Predicate[] {}))
+						.orderBy(builder.desc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
+			}
+		}else {
+			typedQuery = em.createQuery(gtQuery
+					.where(conditions.toArray(new Predicate[] {})));
+		}
+		typedQuery.setFirstResult((pageNumber-1)*limit);
+		typedQuery.setMaxResults(limit);
+		List<Tuple> tupleList = typedQuery.getResultList();
+		List<SeniorCitizenQueryResponse> responseList = new ArrayList<>();
+		if(tupleList!=null) {
+			tupleList.forEach(row->{
+				SeniorCitizenQueryResponse response = new SeniorCitizenQueryResponse();
+				response.setName(row.get(0)!=null ? String.valueOf(row.get(0)):"");
+				response.setIssueId(row.get(1)!=null ? Integer.valueOf(String.valueOf(row.get(1))):null);
+				response.setIssuesRaised(row.get(2)!=null ? String.valueOf(row.get(2)):"");
+				response.setState(row.get(3)!=null ? String.valueOf(row.get(3)):"");
+				response.setDistrict(row.get(4)!=null ? String.valueOf(row.get(4)):"");
+				response.setBlock(row.get(5)!=null ? String.valueOf(row.get(5)):"");
+				response.setCreatedOn(row.get(6)!=null ? String.valueOf(row.get(6)):"");
+				response.setPriority(row.get(7)!=null ? String.valueOf(row.get(7)):"");
+				response.setLastUpdatedOn(row.get(8)!=null ? String.valueOf(row.get(8)):"");
+				response.setResolvedOn(row.get(9)!=null ? String.valueOf(row.get(9)):"");
+				responseList.add(response);
+			});
+		}
+		
+		return responseList;
 	}
 }
