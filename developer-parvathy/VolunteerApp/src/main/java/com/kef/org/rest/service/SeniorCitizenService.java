@@ -1,7 +1,9 @@
 package com.kef.org.rest.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
@@ -273,7 +277,8 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		return result;
 	}
 	
-	public SrCitizenQueryResponseVO getSeniorCitizenQueries(SrCitizenQueriesRequestVO request) {
+	@SuppressWarnings("unchecked")
+	public ResponseEntity<SrCitizenQueryResponseVO> getSeniorCitizenQueries(SrCitizenQueriesRequestVO request) {
 		/**
 		 * Validating the request		
 		 */
@@ -281,14 +286,20 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		/***
 		 * fetching the data using criteria
 		 */
-		List<Tuple> tupleList = fetchSrCitizenQueries(request);
-		
+		Map<String,Object> resultMap = fetchSrCitizenQueries(request);
+		List<Tuple> tupleList = null;
+		Integer rowCount = 0;
+		if(resultMap!=null) {
+			tupleList = (List<Tuple>) resultMap.get("result");
+			rowCount = (Integer) resultMap.get("rowCount");
+		}
 		/**
 		 * setting the response
 		 */
 		SrCitizenQueryResponseVO responseVO = new SrCitizenQueryResponseVO();
 		List<SeniorCitizenQueryResponse> responseList = new ArrayList<>();
-		if(tupleList!=null) {
+		HttpStatus httpStatus;
+		if(tupleList!=null && !tupleList.isEmpty()) {
 			tupleList.forEach(row->{
 				SeniorCitizenQueryResponse response = new SeniorCitizenQueryResponse();
 				response.setName(row.get(0)!=null ? String.valueOf(row.get(0)):"");
@@ -303,10 +314,19 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 				response.setResolvedOn(row.get(9)!=null ? String.valueOf(row.get(9)):"");
 				responseList.add(response);
 			});
+			responseVO.setQueries(responseList);
+			responseVO.setTotalQueriesCount(rowCount);
+			responseVO.setMessage("Success");
+			responseVO.setStatusCode("0");
+			httpStatus = HttpStatus.OK;
+		}else {
+			responseVO.setTotalQueriesCount(0);
+			responseVO.setMessage("Failure");
+			responseVO.setStatusCode("1");
+			httpStatus = HttpStatus.CONFLICT;
 		}
-		responseVO.setQueries(responseList);
-		responseVO.setTotalQueriesCount(responseList.size());
-		return responseVO;
+		
+		return new ResponseEntity<SrCitizenQueryResponseVO>(responseVO,httpStatus );
 	}
 	
 	/***
@@ -338,7 +358,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 	 * @param request
 	 * @return
 	 */
-	public List<Tuple> fetchSrCitizenQueries(SrCitizenQueriesRequestVO request){
+	public Map<String,Object> fetchSrCitizenQueries(SrCitizenQueriesRequestVO request){
 		
 		CriteriaBuilder builder = em.getCriteriaBuilder();
 		CriteriaQuery<Tuple> gtQuery = builder.createTupleQuery();
@@ -380,10 +400,14 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 			typedQuery = em.createQuery(gtQuery
 					.where(conditions.toArray(new Predicate[] {})));
 		}
+		
+		Integer rowCount = typedQuery.getResultList().size();
 		typedQuery.setFirstResult((request.getPageNumber()-1)*request.getLimit());
 		typedQuery.setMaxResults(request.getLimit());
 		List<Tuple> tupleList = typedQuery.getResultList();
-		
-		return tupleList;
+		HashMap<String,Object> map = new HashMap<>();
+		map.put("result",tupleList);
+		map.put("rowCount", rowCount);
+		return map;
 	}
 }

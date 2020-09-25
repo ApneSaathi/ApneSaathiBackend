@@ -55,7 +55,7 @@ public class SeniorCitizenController {
 	 */
 	@PostMapping(value="/srCitizenQueries")
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody SrCitizenQueryResponseVO getSeniorCitizenQueries(@RequestBody SrCitizenQueriesRequestVO requestJson) {
+	public @ResponseBody ResponseEntity<SrCitizenQueryResponseVO> getSeniorCitizenQueries(@RequestBody SrCitizenQueriesRequestVO requestJson) {
 		
 		return srCitizenService.getSeniorCitizenQueries(requestJson);
 	}
