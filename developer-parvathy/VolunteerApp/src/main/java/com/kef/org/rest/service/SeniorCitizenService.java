@@ -307,7 +307,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		if(!block.isEmpty())
 			conditions.add(builder.equal(scRoot.get("blockName"), block));
 		
-		gtQuery.multiselect(gtRoot.get("namesrcitizen").alias("name"),gtRoot.get("adminId").alias("issueId"),gtRoot.get("greivanceType").alias("issueRaised"),
+		gtQuery.multiselect(gtRoot.get("namesrcitizen").alias("name"),gtRoot.get("trackingId").alias("issueId"),gtRoot.get("greivanceType").alias("issueRaised"),
 				scRoot.get("state"),scRoot.get("district"),scRoot.get("blockName").alias("block"),gtRoot.get("createdDate").alias("createdOn"),
 				gtRoot.get("priority"),gtRoot.get("lastUpdatedOn"),gtRoot.get("resolvedDate").alias("resolvedOn"));
 		TypedQuery<Tuple> typedQuery;
