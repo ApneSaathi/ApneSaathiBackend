@@ -38,6 +38,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.kef.org.rest.domain.model.GreivanceTrackingVO;
 import com.kef.org.rest.domain.model.InputVO;
+import com.kef.org.rest.domain.model.SrCitizenListResponse;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.domain.model.VolunteerVO;
@@ -689,18 +690,20 @@ public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody Volunteer
     @RequestMapping(value="/getSrCitizenList",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")
     @CrossOrigin(origins = "http://15.207.42.209:8080")
     @ResponseBody
- public ResponseEntity<SrCitizenResponse> getSrCitizenList(@RequestBody SrCitizenVO srCitizenStatus){
+ public ResponseEntity<SrCitizenListResponse> getSrCitizenList(@RequestBody SrCitizenVO srCitizenStatus){
     	
-    	SrCitizenResponse srCitizen =new SrCitizenResponse();
+    	SrCitizenListResponse srCitizen =new SrCitizenListResponse();
     	srCitizen=srCitizenService.getSeniorCitizen(srCitizenStatus);
     	
     	if(null!=srCitizen.getSrCitizenList() && !srCitizen.getSrCitizenList().isEmpty()) {
     		srCitizen.setMessage("Success");
-    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
+    		srCitizen.setStatusCode("0");
+    		return new ResponseEntity<SrCitizenListResponse>(srCitizen,HttpStatus.OK);
     	}
     	else {
     		srCitizen.setMessage("Failure");
-    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.CONFLICT);
+    		srCitizen.setStatusCode("1");
+    		return new ResponseEntity<SrCitizenListResponse>(srCitizen,HttpStatus.CONFLICT);
     	}
 //    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
 //    		limit=10;

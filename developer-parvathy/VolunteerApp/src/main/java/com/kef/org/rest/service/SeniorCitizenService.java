@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
+import com.kef.org.rest.domain.model.SrCitizenListResponse;
 import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
 import com.kef.org.rest.domain.model.SrCitizenQueryResponseVO;
 import com.kef.org.rest.domain.model.SrCitizenVO;
@@ -62,7 +63,7 @@ public class SeniorCitizenService {
 	  @Autowired
 	  private EntityManager em;
 	  
-	public SrCitizenResponse getSeniorCitizen(SrCitizenVO srCitizenStatus){
+	public SrCitizenListResponse getSeniorCitizen(SrCitizenVO srCitizenStatus){
 	
 		String status=srCitizenStatus.getStatus();
     	Integer limit=null;
@@ -71,7 +72,7 @@ public class SeniorCitizenService {
     	String filterState=srCitizenStatus.getFilterState();
     	String filterDistrict=srCitizenStatus.getFilterDistrict();
     	String filterBlock=srCitizenStatus.getFilterBlock();
-    	SrCitizenResponse SrCitizenresponse=new SrCitizenResponse();
+    	SrCitizenListResponse SrCitizenresponse=new SrCitizenListResponse();
 		List<SeniorCitizen> result;
 		Page<SeniorCitizen> page = null;
 		List<SrCitizenVO> srCitizenVOList;
@@ -113,10 +114,10 @@ public class SeniorCitizenService {
 //		SrCitizenresponse.setSrCitizenList(result);
 		srCitizenVOList=SrCitizenToSrCitizenVO(result);
 		if(!srCitizenVOList.isEmpty() && srCitizenVOList!=null) {
-		SrCitizenresponse.setListsrCitizen(srCitizenVOList);
+		SrCitizenresponse.setSrCitizenList(srCitizenVOList);
 		}
 		else {
-			SrCitizenresponse.setListsrCitizen(null);
+			SrCitizenresponse.setSrCitizenList(null);
 		}
 		SrCitizenresponse.setTotalSrCitizen(totalSrCitizen);
 		return SrCitizenresponse;
