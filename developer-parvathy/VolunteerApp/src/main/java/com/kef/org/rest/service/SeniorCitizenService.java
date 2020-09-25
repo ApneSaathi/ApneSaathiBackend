@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
+import com.kef.org.rest.domain.model.SrCitizenQueryResponseVO;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.model.GreivanceTracking;
@@ -271,7 +272,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		return result;
 	}
 	
-	public List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(SrCitizenQueriesRequestVO request) {
+	public SrCitizenQueryResponseVO getSeniorCitizenQueries(SrCitizenQueriesRequestVO request) {
 		/**
 		 * Validating the request		
 		 */
@@ -284,6 +285,7 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		/**
 		 * setting the response
 		 */
+		SrCitizenQueryResponseVO responseVO = new SrCitizenQueryResponseVO();
 		List<SeniorCitizenQueryResponse> responseList = new ArrayList<>();
 		if(tupleList!=null) {
 			tupleList.forEach(row->{
@@ -301,8 +303,9 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 				responseList.add(response);
 			});
 		}
-		
-		return responseList;
+		responseVO.setQueries(responseList);
+		responseVO.setTotalQueriesCount(responseList.size());
+		return responseVO;
 	}
 	
 	/***
@@ -317,8 +320,8 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		request.setBlock(request.getBlock()!=null ? request.getBlock().trim() : "");
 		request.setSortBy(request.getSortBy()!=null	? request.getSortBy() : "");
 		request.setSortType(request.getSortType()!=null	? request.getSortType().trim() : "");
-		request.setPageNumber(request.getPageNumber()!=null?request.getPageNumber(): 1);
-		request.setLimit(request.getLimit()!=null?request.getLimit(): 10);
+		request.setPageNumber(request.getPageNumber()!=null && request.getPageNumber()!=0 ?request.getPageNumber(): 1);
+		request.setLimit(request.getLimit()!=null && request.getLimit()!=0 ?request.getLimit(): 10);
 
 		if(request.getQueryType().equalsIgnoreCase("pending"))
 			request.setQueryType("RAISED");

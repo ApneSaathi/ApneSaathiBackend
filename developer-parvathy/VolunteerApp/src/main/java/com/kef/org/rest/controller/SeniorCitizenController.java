@@ -1,7 +1,5 @@
 package com.kef.org.rest.controller;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +14,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kef.org.rest.domain.model.InputVO;
-import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
+import com.kef.org.rest.domain.model.SrCitizenQueryResponseVO;
 import com.kef.org.rest.service.SeniorCitizenService;
 
 @RestController
@@ -57,7 +55,7 @@ public class SeniorCitizenController {
 	 */
 	@PostMapping(value="/srCitizenQueries")
 	@ResponseStatus(HttpStatus.OK)
-	public @ResponseBody List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(@RequestBody SrCitizenQueriesRequestVO requestJson) {
+	public @ResponseBody SrCitizenQueryResponseVO getSeniorCitizenQueries(@RequestBody SrCitizenQueriesRequestVO requestJson) {
 		
 		return srCitizenService.getSeniorCitizenQueries(requestJson);
 	}
