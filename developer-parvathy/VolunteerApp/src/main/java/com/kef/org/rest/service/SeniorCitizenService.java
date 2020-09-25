@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
+import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.model.GreivanceTracking;
@@ -271,64 +272,19 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		return result;
 	}
 	
-	public List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(String request) {
-		JSONObject json = new JSONObject(request);
-		String queryType = json.has("queryType") && json.getString("queryType")!=null 
-				? json.getString("queryType").trim() : "";
-		String state = json.has("state") && json.getString("state")!=null
-						? json.getString("state").trim() : "";
-		String district = json.has("district") && json.getString("district")!=null
-				? json.getString("district").trim() : "";
-		String block = json.has("block") && json.getString("block")!=null
-						? json.getString("block").trim() : "";
-		String sortBy = json.has("sortBy") && json.getString("sortBy")!=null
-				? json.getString("sortBy").trim() : "";
-		String sortType = json.has("sortType") && json.getString("sortType")!=null
-				? json.getString("sortType").trim() : "";
-		Integer pageNumber = json.has("pageNumber")? json.getInt("pageNumber"): 1;
-		Integer limit = json.has("limit")? json.getInt("limit"): 10;
-		if(queryType.equalsIgnoreCase("pending"))
-			queryType="RAISED";
-		else if(queryType.equalsIgnoreCase("In progress"))
-			queryType = "UNDER REVIEW";
-		else if(queryType.equalsIgnoreCase("Resolved"))
-			queryType = "RESOLVED";
-		CriteriaBuilder builder = em.getCriteriaBuilder();
-		CriteriaQuery<Tuple> gtQuery = builder.createTupleQuery();
-		Root<GreivanceTracking> gtRoot = gtQuery.from(GreivanceTracking.class);
-		Root<SeniorCitizen> scRoot = gtQuery.from(SeniorCitizen.class);
-		List<Predicate> conditions = new ArrayList<>();
-		conditions.add(builder.equal(gtRoot.get("phoneNo"),scRoot.get("phoneNo")));
-		conditions.add(builder.equal(gtRoot.get("status"), queryType));
-		if(!state.isEmpty())
-			conditions.add(builder.equal(scRoot.get("state"), state));
-		if(!district.isEmpty())
-			conditions.add(builder.equal(scRoot.get("district"), district));
-		if(!block.isEmpty())
-			conditions.add(builder.equal(scRoot.get("blockName"), block));
+	public List<SeniorCitizenQueryResponse> getSeniorCitizenQueries(SrCitizenQueriesRequestVO request) {
+		/**
+		 * Validating the request		
+		 */
+		request = validateSrCitizenQueriesRequest(request);
+		/***
+		 * fetching the data using criteria
+		 */
+		List<Tuple> tupleList = fetchSrCitizenQueries(request);
 		
-		gtQuery.multiselect(gtRoot.get("namesrcitizen").alias("name"),gtRoot.get("trackingId").alias("issueId"),gtRoot.get("greivanceType").alias("issueRaised"),
-				scRoot.get("state"),scRoot.get("district"),scRoot.get("blockName").alias("block"),gtRoot.get("createdDate").alias("createdOn"),
-				gtRoot.get("priority"),gtRoot.get("lastUpdatedOn"),gtRoot.get("resolvedDate").alias("resolvedOn"));
-		TypedQuery<Tuple> typedQuery;
-		if(!sortBy.isEmpty()) {
-			sortType = sortType.isEmpty() ? "asc" : sortType;
-			if(sortType.equalsIgnoreCase("asc")) {
-				typedQuery = em.createQuery(gtQuery
-						.where(conditions.toArray(new Predicate[] {}))
-						.orderBy(builder.asc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
-			}else{
-				typedQuery = em.createQuery(gtQuery
-						.where(conditions.toArray(new Predicate[] {}))
-						.orderBy(builder.desc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
-			}
-		}else {
-			typedQuery = em.createQuery(gtQuery
-					.where(conditions.toArray(new Predicate[] {})));
-		}
-		typedQuery.setFirstResult((pageNumber-1)*limit);
-		typedQuery.setMaxResults(limit);
-		List<Tuple> tupleList = typedQuery.getResultList();
+		/**
+		 * setting the response
+		 */
 		List<SeniorCitizenQueryResponse> responseList = new ArrayList<>();
 		if(tupleList!=null) {
 			tupleList.forEach(row->{
@@ -348,5 +304,83 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		}
 		
 		return responseList;
+	}
+	
+	/***
+	 * RequestVO validation for SrCitizenQueries API
+	 * @param request
+	 * @return
+	 */
+	public SrCitizenQueriesRequestVO validateSrCitizenQueriesRequest(SrCitizenQueriesRequestVO request) {
+		request.setQueryType(request.getQueryType()!=null ?  request.getQueryType().trim() : "");
+		request.setState(request.getState()!=null ?  request.getState().trim():"");
+		request.setDistrict(request.getDistrict()!=null ? request.getDistrict().trim() : "");
+		request.setBlock(request.getBlock()!=null ? request.getBlock().trim() : "");
+		request.setSortBy(request.getSortBy()!=null	? request.getSortBy() : "");
+		request.setSortType(request.getSortType()!=null	? request.getSortType().trim() : "");
+		request.setPageNumber(request.getPageNumber()!=null?request.getPageNumber(): 1);
+		request.setLimit(request.getLimit()!=null?request.getLimit(): 10);
+
+		if(request.getQueryType().equalsIgnoreCase("pending"))
+			request.setQueryType("RAISED");
+		else if(request.getQueryType().equalsIgnoreCase("In progress"))
+			request.setQueryType("UNDER REVIEW");
+		else if(request.getQueryType().equalsIgnoreCase("Resolved"))
+			request.setQueryType("RESOLVED");
+		return request;
+	}
+	
+	/***
+	 * fetch data for SrCitizenQueries API
+	 * @param request
+	 * @return
+	 */
+	public List<Tuple> fetchSrCitizenQueries(SrCitizenQueriesRequestVO request){
+		
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Tuple> gtQuery = builder.createTupleQuery();
+		
+		Root<GreivanceTracking> gtRoot = gtQuery.from(GreivanceTracking.class);
+		Root<SeniorCitizen> scRoot = gtQuery.from(SeniorCitizen.class);
+		
+		List<Predicate> conditions = new ArrayList<>();
+		conditions.add(builder.equal(gtRoot.get("phoneNo"),scRoot.get("phoneNo")));
+		conditions.add(builder.equal(gtRoot.get("status"), request.getQueryType()));
+		
+		if(!request.getState().isEmpty())
+			conditions.add(builder.equal(scRoot.get("state"), request.getState()));
+		if(!request.getDistrict().isEmpty())
+			conditions.add(builder.equal(scRoot.get("district"), request.getDistrict()));
+		if(!request.getBlock().isEmpty())
+			conditions.add(builder.equal(scRoot.get("blockName"), request.getBlock()));
+		
+		gtQuery.multiselect(gtRoot.get("namesrcitizen"),gtRoot.get("trackingId"),gtRoot.get("greivanceType"),
+				scRoot.get("state"),scRoot.get("district"),scRoot.get("blockName"),gtRoot.get("createdDate"),
+				gtRoot.get("priority"),gtRoot.get("lastUpdatedOn"),gtRoot.get("resolvedDate"));
+		
+		TypedQuery<Tuple> typedQuery;
+		
+		if(!request.getSortBy().isEmpty()) {
+			String sortType = request.getSortType().isEmpty() ? "asc" : request.getSortType();
+			String sortBy = request.getSortBy();
+			
+			if(sortType.equalsIgnoreCase("asc")) {
+				typedQuery = em.createQuery(gtQuery
+						.where(conditions.toArray(new Predicate[] {}))
+						.orderBy(builder.asc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
+			}else{
+				typedQuery = em.createQuery(gtQuery
+						.where(conditions.toArray(new Predicate[] {}))
+						.orderBy(builder.desc(sortBy.equalsIgnoreCase("priority") ? gtRoot.get("priority") : gtRoot.get("createdDate"))));
+			}
+		}else {
+			typedQuery = em.createQuery(gtQuery
+					.where(conditions.toArray(new Predicate[] {})));
+		}
+		typedQuery.setFirstResult((request.getPageNumber()-1)*request.getLimit());
+		typedQuery.setMaxResults(request.getLimit());
+		List<Tuple> tupleList = typedQuery.getResultList();
+		
+		return tupleList;
 	}
 }
