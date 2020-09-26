@@ -5,6 +5,10 @@ public class InputVO {
 	private Integer id;
 	
 	private Integer filterBy;
+	
+	private String phoneNo;
+	
+	private String deboardReasons;
 
 	public Integer getId() {
 		return id;
@@ -20,6 +24,22 @@ public class InputVO {
 
 	public void setFilterBy(Integer filterBy) {
 		this.filterBy = filterBy;
+	}
+
+	public String getPhoneNo() {
+		return phoneNo;
+	}
+
+	public void setPhoneNo(String phoneNo) {
+		this.phoneNo = phoneNo;
+	}
+
+	public String getDeboardReasons() {
+		return deboardReasons;
+	}
+
+	public void setDeboardReasons(String deboardReasons) {
+		this.deboardReasons = deboardReasons;
 	}
 	
 	

@@ -22,5 +22,6 @@ public interface VolunteerAssignmentRepository  extends JpaRepository<VolunteerA
 	
 	List<VolunteerAssignment> findByVolAndSrCitizen(Integer idvolunteer,String phoneNo);
 	List<VolunteerAssignment> findByPhonenosrcitizenAndStatusIgnoreCase(String phonenosrcitizen,String status);
-
+		List<VolunteerAssignment> findByPhonenosrcitizen(String phonenosrcitizen);
+		
 }

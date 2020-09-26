@@ -1,5 +1,6 @@
 package com.kef.org.rest.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenListResponse;
@@ -32,12 +35,14 @@ import com.kef.org.rest.domain.model.SrCitizenQueryResponseVO;
 import com.kef.org.rest.domain.model.SrCitizenVO;
 import com.kef.org.rest.domain.model.VolunteerAssignmentVO;
 import com.kef.org.rest.model.GreivanceTracking;
+import com.kef.org.rest.model.GreivanceUpdateStatus;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.SeniorCitizen;
 import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
+import com.kef.org.rest.repository.GreivanceUpdateStatusRepository;
 import com.kef.org.rest.repository.MedicalandGreivanceRepository;
 import com.kef.org.rest.repository.SeniorCitizenRepository;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
@@ -63,6 +68,12 @@ public class SeniorCitizenService {
 	  
 	  @Autowired
 	  private GreivanceTrackingRepository greivanceRepository;
+	  
+	  @Autowired 
+	  private GreivanceUpdateStatusRepository greivanceupdateRepo;
+	  
+	  
+	  
 	  public static final Logger logger = LoggerFactory.getLogger(SeniorCitizenService.class);
 	  @Autowired
 	  private EntityManager em;
@@ -410,4 +421,102 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		map.put("rowCount", rowCount);
 		return map;
 	}
+	
+	public  Boolean updateGreivancestatus(GreivanceTracking greivanceTracking) {
+		
+		GreivanceTracking greivanceTrack = new GreivanceTracking();
+		Boolean flag=false;
+		greivanceTrack =  greivanceRepository.findbytrackingid(greivanceTracking.getTrackingId());
+		  if(null != greivanceTrack) {
+			  flag=true;
+			  			//insert data in grievanceupdate table
+			  				insertToGreivanceupdate(greivanceTrack);
+			  
+
+			  
+			  
+			  greivanceTrack.setStatus(greivanceTracking.getStatus());
+			  //update greivance based on status
+			  if(greivanceTracking.getStatus().equalsIgnoreCase("RAISED")) {
+				  greivanceTrack.setDescription(greivanceTracking.getDescription());
+				  greivanceTrack.setRaisedby(greivanceTracking.getRaisedby());
+				  greivanceTrack.setCreatedDate(LocalDateTime.now());
+			  }
+			  if(greivanceTracking.getStatus().equalsIgnoreCase("UNDER REVIEW")) {
+				  greivanceTrack.setReviewedby(greivanceTracking.getReviewedby());
+				  greivanceTrack.setUnderReviewRemarks(greivanceTracking.getDescription());
+				  greivanceTrack.setUnderReviewDate(LocalDateTime.now());
+			  }
+			  if(greivanceTracking.getStatus().equalsIgnoreCase("RESOLVED")) {
+				  greivanceTrack.setResolvedby(greivanceTracking.getReviewedby());
+				  greivanceTrack.setResolvedRemarks(greivanceTracking.getDescription());
+				  greivanceTrack.setResolvedDate(LocalDateTime.now());
+			  }
+			  greivanceTrack.setLastUpdatedOn(LocalDateTime.now());
+			  greivanceRepository.save(greivanceTrack);
+			  //insert updated data in greivance table
+			  insertToGreivanceupdate(greivanceTrack);
+			  
+			  
+		  }
+		  return flag;
+	}
+	
+	//insert data in greivance update table
+	private void insertToGreivanceupdate(GreivanceTracking greivanceTrack) {
+		// TODO Auto-generated method stub
+		GreivanceUpdateStatus greivanceupdate=new GreivanceUpdateStatus();
+		greivanceupdate.setAdminId(greivanceTrack.getAdminId());
+		greivanceupdate.setCallid(greivanceTrack.getCallid());
+		greivanceupdate.setCreatedBy(greivanceTrack.getCreatedBy());
+		greivanceupdate.setCreatedDate(LocalDateTime.now());
+		greivanceupdate.setDescription(greivanceTrack.getDescription());
+		greivanceupdate.setGreivanceType(greivanceTrack.getGreivanceType());
+		greivanceupdate.setIdgrevance(greivanceTrack.getIdgrevance());
+		greivanceupdate.setLastUpdatedOn(greivanceTrack.getLastUpdatedOn());
+		greivanceupdate.setPriority(greivanceTrack.getPriority());
+		greivanceupdate.setRaisedby(greivanceTrack.getRaisedby());
+		greivanceupdate.setResolvedby(greivanceTrack.getResolvedby());
+		greivanceupdate.setResolvedDate(greivanceTrack.getResolvedDate());
+		greivanceupdate.setResolvedRemarks(greivanceTrack.getResolvedRemarks());
+		greivanceupdate.setReviewedby(greivanceTrack.getReviewedby());
+		greivanceupdate.setRole(greivanceTrack.getRole());
+		greivanceupdate.setStatus(greivanceTrack.getStatus());
+		greivanceupdate.setTrackingId(greivanceTrack.getTrackingId());
+		greivanceupdate.setUnderReviewDate(greivanceTrack.getUnderReviewDate());
+		greivanceupdate.setUnderReviewRemarks(greivanceTrack.getUnderReviewRemarks());
+		
+		
+		greivanceupdateRepo.save(greivanceupdate);
+			
+	}
+
+	public Boolean deboardSrCitizen(InputVO inputVO) {
+		// TODO Auto-generated method stub
+		Boolean flag=false;
+		Optional<SeniorCitizen> srCitizen;
+		SeniorCitizen senior=new SeniorCitizen();
+		srCitizen=srCitizenRespository.findById(inputVO.getId());
+		List<VolunteerAssignment> volAssignment;
+		if(srCitizen.isPresent()) {
+			
+			flag=true;
+			senior=srCitizen.get();
+			senior.setStatus("Deboarded");
+			senior.setReasons(inputVO.getDeboardReasons());
+			senior.setDeboardedOn(LocalDateTime.now());
+			srCitizenRespository.save(senior);
+			
+			volAssignment=volunteerassignmentRespository.findByPhonenosrcitizen(inputVO.getPhoneNo());
+			for(VolunteerAssignment va:volAssignment) {
+				va.setStatus("Deboarded");
+				
+			}
+			volunteerassignmentRespository.saveAll(volAssignment);
+			
+		}
+		return flag;
+	}
+	
+
 }

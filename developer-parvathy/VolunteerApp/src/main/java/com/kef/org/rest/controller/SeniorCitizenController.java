@@ -1,5 +1,7 @@
 package com.kef.org.rest.controller;
 
+import java.time.LocalDateTime;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
 import com.kef.org.rest.domain.model.SrCitizenQueryResponseVO;
+import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.service.SeniorCitizenService;
 
 @RestController
@@ -27,6 +30,7 @@ public class SeniorCitizenController {
 	
 	@Autowired
 	SeniorCitizenService srCitizenService;
+	
 	
 	@RequestMapping(value="/srCitizenPersonalinfo",method=RequestMethod.POST,consumes = "application/json", produces = "application/json")
    @ResponseBody
@@ -59,4 +63,54 @@ public class SeniorCitizenController {
 		
 		return srCitizenService.getSeniorCitizenQueries(requestJson);
 	}
+	
+	@RequestMapping(value="/updateGreivanceStatus",method=RequestMethod.PUT,consumes = "application/json", produces = "application/json")
+	   @ResponseBody
+	   public ResponseEntity<SrCitizenQueryResponseVO> updateGreivanceStatus(@RequestBody GreivanceTracking greivanceTracking){
+			
+		
+		
+		SrCitizenQueryResponseVO response= new SrCitizenQueryResponseVO();
+		Boolean flag;
+				flag=srCitizenService.updateGreivancestatus(greivanceTracking);
+				if(flag) {
+					
+					response.setStatusCode("0");
+					response.setMessage("Success");;
+				}
+				else {
+					
+					response.setStatusCode("1");
+					response.setMessage("Failure");
+				}
+	
+	
+				return new ResponseEntity<SrCitizenQueryResponseVO>(response,response.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+		}
+	
+	@RequestMapping(value="/deboardSrCitizen",method=RequestMethod.PUT,consumes = "application/json", produces = "application/json")
+	   @ResponseBody
+	   public ResponseEntity<SrCitizenQueryResponseVO> deboardSrCitizen(@RequestBody InputVO inputVO){
+			
+		
+		
+		SrCitizenQueryResponseVO response= new SrCitizenQueryResponseVO();
+		Boolean flag;
+				flag=srCitizenService.deboardSrCitizen(inputVO);
+				if(flag) {
+					
+					response.setStatusCode("0");
+					response.setMessage("Success");;
+				}
+				else {
+					
+					response.setStatusCode("1");
+					response.setMessage("Failure");
+				}
+	
+	
+				return new ResponseEntity<SrCitizenQueryResponseVO>(response,response.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
+		}
+	
+	
 }
