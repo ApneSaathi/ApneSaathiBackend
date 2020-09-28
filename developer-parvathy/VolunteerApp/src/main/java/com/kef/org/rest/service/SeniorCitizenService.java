@@ -24,9 +24,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
+import com.kef.org.rest.domain.model.InProgressQueryRequestVO;
+import com.kef.org.rest.domain.model.InProgressQueryResponseVO;
 import com.kef.org.rest.domain.model.InputVO;
+import com.kef.org.rest.domain.model.ProgressUpdates;
 import com.kef.org.rest.domain.model.SeniorCitizenQueryResponse;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenListResponse;
@@ -38,7 +40,6 @@ import com.kef.org.rest.model.GreivanceTracking;
 import com.kef.org.rest.model.GreivanceUpdateStatus;
 import com.kef.org.rest.model.MedicalandGreivance;
 import com.kef.org.rest.model.SeniorCitizen;
-import com.kef.org.rest.model.SrCitizenResponse;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.repository.GreivanceTrackingRepository;
@@ -516,5 +517,54 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		return flag;
 	}
 	
+	public ResponseEntity<InProgressQueryResponseVO> getInProgressQueryDetails(InProgressQueryRequestVO request){
+		InProgressQueryResponseVO response = new InProgressQueryResponseVO();
+		
+		request.setIssueId(request.getIssueId()!=null ? request.getIssueId():0);
+		String status = request.getStatus()!=null? request.getStatus():"UNDER REVIEW";
+		if(status.equalsIgnoreCase("In Progress")) {
+			status = "UNDER REVIEW";
+		}
+		
+		Optional<GreivanceTracking> gtOpt = greivanceRepository.findById(request.getIssueId());
+		Integer volunteerId;
+		String srCitizenPhoneNo =null;
+		HttpStatus httpStatus;
+		
+		if(gtOpt.isPresent()) {
+			GreivanceTracking gtEntity = gtOpt.get();
+			volunteerId = gtEntity.getIdvolunteer();
+			response.setGreivancedesc(gtEntity.getDescription());
+			srCitizenPhoneNo = gtEntity.getPhoneNo();
+			Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
+			if(volunteerOpt.isPresent()) {
+				Volunteer volunteerEntity = volunteerOpt.get();
+				response.setVolunteerFirstName(volunteerEntity.getFirstName());
+				response.setVolunteerLastName(volunteerEntity.getLastName());
+			}
+			SeniorCitizen srCitizen = srCitizenRespository.findByPhoneNo(srCitizenPhoneNo);
+			response.setSrCitizenFirstName(srCitizen.getFirstName());
+			response.setSrCitizenLastName(srCitizen.getLastName());
+			List<ProgressUpdates> progressUpdates = new ArrayList<>();
+			Optional<List<GreivanceUpdateStatus>> grvUpdateStatusList = greivanceupdateRepo.findByTrackingIdAndStatusOrderByUnderReviewDateDesc(request.getIssueId(),status);
+			if(grvUpdateStatusList.isPresent()) {
+				grvUpdateStatusList.get().forEach(list->{
+					ProgressUpdates updates = new ProgressUpdates();
+					updates.setUnderReviewRemarks(list.getUnderReviewRemarks());
+					updates.setUnderReviewDate(list.getUnderReviewDate());
+					progressUpdates.add(updates);
+				});
+			}
+			response.setProgressUpdates(progressUpdates);
+			response.setMessage("Success");
+			response.setStatusCode("0");
+			httpStatus = HttpStatus.OK;
+		}else {
+			response.setStatusCode("1");
+			response.setMessage("Failure");
+			httpStatus = HttpStatus.CONFLICT;
+		}
+		return new ResponseEntity<InProgressQueryResponseVO>(response,httpStatus);
+	}
 
 }

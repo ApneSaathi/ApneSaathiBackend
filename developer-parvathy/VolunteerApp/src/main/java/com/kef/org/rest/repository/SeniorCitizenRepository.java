@@ -33,4 +33,6 @@ public interface SeniorCitizenRepository extends JpaRepository<SeniorCitizen, In
 	void updateStatus(String status,Integer id);
 	
 	Optional<SeniorCitizen> findAllByPhoneNoAndFirstNameIgnoreCase(String phoneNo,String firstName);
+	
+	public SeniorCitizen findByPhoneNo(String phoneNo);
 }

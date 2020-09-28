@@ -1,7 +1,5 @@
 package com.kef.org.rest.controller;
 
-import java.time.LocalDateTime;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kef.org.rest.domain.model.InProgressQueryRequestVO;
+import com.kef.org.rest.domain.model.InProgressQueryResponseVO;
 import com.kef.org.rest.domain.model.InputVO;
 import com.kef.org.rest.domain.model.SrCitizenDetailsResponse;
 import com.kef.org.rest.domain.model.SrCitizenQueriesRequestVO;
@@ -112,5 +112,15 @@ public class SeniorCitizenController {
 				return new ResponseEntity<SrCitizenQueryResponseVO>(response,response.getStatusCode().equals("0")? HttpStatus.OK : HttpStatus.CONFLICT);
 		}
 	
-	
+	/***
+	 * API to fetch InProgress Query details
+	 * @param requestJson
+	 * @return
+	 */
+	@PostMapping("/getInProgressQueryDetails")
+	public @ResponseBody ResponseEntity<InProgressQueryResponseVO> getInProgressQueryDetails(
+			@RequestBody InProgressQueryRequestVO requestJson){
+		
+		return srCitizenService.getInProgressQueryDetails(requestJson);
+	}
 }
