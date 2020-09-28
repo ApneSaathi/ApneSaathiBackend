@@ -429,8 +429,6 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 		greivanceTrack =  greivanceRepository.findbytrackingid(greivanceTracking.getTrackingId());
 		  if(null != greivanceTrack) {
 			  flag=true;
-			  			//insert data in grievanceupdate table
-			  				insertToGreivanceupdate(greivanceTrack);
 			  
 
 			  
