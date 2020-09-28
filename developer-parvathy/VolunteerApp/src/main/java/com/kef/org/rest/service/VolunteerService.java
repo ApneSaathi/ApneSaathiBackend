@@ -492,6 +492,11 @@ public class VolunteerService implements VolunteerInterface {
 				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row.get(18))));
 				volunteerList.add(vo);
 			});
+			volResponse.setMessage("Success");
+			volResponse.setStatusCode(0);
+		}else {
+			volResponse.setMessage("Failure");
+			volResponse.setStatusCode(1);
 		}
 		if(!request.getSortBy().isEmpty()) {
 			String sortType = (request.getSortType()!=null && request.getSortType().equalsIgnoreCase("asc")) ? "asc" : "desc";
