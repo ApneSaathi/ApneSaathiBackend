@@ -552,6 +552,10 @@ public List<SeniorCitizen> srCitizenAssignedToVol(Integer idvolunteer) {
 					ProgressUpdates updates = new ProgressUpdates();
 					updates.setUnderReviewRemarks(list.getUnderReviewRemarks());
 					updates.setUnderReviewDate(list.getUnderReviewDate());
+					updates.setReviewedBy(list.getReviewedby());
+					updates.setResolvedRemarks(list.getResolvedRemarks());
+					updates.setResolvedDate(list.getResolvedDate());
+					updates.setResolvedBy(list.getResolvedby());
 					progressUpdates.add(updates);
 				});
 			}
