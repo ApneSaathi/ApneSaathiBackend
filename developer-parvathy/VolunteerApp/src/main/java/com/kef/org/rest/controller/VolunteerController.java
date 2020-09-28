@@ -653,8 +653,7 @@ public class VolunteerController {
 	@ResponseBody
 	public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus) {
 		VolunteerResponse vr = new VolunteerResponse();
-		//vr = volunteerService.getVolunteerListByQuery(volunteerStatus);
-		vr = volunteerService.getVolunteerListByJPACriteria(volunteerStatus);
+		vr = volunteerService.getVolunteerListByQuery(volunteerStatus);
 		HttpStatus status = Constants.SUCCESS.equals(vr.getMessage()) ? HttpStatus.OK : HttpStatus.CONFLICT;
 		return new ResponseEntity<VolunteerResponse>(vr, status);
 	}
