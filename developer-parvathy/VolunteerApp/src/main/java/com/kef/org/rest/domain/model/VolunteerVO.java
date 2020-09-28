@@ -306,8 +306,9 @@ public class VolunteerVO {
 		this.sortBy = sortBy;
 	}
 
-	public String getSortType() {
-		return sortType;
+	public Direction getSortType() {
+		return sortType != null && sortType.equalsIgnoreCase("DESC") ? Sort.Direction.DESC
+				: null;
 	}
 
 	public void setSortType(String sortType) {

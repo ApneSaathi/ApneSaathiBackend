@@ -21,6 +21,7 @@ import com.kef.org.rest.exception.FileStorageException;
 import com.opencsv.CSVWriter;
 
 public final class FileUtils {
+
 	public static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
 	private FileUtils() {
@@ -35,14 +36,14 @@ public final class FileUtils {
 		try {
 			// Check if the file's name contains invalid characters
 			if (fileName.contains("..")) {
-				throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+				throw new FileStorageException(String.format(Constants.SORRY_FILENAME_CONTAINS_INVALID_PATH_SEQUENCE, fileName));
 			}
 			// Copy file to the target location (Replacing existing file with the same name)
 			Path targetLocation = uploadFileStorageLocation.resolve(fileName);
 			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 			return fileName;
 		} catch (IOException ex) {
-			throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
+			throw new FileStorageException(String.format(Constants.COULD_NOT_STORE_FILE_S_PLEASE_TRY_AGAIN, fileName), ex);
 		}
 	}
 
@@ -53,10 +54,10 @@ public final class FileUtils {
 			if (resource.exists()) {
 				return resource;
 			} else {
-				throw new FileNotFoundException("File not found " + fileName);
+				throw new FileNotFoundException(String.format(Constants.FILE_NOT_FOUND_S, fileName));
 			}
 		} catch (MalformedURLException ex) {
-			throw new FileNotFoundException("File not found " + fileName, ex);
+			throw new FileNotFoundException(String.format(Constants.FILE_NOT_FOUND_S, fileName), ex);
 		}
 	}
 

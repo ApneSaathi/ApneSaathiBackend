@@ -5,7 +5,7 @@ import java.util.List;
 public class InProgressQueryResponseVO {
 
 	private String message;
-	private String statusCode;
+	private Integer statusCode;
 	private String greivancedesc;
 	private String volunteerFirstName;
 	private String volunteerLastName;
@@ -19,10 +19,10 @@ public class InProgressQueryResponseVO {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	public String getStatusCode() {
+	public Integer getStatusCode() {
 		return statusCode;
 	}
-	public void setStatusCode(String statusCode) {
+	public void setStatusCode(Integer statusCode) {
 		this.statusCode = statusCode;
 	}
 	public String getGreivancedesc() {

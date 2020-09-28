@@ -22,62 +22,63 @@ public final class VolunteerValidator {
 		List<String> failureReasons = new ArrayList<>();
 		boolean isValid = true;
 		if (StringUtils.isEmpty(volunteer.getFirstName())) {
-			failureReasons.add("First name is empty");
+			failureReasons.add(Constants.FIRST_NAME_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getLastName())) {
-			failureReasons.add("Last name is empty");
+			failureReasons.add(Constants.LAST_NAME_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getEmail())) {
-			failureReasons.add("Email is empty");
+			failureReasons.add(Constants.EMAIL_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getGender())) {
-			failureReasons.add("Gender is empty");
+			failureReasons.add(Constants.GENDER_IS_EMPTY);
 			isValid = false;
-		} else if (!(volunteer.getGender().equalsIgnoreCase("M") || volunteer.getGender().equalsIgnoreCase("F"))) {
-			failureReasons.add("Gender must be M or F");
+		} else if (!(volunteer.getGender().equalsIgnoreCase(Constants.MALE)
+				|| volunteer.getGender().equalsIgnoreCase(Constants.FEMALE))) {
+			failureReasons.add(Constants.GENDER_MUST_BE_M_OR_F);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getState())) {
-			failureReasons.add("State is empty");
+			failureReasons.add(Constants.STATE_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getDistrict())) {
-			failureReasons.add("District is empty");
+			failureReasons.add(Constants.DISTRICT_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getAssignedToFellow())) {
-			failureReasons.add("Assigned to fellow is empty");
+			failureReasons.add(Constants.ASSIGNED_TO_FELLOW_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getAssignedToFellowContact())) {
-			failureReasons.add("Assigned to fellow contact is empty");
+			failureReasons.add(Constants.ASSIGNED_TO_FELLOW_CONTACT_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getStatus())) {
-			failureReasons.add("Status is empty");
+			failureReasons.add(Constants.STATUS_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getBlock())) {
-			failureReasons.add("Block is empty");
+			failureReasons.add(Constants.BLOCK_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getVillage())) {
-			failureReasons.add("Village is empty");
+			failureReasons.add(Constants.VILLAGE_IS_EMPTY);
 			isValid = false;
 		}
 		if (StringUtils.isEmpty(volunteer.getAddress())) {
-			failureReasons.add("Address is empty");
+			failureReasons.add(Constants.ADDRESS_IS_EMPTY);
 			isValid = false;
 		}
 		// mobile check has to be at last
 		if (StringUtils.isEmpty(volunteer.getMobileNo())) {
-			failureReasons.add("Mobile number is empty");
+			failureReasons.add(Constants.MOBILE_NUMBER_IS_EMPTY);
 			isValid = false;
 		} else if (allMobileNumbers.contains(volunteer.getMobileNo())) {
-			failureReasons.add("Mobile number is already present");
+			failureReasons.add(Constants.MOBILE_NUMBER_IS_ALREADY_PRESENT);
 			isValid = false;
 		} else {
 			allMobileNumbers.add(volunteer.getMobileNo());
@@ -87,9 +88,11 @@ public final class VolunteerValidator {
 	}
 
 	public static void validateColumns(String[] columns) {
-		List<VolunteerCSVColumns> fromCSV = Arrays.asList(columns).stream().map(VolunteerCSVColumns::fromString).filter(value -> VolunteerCSVColumns.UNMAPPED != value).collect(Collectors.toList());
-		if(fromCSV.size() != VolunteerCSVColumns.getColumns().size()) {
-			throw new CSVValidationException("Check the columns in the uploaded file. The allowed columns are: " + VolunteerCSVColumns.getColumns());
+		List<VolunteerCSVColumns> fromCSV = Arrays.asList(columns).stream().map(VolunteerCSVColumns::fromString)
+				.filter(value -> VolunteerCSVColumns.UNMAPPED != value).collect(Collectors.toList());
+		if (fromCSV.size() != VolunteerCSVColumns.getColumns().size()) {
+			throw new CSVValidationException(Constants.CHECK_THE_COLUMNS_IN_THE_UPLOADED_FILE_THE_ALLOWED_COLUMNS_ARE
+					+ VolunteerCSVColumns.getColumns());
 		}
 	}
 }

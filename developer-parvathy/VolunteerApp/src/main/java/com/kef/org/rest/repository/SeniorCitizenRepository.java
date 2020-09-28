@@ -16,23 +16,29 @@ import org.springframework.stereotype.Repository;
 import com.kef.org.rest.model.SeniorCitizen;
 
 @Repository
-public interface SeniorCitizenRepository extends JpaRepository<SeniorCitizen, Integer>, PagingAndSortingRepository<SeniorCitizen, Integer>{
-			
+public interface SeniorCitizenRepository
+		extends JpaRepository<SeniorCitizen, Integer>, PagingAndSortingRepository<SeniorCitizen, Integer> {
+
 	List<SeniorCitizen> fetchByStatus(String status);
-	//for pagination
 
-	Page<SeniorCitizen> findAllByStatusIgnoreCase(String status,Pageable pageable);
-	Page<SeniorCitizen> findByStatusAndStateIgnoreCase(String status, String state,Pageable pageable);
-	Page<SeniorCitizen> findByStatusAndStateAndDistrictIgnoreCase(String status, String state,String district,Pageable pageable);
-	Page<SeniorCitizen> findByStatusAndStateAndDistrictAndBlockNameIgnoreCase(String status, String state,String district,String block,Pageable pageable);
+	List<String> fetchAllPhoneNumbers();
 
-	//for update status
+	Page<SeniorCitizen> findAllByStatusIgnoreCase(String status, Pageable pageable);
+
+	Page<SeniorCitizen> findByStatusAndStateIgnoreCase(String status, String state, Pageable pageable);
+
+	Page<SeniorCitizen> findByStatusAndStateAndDistrictIgnoreCase(String status, String state, String district,
+			Pageable pageable);
+
+	Page<SeniorCitizen> findByStatusAndStateAndDistrictAndBlockNameIgnoreCase(String status, String state,
+			String district, String block, Pageable pageable);
+
 	@Transactional
 	@Modifying
-	@Query(value="update SeniorCitizen sc set sc.status=?1 where sc.srCitizenId=?2")
-	void updateStatus(String status,Integer id);
-	
-	Optional<SeniorCitizen> findAllByPhoneNoAndFirstNameIgnoreCase(String phoneNo,String firstName);
-	
+	@Query(value = "update SeniorCitizen sc set sc.status=?1 where sc.srCitizenId=?2")
+	void updateStatus(String status, Integer id);
+
+	Optional<SeniorCitizen> findAllByPhoneNoAndFirstNameIgnoreCase(String phoneNo, String firstName);
+
 	public SeniorCitizen findByPhoneNo(String phoneNo);
 }
