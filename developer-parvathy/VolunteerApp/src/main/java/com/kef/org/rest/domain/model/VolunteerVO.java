@@ -2,6 +2,9 @@ package com.kef.org.rest.domain.model;
 
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+
 import com.kef.org.rest.model.VolunteerAssignment;
 import com.kef.org.rest.model.VolunteerRating;
 
@@ -303,8 +306,9 @@ public class VolunteerVO {
 		this.sortBy = sortBy;
 	}
 
-	public String getSortType() {
-		return sortType;
+	public Direction getSortType() {
+		return sortType != null && sortType.equalsIgnoreCase("DESC") ? Sort.Direction.DESC
+				: null;
 	}
 
 	public void setSortType(String sortType) {

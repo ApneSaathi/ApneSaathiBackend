@@ -10,7 +10,7 @@ public class VolunteerResponse {
 	private List<VolunteerVO> volunteers;
 	private String message;
 	private Integer statusCode;
-	private Integer totalVolunteers;
+	private Long totalVolunteers;
 	private List<VolunteerVO> excludedVolunteers;
 
 
@@ -32,10 +32,10 @@ public class VolunteerResponse {
 	}
 	
 	
-	public Integer getTotalVolunteers() {
+	public Long getTotalVolunteers() {
 		return totalVolunteers;
 	}
-	public void setTotalVolunteers(Integer totalVolunteers) {
+	public void setTotalVolunteers(Long totalVolunteers) {
 		this.totalVolunteers = totalVolunteers;
 	}
 	public List<VolunteerVO> getVolunteers() {

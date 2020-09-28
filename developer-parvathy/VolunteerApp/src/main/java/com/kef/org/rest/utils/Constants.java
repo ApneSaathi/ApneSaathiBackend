@@ -31,10 +31,16 @@ public final class Constants {
 	public static final String MAY_BE = "3";
 	public static final String NOT_APPLICABLE = "4";
 
-	public static final String CSV = "csv";
+	// Response Messages
 	public static final String SUCCESS = "Success";
 	public static final String FAILURE = "Failure";
 	public static final String PARTIAL_SUCCESS = "Partial Success";
+	
+	// Response Status
+	public static final Integer ONE = 1;
+	public static final Integer ZERO = 0;
+	
+	public static final String CSV = "csv";
 	public static final String FILE_DOWNLOAD_TYPE_UPLOAD = "Upload";
 	public static final String FILE_DOWNLOAD_TYPE_ERROR = "Error";
 

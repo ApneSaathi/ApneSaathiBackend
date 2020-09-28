@@ -652,24 +652,10 @@ public class VolunteerController {
 	@CrossOrigin(origins = "http://15.207.42.209:8080")
 	@ResponseBody
 	public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus) {
-
 		VolunteerResponse vr = new VolunteerResponse();
 		vr = volunteerService.getVolunteerListByQuery(volunteerStatus);
-		if (!vr.getVolunteers().isEmpty() && vr.getVolunteers() != null) {
-
-			vr.setMessage("Success");
-			vr.setStatusCode(0);
-
-			return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.OK);
-		}
-
-		else {
-
-			vr.setMessage("Failure");
-			vr.setStatusCode(1);
-			return new ResponseEntity<VolunteerResponse>(vr, HttpStatus.CONFLICT);
-		}
-
+		HttpStatus status = Constants.SUCCESS.equals(vr.getMessage()) ? HttpStatus.OK : HttpStatus.CONFLICT;
+		return new ResponseEntity<VolunteerResponse>(vr, status);
 	}
 
 	@RequestMapping(value = "/getSrCitizenList", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
@@ -1077,7 +1063,7 @@ public class VolunteerController {
 
 	@RequestMapping(value = "/importVolunteers")
 	@ResponseBody
-	public ResponseEntity<UploadFileResponseVO> getCSV(@RequestParam("file") MultipartFile file,
+	public ResponseEntity<UploadFileResponseVO> importVolunteers(@RequestParam("file") MultipartFile file,
 			@RequestParam("adminId") Integer adminId, @RequestParam("adminRole") Integer adminRole) throws IOException {
 		UploadFileResponseVO responseVO = volunteerService.uploadFile(file, adminId, adminRole);
 
@@ -1093,7 +1079,7 @@ public class VolunteerController {
 			responseVO.setErrorFileDownloadUrl(errorFileDownloadUri);
 		}
 
-		HttpStatus status = responseVO.getStatusCode() == 1 ? HttpStatus.CONFLICT : HttpStatus.OK;
+		HttpStatus status = responseVO.getStatusCode() == Constants.ONE ? HttpStatus.CONFLICT : HttpStatus.OK;
 		return new ResponseEntity<UploadFileResponseVO>(responseVO, status);
 	}
 

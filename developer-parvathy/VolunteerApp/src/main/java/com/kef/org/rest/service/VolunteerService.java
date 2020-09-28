@@ -6,10 +6,27 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -20,7 +37,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -34,7 +50,11 @@ import com.kef.org.rest.exception.FileStorageException;
 import com.kef.org.rest.interfaces.VolunteerInterface;
 import com.kef.org.rest.model.Volunteer;
 import com.kef.org.rest.model.VolunteerAssignment;
+import com.kef.org.rest.model.VolunteerAssignment_;
+import com.kef.org.rest.model.VolunteerRating;
+import com.kef.org.rest.model.VolunteerRating_;
 import com.kef.org.rest.model.VolunteerResponse;
+import com.kef.org.rest.model.Volunteer_;
 import com.kef.org.rest.repository.VolunteerAssignmentRepository;
 import com.kef.org.rest.repository.VolunteerRepository;
 import com.kef.org.rest.utils.Constants;
@@ -48,6 +68,9 @@ import com.opencsv.exceptions.CsvValidationException;
 public class VolunteerService implements VolunteerInterface {
 
 	public static final Logger logger = LoggerFactory.getLogger(VolunteerService.class);
+
+	@PersistenceContext
+	private EntityManager em;
 
 	@Autowired
 	private VolunteerRepository volunteerRespository;
@@ -88,144 +111,204 @@ public class VolunteerService implements VolunteerInterface {
 		return volunteerRespository.findAllVolunteerDetailsByAdminId(adminId);
 	}
 
-	public VolunteerResponse getVolunteerListByQuery(VolunteerVO volunteerStatus) {
+	public VolunteerResponse getVolunteerListByQuery(VolunteerVO volunteerFilter) {
+		CriteriaBuilder builder = em.getCriteriaBuilder();
+		CriteriaQuery<Tuple> criteriaQuery = builder.createTupleQuery();
 
-		List<VolunteerVO> result = new ArrayList<VolunteerVO>();
-		String status = volunteerStatus.getStatus();
-		String filterState = volunteerStatus.getFilterState();
-		String filterDistrict = volunteerStatus.getFilterDistrict();
-		String filterBlock = volunteerStatus.getFilterBlock();
-		String sortBy = volunteerStatus.getSortBy();
-		String sortType = volunteerStatus.getSortType();
-		Integer limit;
-		Integer pagenumber;
-		List<Object> resultList;
-		List<VolunteerVO> excludedVolunteers = new ArrayList<VolunteerVO>();
-		VolunteerResponse volResponse = new VolunteerResponse();
-		if (volunteerStatus.getLimit() == null && volunteerStatus.getPagenumber() == null) {
-			limit = 10;
-			pagenumber = 0;
+		// setting up the required joins
+		Root<Volunteer> rootVolunteer = criteriaQuery.from(Volunteer.class);
+		Join<Volunteer, VolunteerAssignment> joinVolunteerAssignment = rootVolunteer.join(Volunteer_.volunteercallList,
+				JoinType.LEFT);
+		Join<Volunteer, VolunteerRating> joinVolunteerRating = rootVolunteer.join(Volunteer_.volunteerRatingList,
+				JoinType.LEFT);
 
-		} else {
-			limit = volunteerStatus.getLimit();
+		// putting all joins into a map with a dot`ted name
+		Map<String, From<?, ?>> mapFieldToFrom = getMapOfJoins(rootVolunteer, joinVolunteerAssignment,
+				joinVolunteerRating);
 
-			pagenumber = volunteerStatus.getPagenumber();
-		}
+		// select
+		setSelect(builder, criteriaQuery, rootVolunteer, joinVolunteerAssignment, joinVolunteerRating);
 
-		Pageable ptry;
-		Page<Object> page;
-		Integer totalVolunteer = 0;
-		if (sortBy != null && sortType != null) {
-			Direction direction = sortType.equalsIgnoreCase("DESC") && sortType != null ? Sort.Direction.DESC
-					: Sort.Direction.ASC;
+		// where
+		List<Predicate> allPredicates = getPredicates(volunteerFilter, builder, rootVolunteer, mapFieldToFrom);
+		criteriaQuery.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
 
-			if (sortBy.equalsIgnoreCase("rating") && sortBy != null) {
+		// group by
+		criteriaQuery.groupBy(rootVolunteer.get(Volunteer_.idvolunteer));
 
-				ptry = PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction, "(average_rating)"));
-			} else if (sortBy.equalsIgnoreCase("assignedSrCitizen") && sortBy != null) {
+		// order
+		setOrderBy(volunteerFilter, builder, criteriaQuery, joinVolunteerAssignment, joinVolunteerRating);
 
-				ptry = PageRequest.of(pagenumber, limit, JpaSort.unsafe(direction, "(countsr)"));
+		// query
+		TypedQuery<Tuple> query = em.createQuery(criteriaQuery);
+		
+		// pagination
+		query.setFirstResult(volunteerFilter.getPagenumber() == null ? 0 : volunteerFilter.getPagenumber());
+		query.setMaxResults(volunteerFilter.getLimit() == null ? 10 : volunteerFilter.getLimit());
+		
+		VolunteerResponse response = createResponse(volunteerFilter, builder, allPredicates, query);
+		return response;
+	}
 
-			} else {
-				ptry = PageRequest.of(pagenumber, limit);
-			}
-		} else {
-			ptry = PageRequest.of(pagenumber, limit);
-		}
-		if (filterState != null && filterDistrict == null && filterBlock == null) {
-			page = volunteerRespository.fetchByStatusAndState(status, filterState, ptry);
-			resultList = page.getContent();
-			totalVolunteer = (int) page.getTotalElements();
-		}
-
-		else if (filterState != null && filterDistrict != null && filterBlock == null) {
-			page = volunteerRespository.fetchByStatusAndStateAndDistrict(status, filterState, filterDistrict, ptry);
-			resultList = page.getContent();
-			totalVolunteer = (int) page.getTotalElements();
-		}
-
-		else if (filterState != null && filterDistrict != null && filterBlock != null) {
-
-			page = volunteerRespository.fetchByStatusAndStateAndDistrictAndBlock(status, filterState, filterDistrict,
-					filterBlock, ptry);
-			resultList = page.getContent();
-			totalVolunteer = (int) page.getTotalElements();
-		} else {
-			page = volunteerRespository.queryFunction(status, ptry);
-			resultList = page.getContent();
-			totalVolunteer = (int) page.getTotalElements();
-//    		resultList=volunteerRespository.queryFunction(status, ptry);
-		}
-
+	private VolunteerResponse createResponse(VolunteerVO volunteerFilter, CriteriaBuilder builder,
+			List<Predicate> allPredicates, TypedQuery<Tuple> query) {
+		VolunteerResponse response = new VolunteerResponse();
+		List<Tuple> resultList = query.getResultList();
 		if (resultList != null && !resultList.isEmpty()) {
-
-			for (int i = 0; i < resultList.size(); i++) {
-				Object[] row = (Object[]) resultList.get(i);
-				VolunteerVO vo = new VolunteerVO();
-				vo.setIdvolunteer(Integer.valueOf(String.valueOf(row[0])));
-				vo.setFirstName(String.valueOf(row[1]));
-				vo.setLastName(String.valueOf(row[2]));
-				vo.setphoneNo(String.valueOf(row[3]));
-				vo.setEmail(String.valueOf(row[4]));
-				vo.setGender(String.valueOf(row[5]));
-				vo.setState(String.valueOf(row[6]));
-				vo.setDistrict(String.valueOf(row[7]));
-				vo.setBlock(String.valueOf(row[8]));
-				vo.setAddress(String.valueOf(row[9]));
-				vo.setVillage(String.valueOf(row[10]));
-				vo.setAssignedtoFellow(String.valueOf(row[11]));
-				vo.setAssignedtoFellowContact(String.valueOf(row[12]));
-//				vo.setPic((String.valueOf(row[13]).getBytes()));
-				vo.setRole(Integer.valueOf(String.valueOf(row[14])));
-				vo.setAdminId(Integer.valueOf(String.valueOf(row[15])));
-				vo.setStatus(String.valueOf(row[16]));
-				vo.setRating(Float.valueOf(String.valueOf(row[17])));
-//				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row[18])));
-				Integer idvolunteer = Integer.valueOf(String.valueOf(row[0]));
-				Integer countsr = getSrCitizenCount(idvolunteer);
-				vo.setCount_SrCitizen(countsr);
-				result.add(vo);
-			}
-			if (volunteerStatus.getExcludeIds() != null && !volunteerStatus.getExcludeIds().isEmpty()) {
-				excludedVolunteers = excludeVolunteer(volunteerStatus.getExcludeIds(), result);
-				volResponse.setExcludedVolunteers(excludedVolunteers);
-			}
+			response = populateVolunteerResponse(resultList, response);
+			response.setTotalVolunteers(getTotalCount(volunteerFilter, builder, allPredicates));
+		} else {
+			response.setTotalVolunteers(0l);
+			response.setMessage(Constants.FAILURE);
+			response.setStatusCode(Constants.ONE);
 		}
-		volResponse.setVolunteers(result);
-		volResponse.setTotalVolunteers(totalVolunteer);
-
-		return volResponse;
+		return response;
 	}
 
-	public Integer getSrCitizenCount(Integer idvolunteer) {
-
-		List<VolunteerAssignment> vol = new ArrayList<>();
-		Integer countsrCitizen = 0;
-		vol = volunteerAssignmentRepository.findAllByIdVolunteer(idvolunteer);
-		if (vol != null && !vol.isEmpty()) {
-			for (VolunteerAssignment va : vol) {
-				if (!va.getStatus().equalsIgnoreCase("UnAssigned")) {
-
-					countsrCitizen += 1;
-				}
-			}
-
-		}
-		return countsrCitizen;
+	private Map<String, From<?, ?>> getMapOfJoins(Root<Volunteer> rootVolunteer,
+			Join<Volunteer, VolunteerAssignment> joinVolunteerAssignment,
+			Join<Volunteer, VolunteerRating> joinVolunteerRating) {
+		Map<String, From<?, ?>> mapFieldToFrom = new HashMap<>();
+		mapFieldToFrom.put("volunteer", rootVolunteer);
+		mapFieldToFrom.put("volunteer.volunteerrating", joinVolunteerRating);
+		mapFieldToFrom.put("volunteer.volunteerassignment", joinVolunteerAssignment);
+		return mapFieldToFrom;
 	}
 
-	public List<VolunteerVO> excludeVolunteer(List<Integer> exclude, List<VolunteerVO> resultList) {
+	private void setSelect(CriteriaBuilder builder, CriteriaQuery<Tuple> criteriaQuery, Root<Volunteer> rootVolunteer,
+			Join<Volunteer, VolunteerAssignment> joinVolunteerAssignment,
+			Join<Volunteer, VolunteerRating> joinVolunteerRating) {
+		criteriaQuery.multiselect(rootVolunteer.get(Volunteer_.idvolunteer), rootVolunteer.get(Volunteer_.firstName),
+				rootVolunteer.get(Volunteer_.lastName), rootVolunteer.get(Volunteer_.phoneNo),
+				rootVolunteer.get(Volunteer_.email), rootVolunteer.get(Volunteer_.gender),
+				rootVolunteer.get(Volunteer_.state), rootVolunteer.get(Volunteer_.district),
+				rootVolunteer.get(Volunteer_.block), rootVolunteer.get(Volunteer_.address),
+				rootVolunteer.get(Volunteer_.Village), rootVolunteer.get(Volunteer_.assignedtoFellow),
+				rootVolunteer.get(Volunteer_.assignedtoFellowContact), rootVolunteer.get(Volunteer_.pic),
+				rootVolunteer.get(Volunteer_.role), rootVolunteer.get(Volunteer_.adminId),
+				rootVolunteer.get(Volunteer_.status),
+				builder.avg(builder.coalesce(joinVolunteerRating.get(VolunteerRating_.RATING), 0))
+						.alias("average_rating"),
+				builder.count(joinVolunteerAssignment).alias("citizenCount"));
+	}
 
-		List<VolunteerVO> results = new ArrayList<>();
-
-		for (VolunteerVO t : resultList) {
-			if (exclude.contains(t.getIdvolunteer())) {
-
-			} else {
-				results.add(t);
-			}
+	private List<Predicate> getPredicates(VolunteerVO volunteerFilter, CriteriaBuilder builder,
+			Root<Volunteer> rootVolunteer, Map<String, From<?, ?>> mapFieldToFrom) {
+		List<Predicate> allPredicates = new ArrayList<>();
+		for (Entry<String, Object> currentEntry : getFilters(volunteerFilter).entrySet()) {
+			Predicate currentPredicate = builder.like(
+					builder.lower(getStringPath(currentEntry.getKey(), mapFieldToFrom)),
+					builder.lower(builder.literal("%" + String.valueOf(currentEntry.getValue()) + "%")));
+			allPredicates.add(currentPredicate);
 		}
-		return results;
+		allPredicates.add(excludingVolunteers(builder, rootVolunteer, volunteerFilter.getExcludeIds()));
+		return allPredicates;
+	}
+
+	private void setOrderBy(VolunteerVO volunteerFilter, CriteriaBuilder builder, CriteriaQuery<Tuple> criteriaQuery,
+			Join<Volunteer, VolunteerAssignment> joinVolunteerAssignment,
+			Join<Volunteer, VolunteerRating> joinVolunteerRating) {
+		if (!StringUtils.isEmpty(volunteerFilter.getSortBy())) {
+			Order orderBy = null;
+			if (volunteerFilter.getSortBy().equalsIgnoreCase("assignedSrCitizen")) {
+				Expression<Long> orderByCallId = builder
+						.count(joinVolunteerAssignment.get(VolunteerAssignment_.callid));
+				orderBy = volunteerFilter.getSortType() == Sort.Direction.DESC ? builder.desc(orderByCallId)
+						: builder.asc(orderByCallId);
+			} else if (volunteerFilter.getSortBy().equalsIgnoreCase("rating")) {
+				Expression<Double> orderByAvgRating = builder
+						.avg(builder.coalesce(joinVolunteerRating.get(VolunteerRating_.RATING), 0));
+				orderBy = volunteerFilter.getSortType() == Sort.Direction.DESC ? builder.desc(orderByAvgRating)
+						: builder.asc(orderByAvgRating);
+			}
+			criteriaQuery.orderBy(orderBy);
+		}
+	}
+
+	private Long getTotalCount(VolunteerVO volunteerFilter, CriteriaBuilder builder, List<Predicate> allPredicates) {
+		CriteriaQuery<Long> cQuery = builder.createQuery(Long.class);
+		Root<Volunteer> from = cQuery.from(Volunteer.class);
+		CriteriaQuery<Long> select = cQuery.select(builder.count(from));
+		select.where(builder.and(allPredicates.toArray(new Predicate[allPredicates.size()])));
+		TypedQuery<Long> typedQuery = em.createQuery(select);
+		typedQuery.setFirstResult(volunteerFilter.getPagenumber() == null ? 0 : volunteerFilter.getPagenumber());
+		typedQuery.setMaxResults(volunteerFilter.getLimit() == null ? 10 : volunteerFilter.getLimit());
+		// here is the size of your query 
+		return typedQuery.getSingleResult();
+	}
+
+	private Predicate excludingVolunteers(CriteriaBuilder builder, Root<Volunteer> rootVolunteer,
+			List<Integer> excludeIds) {
+		return builder.not(rootVolunteer.get(Volunteer_.idvolunteer).in(excludeIds));
+	}
+
+	private VolunteerResponse populateVolunteerResponse(List<Tuple> resultList, VolunteerResponse response) {
+		response.setVolunteers(resultList.stream().map(row -> {
+			VolunteerVO vo = new VolunteerVO();
+			vo.setIdvolunteer(row.get(0) != null ? Integer.valueOf(String.valueOf(row.get(0))) : null);
+			vo.setFirstName(row.get(1) != null ? String.valueOf(row.get(1)) : null);
+			vo.setLastName(row.get(2) != null ? String.valueOf(row.get(2)) : null);
+			vo.setphoneNo(row.get(3) != null ? String.valueOf(row.get(3)) : null);
+			vo.setEmail(row.get(4) != null ? String.valueOf(row.get(4)) : null);
+			vo.setGender(row.get(5) != null ? String.valueOf(row.get(5)) : null);
+			vo.setState(row.get(6) != null ? String.valueOf(row.get(6)) : null);
+			vo.setDistrict(row.get(7) != null ? String.valueOf(row.get(7)) : null);
+			vo.setBlock(row.get(8) != null ? String.valueOf(row.get(8)) : null);
+			vo.setAddress(row.get(9) != null ? String.valueOf(row.get(9)) : null);
+			vo.setVillage(row.get(10) != null ? String.valueOf(row.get(10)) : null);
+			vo.setAssignedtoFellow(row.get(11) != null ? String.valueOf(row.get(11)) : null);
+			vo.setAssignedtoFellowContact(row.get(12) != null ? String.valueOf(row.get(12)) : null);
+			vo.setPic(row.get(13) != null ? String.valueOf(row.get(13)).getBytes() : null);
+			vo.setRole(row.get(14) != null ? Integer.valueOf(String.valueOf(row.get(14))) : null);
+			vo.setAdminId(row.get(15) != null ? Integer.valueOf(String.valueOf(row.get(15))) : null);
+			vo.setStatus(row.get(16) != null ? String.valueOf(row.get(16)) : null);
+			vo.setRating(row.get(17) != null ? Float.valueOf(String.valueOf(row.get(17))) : null);
+			vo.setCount_SrCitizen(row.get(18) != null ? Integer.valueOf(String.valueOf(row.get(18))) : null);
+			return vo;
+		}).collect(Collectors.toList()));
+		response.setMessage(Constants.SUCCESS);
+		response.setStatusCode(Constants.ZERO);
+		return response;
+	}
+
+	/**
+	 * divides the given field at the last dot and takes <br>
+	 * - the first part as the key in the map to retrieve the From<?, ?> <br>
+	 * - the last part as the name of the column in the entity
+	 */
+	private Path<String> getStringPath(String field, Map<String, From<?, ?>> mapFieldToFrom) {
+		if (!field.matches(".+\\..+")) {
+			throw new IllegalArgumentException("field '" + field
+					+ "' needs to be a dotted path (i. e. volunteer.volunteerassignment.assignedbymember)");
+		}
+		String fromPart = field.substring(0, field.lastIndexOf('.'));
+		String fieldPart = field.substring(field.lastIndexOf('.') + 1);
+
+		From<?, ?> actualFrom = mapFieldToFrom.get(fromPart);
+		if (actualFrom == null) {
+			throw new IllegalStateException(
+					"the given map does not contain a from or for the value '" + fromPart + "' or is null");
+		}
+		return actualFrom.get(fieldPart);
+	}
+
+	private Map<String, Object> getFilters(VolunteerVO volunteerFilter) {
+		Map<String, Object> filterMap = new HashMap<>();
+		// add status
+		filterMap.put("volunteer." + Volunteer_.status.getName(), volunteerFilter.getStatus());
+		// add state
+		if (!StringUtils.isEmpty(volunteerFilter.getFilterState())) {
+			filterMap.put("volunteer." + Volunteer_.state.getName(), volunteerFilter.getFilterState());
+		}
+		// add district
+		if (!StringUtils.isEmpty(volunteerFilter.getFilterDistrict())) {
+			filterMap.put("volunteer." + Volunteer_.district.getName(), volunteerFilter.getFilterDistrict());
+		}
+		// add block
+		if (!StringUtils.isEmpty(volunteerFilter.getFilterBlock())) {
+			filterMap.put("volunteer." + Volunteer_.block.getName(), volunteerFilter.getFilterBlock());
+		}
+		return filterMap;
 	}
 
 	public UploadFileResponseVO uploadFile(MultipartFile file, Integer adminId, Integer adminRole) throws IOException {
@@ -278,15 +361,15 @@ public class VolunteerService implements VolunteerInterface {
 	private void setMessageAndStatusCode(UploadFileResponseVO responseVO, int successCount, int failureCount) {
 		String message = null;
 		Integer statusCode = null;
-		if(successCount == 0) {
+		if (successCount == 0) {
 			message = Constants.FAILURE;
-			statusCode = 1;
+			statusCode = Constants.ONE;
 		} else if (failureCount == 0) {
 			message = Constants.SUCCESS;
-			statusCode = 0;
+			statusCode = Constants.ZERO;
 		} else {
 			message = Constants.PARTIAL_SUCCESS;
-			statusCode = 1;
+			statusCode = Constants.ONE;
 		}
 		responseVO.setMessage(message);
 		responseVO.setStatusCode(statusCode);
