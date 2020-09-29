@@ -654,7 +654,6 @@ public class VolunteerController {
 	public ResponseEntity<VolunteerResponse> getVolunteerList(@RequestBody VolunteerVO volunteerStatus) {
 		VolunteerResponse vr = new VolunteerResponse();
 		vr = volunteerService.getVolunteerListByQuery(volunteerStatus);
-		//vr = volunteerService.getVolunteerListByJPACriteria(volunteerStatus); 
 		HttpStatus status = Constants.SUCCESS.equals(vr.getMessage()) ? HttpStatus.OK : HttpStatus.CONFLICT;
 		return new ResponseEntity<VolunteerResponse>(vr, status);
 	}
@@ -676,37 +675,6 @@ public class VolunteerController {
 			srCitizen.setStatusCode("1");
 			return new ResponseEntity<SrCitizenListResponse>(srCitizen, HttpStatus.CONFLICT);
 		}
-//    	if(srCitizenStatus.getLimit()==null && srCitizenStatus.getPagenumber()==null) {
-//    		limit=10;
-//    		pagenumber=0;
-//    		
-//    	}
-//    	else {
-//    	limit=srCitizenStatus.getLimit();
-//    	
-//    	pagenumber=srCitizenStatus.getPagenumber();
-//    	}
-//    	
-//    	List<SeniorCitizen> srCitizenList;
-//    	if(status.length()<=0) {
-//    		
-//    		srCitizenList=seniorcitizenRepository.findAll();
-//    		
-//    	}
-//    	else {
-////    		srCitizenList=seniorcitizenRepository.fetchByStatus(status);
-//    		Pageable ptry=PageRequest.of(pagenumber, limit);
-//    		srCitizenList=seniorcitizenRepository.findAllByStatus(status, ptry);
-//    	}
-//    		if(null!=srCitizenList && !srCitizenList.isEmpty()) {
-//    		srCitizen.setSrCitizenList(srCitizenList);
-//    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.OK);
-//    	}
-//    	else {
-//    		
-//    		return new ResponseEntity<SrCitizenResponse>(srCitizen,HttpStatus.CONFLICT);
-//    	}
-//    	
 	}
 
 	@RequestMapping(value = "/assignSrCitizen", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
@@ -716,20 +684,13 @@ public class VolunteerController {
 		List<SeniorCitizen> srCitizenList = srCitizen.getSrCitizenList();
 		LoginInfo loginInfo = new LoginInfo();
 		Optional<Volunteer> volunteer = volunteerRespository.findByidvolunteer(srCitizen.getIdvolunteer());
-
 		if (volunteer.isPresent()) {
-
 			if (srCitizenList != null && !srCitizenList.isEmpty()) {
-
 				for (SeniorCitizen sr : srCitizenList) {
-
 					Integer idsrcitizen = sr.getSrCitizenId();
 					if (sr.getStatus().equalsIgnoreCase("UnAssigned") && idsrcitizen != null) {
-
 						srCitizenService.updateStatus("Assigned", idsrcitizen);
-
 					}
-
 					VolunteerAssignment vo = new VolunteerAssignment();
 					vo.setIdvolunteer(srCitizen.getIdvolunteer());
 					vo.setNamesrcitizen(sr.getFirstName());
@@ -747,21 +708,16 @@ public class VolunteerController {
 					vo.setAdminId(srCitizen.getAdminId());
 					vo.setStatus("Assigned");
 					volunteerassignmentRespository.save(vo);
-
 				}
 				loginInfo.setMessage("Success");
 				loginInfo.setStatusCode("0");
-
 			}
 		} else {
-
 			loginInfo.setMessage("Failure");
 			loginInfo.setStatusCode("1");
-
 		}
 		return new ResponseEntity<LoginInfo>(loginInfo,
 				loginInfo.getStatusCode().equals("0") ? HttpStatus.OK : HttpStatus.CONFLICT);
-
 	}
 
 	@RequestMapping(value = "/distributeSrCitizen", method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
@@ -771,9 +727,7 @@ public class VolunteerController {
 		List<VolunteerVO> volList = srCitizen.getVolunteerList();
 		LoginInfo loginInfo = new LoginInfo();
 		Collection<List<SeniorCitizen>> srCitizenListChunks;
-
 		Integer volListSize = volList.size();
-
 		if (volListSize.equals(1)) {
 			assignSrCitizen(srCitizen);
 		}
@@ -785,16 +739,11 @@ public class VolunteerController {
 					List<SeniorCitizen> sr1 = new ArrayList<>();
 					sr1 = sr;
 					if (sr1 != null && !sr1.isEmpty()) {
-
 						for (SeniorCitizen sr2 : sr1) {
-
 							Integer idsrcitizen = sr2.getSrCitizenId();
 							if (sr2.getStatus().equalsIgnoreCase("UnAssigned") && idsrcitizen != null) {
-
 								srCitizenService.updateStatus("Assigned", idsrcitizen);
-
 							}
-
 							VolunteerAssignment vo = new VolunteerAssignment();
 							vo.setIdvolunteer(volList.get(i).getIdvolunteer());
 							vo.setNamesrcitizen(sr2.getFirstName());
@@ -812,12 +761,10 @@ public class VolunteerController {
 							vo.setAdminId(volList.get(i).getAdminId());
 							vo.setStatus("Assigned");
 							volunteerassignmentRespository.save(vo);
-
 							// set previous status to unassigned
 							Integer idvolunteer = srCitizen.getIdvolunteer();
 							List<VolunteerAssignment> volAss = new ArrayList<VolunteerAssignment>();
 							for (SeniorCitizen ss : srCitizenList) {
-
 								volAss = volunteerassignmentRespository.findByVolAndSrCitizen(idvolunteer,
 										ss.getPhoneNo());
 								for (VolunteerAssignment vv : volAss) {
@@ -825,24 +772,16 @@ public class VolunteerController {
 								}
 								volunteerassignmentRespository.saveAll(volAss);
 							}
-
 						}
-
 					}
 					srCitizenListChunks.remove(sr);
 					break;
-
 				}
 			}
-
 			loginInfo.setMessage("Success");
 			loginInfo.setStatusCode("0");
-
 			return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.OK);
-		}
-
-		else {
-
+		} else {
 			loginInfo.setMessage("Failure");
 			loginInfo.setStatusCode("1");
 			return new ResponseEntity<LoginInfo>(loginInfo, HttpStatus.CONFLICT);
@@ -946,13 +885,11 @@ public class VolunteerController {
 								: string.equalsIgnoreCase(RelatedInfoTalkedAbout.ACCESS.getValue()) ? "2" : "3");
 					}
 				}
-
 				medicalandgreivance.setRelated_info_talked_about(
 						str.equalsIgnoreCase(RelatedInfoTalkedAbout.PREVENTION.getValue()) ? "1"
 								: str.equalsIgnoreCase(RelatedInfoTalkedAbout.ACCESS.getValue()) ? "2"
 										: str.equalsIgnoreCase(RelatedInfoTalkedAbout.DETECION.getValue()) ? "3"
 												: str1.toString());
-
 				if (null != medicalandgreivance.getBehavioural_change_noticed()
 						&& !medicalandgreivance.getBehavioural_change_noticed().equals("")) {
 					medicalandgreivance.setBehavioural_change_noticed(medicalandgreivance
@@ -1017,12 +954,9 @@ public class VolunteerController {
 										? (medicalandgreivance.getIsSymptomsPreventionTaken()
 												.equalsIgnoreCase(InputEnum.Y.name()) ? "1" : "2")
 										: "");
-
 			}
 		}
-
 		return medList;
-
 	}
 
 	public VolunteerVO mapEntityToVoluntnteerVO(Volunteer v) {

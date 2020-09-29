@@ -212,7 +212,9 @@ public class VolunteerService implements VolunteerInterface {
 					builder.lower(builder.literal("%" + String.valueOf(currentEntry.getValue()) + "%")));
 			allPredicates.add(currentPredicate);
 		}
-		allPredicates.add(excludingVolunteers(builder, rootVolunteer, volunteerFilter.getExcludeIds()));
+		if (CollectionUtils.isNotEmpty(volunteerFilter.getExcludeIds())) {
+			allPredicates.add(excludingVolunteers(builder, rootVolunteer, volunteerFilter.getExcludeIds()));
+		}
 		return allPredicates;
 	}
 
@@ -289,15 +291,17 @@ public class VolunteerService implements VolunteerInterface {
 	 */
 	private Path<String> getStringPath(String field, Map<String, From<?, ?>> mapFieldToFrom) {
 		if (!field.matches(".+\\..+")) {
-			throw new IllegalArgumentException(String.format(Constants.FIELD_S_NEEDS_TO_BE_A_DOTTED_PATH_I_E_VOLUNTEER_VOLUNTEERASSIGNMENT_ASSIGNEDBYMEMBER, field));
+			throw new IllegalArgumentException(String.format(
+					Constants.FIELD_S_NEEDS_TO_BE_A_DOTTED_PATH_I_E_VOLUNTEER_VOLUNTEERASSIGNMENT_ASSIGNEDBYMEMBER,
+					field));
 		}
 		String fromPart = field.substring(0, field.lastIndexOf('.'));
 		String fieldPart = field.substring(field.lastIndexOf('.') + 1);
 
 		From<?, ?> actualFrom = mapFieldToFrom.get(fromPart);
 		if (actualFrom == null) {
-			throw new IllegalStateException(
-					String.format(Constants.THE_GIVEN_MAP_DOES_NOT_CONTAIN_A_FROM_OR_FOR_THE_VALUE_S_OR_IS_NULL, fromPart));
+			throw new IllegalStateException(String
+					.format(Constants.THE_GIVEN_MAP_DOES_NOT_CONTAIN_A_FROM_OR_FOR_THE_VALUE_S_OR_IS_NULL, fromPart));
 		}
 		return actualFrom.get(fieldPart);
 	}
@@ -467,144 +471,5 @@ public class VolunteerService implements VolunteerInterface {
 				? FileUtils.loadFileAsResource(fileName, uploadFileStorageLocation)
 				: FileUtils.loadFileAsResource(fileName, errorFileStorageLocation);
 	}
-//	@SuppressWarnings("unchecked")
-//	public VolunteerResponse getVolunteerListByJPACriteria(VolunteerVO request){
-//		List<VolunteerVO> volunteerList=new ArrayList<VolunteerVO>();
-//		/**
-//		 * calling method for request validation
-//		 */
-//		request = validateVolunteerListRequest(request);
-//		/***
-//		 * calling method for fetching volunteer list from DB
-//		 */
-//		Map<String,Object> resultMap = fetchVolunteerList(request);
-//		List<Tuple> tupleList = null;
-//		Long rowCount = 0L;
-//		VolunteerResponse volResponse=new VolunteerResponse();
-//		if(resultMap!=null) {
-//			tupleList = (List<Tuple>) resultMap.get("result");
-//			rowCount = (Long) resultMap.get("rowCount");
-//		}
-//		/***
-//		 * Constructing the response.
-//		 */
-//		if(tupleList!=null && !tupleList.isEmpty()) {
-//			tupleList.forEach(row->{
-//				VolunteerVO vo = new VolunteerVO();
-//				vo.setIdvolunteer(Integer.valueOf(String.valueOf(row.get(0))));
-//				vo.setFirstName(String.valueOf(row.get(1)));
-//				vo.setLastName(String.valueOf(row.get(2)));
-//				vo.setphoneNo(String.valueOf(row.get(3)));
-//				vo.setEmail(String.valueOf(row.get(4)));
-//				vo.setGender(String.valueOf(row.get(5)));
-//				vo.setState(String.valueOf(row.get(6)));
-//				vo.setDistrict(String.valueOf(row.get(7)));
-//				vo.setBlock(String.valueOf(row.get(8)));
-//				vo.setAddress(String.valueOf(row.get(9)));
-//				vo.setVillage(String.valueOf(row.get(10)));
-//				vo.setAssignedtoFellow(String.valueOf(row.get(11)));
-//				vo.setAssignedtoFellowContact(String.valueOf(row.get(12)));
-////				vo.setPic((String.valueOf(row[13]).getBytes()));
-//				vo.setRole(Integer.valueOf(String.valueOf(row.get(14))));
-//				vo.setAdminId(Integer.valueOf(String.valueOf(row.get(15))));
-//				vo.setStatus(String.valueOf(row.get(16)));
-//				vo.setRating(Float.valueOf(String.valueOf(row.get(17))));
-//				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row.get(18))));
-//				volunteerList.add(vo);
-//			});
-//			volResponse.setMessage("Success");
-//			volResponse.setStatusCode(0);
-//		}else {
-//			volResponse.setMessage("Failure");
-//			volResponse.setStatusCode(1);
-//		}
-//		if(!request.getSortBy().isEmpty()) {
-//			String sortType = (request.getSortType()!=null && request.getSortType().equalsIgnoreCase("asc")) ? "asc" : "desc";
-//			String sortBy = request.getSortBy();
-//			if(sortBy.equalsIgnoreCase("rating")) {
-//				if(sortType.equalsIgnoreCase("asc")) {
-//					volunteerList.sort(Comparator.comparing(VolunteerVO::getRating));
-//				}else {
-//					volunteerList.sort(Comparator.comparing(VolunteerVO::getRating).reversed());
-//				}
-//			}else {
-//				if(sortType.equalsIgnoreCase("asc")) {
-//					volunteerList.sort(Comparator.comparing(VolunteerVO::getCount_SrCitizen));
-//				}else {
-//					volunteerList.sort(Comparator.comparing(VolunteerVO::getCount_SrCitizen).reversed());
-//				}
-//			}
-//		}
-//		volResponse.setVolunteers(volunteerList);
-//		volResponse.setTotalVolunteers(rowCount);
-//		return volResponse;
-//	}
-//	
-//	public VolunteerVO validateVolunteerListRequest(VolunteerVO request) {
-//		request.setStatus(request.getStatus()!=null ? request.getStatus() : "");
-//		request.setFilterState(request.getFilterState()!=null ? request.getFilterState():"");
-//		request.setFilterDistrict(request.getFilterDistrict()!=null ? request.getFilterDistrict():"");
-//		request.setFilterBlock(request.getFilterBlock()!=null ? request.getFilterBlock():"");
-//		request.setSortBy(request.getSortBy()!=null?request.getSortBy():"");
-//		request.setSortType(request.getSortType()!=null ? request.getSortType().toString() : "");
-//		request.setPagenumber(request.getPagenumber()!=null && request.getPagenumber()!=0 ? request.getPagenumber() : 0);
-//		request.setLimit(request.getLimit()!=null && request.getLimit()!=0 ? request.getLimit() : 0);
-//		return request;
-//	}
-//	
-//	public Map<String,Object> fetchVolunteerList(VolunteerVO request) {
-//		CriteriaBuilder builder = em.getCriteriaBuilder();
-//		CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-//
-//		Root<Volunteer> vRoot = cq.from(Volunteer.class);
-//
-//		List<Predicate> conditions = new ArrayList<>();
-//		conditions.add(builder.equal(vRoot.get("status"), request.getStatus()));
-//
-//		if(!request.getFilterState().isEmpty())
-//			conditions.add(builder.equal(vRoot.get("state"), request.getFilterState()));
-//		if(!request.getFilterDistrict().isEmpty())
-//			conditions.add(builder.equal(vRoot.get("district"), request.getFilterDistrict()));
-//		if(!request.getFilterBlock().isEmpty())
-//			conditions.add(builder.equal(vRoot.get("block"), request.getFilterBlock()));
-//		if(request.getExcludeIds()!=null && !request.getExcludeIds().isEmpty())
-//			conditions.add(builder.not(vRoot.get("idvolunteer").in(request.getExcludeIds())));
-//
-//		Subquery<Double> avgRatingQuery = cq.subquery(Double.class); 
-//		Root<VolunteerRating> vrSubQuery = avgRatingQuery.from(VolunteerRating.class);
-//		Expression<Double> avgRatingExpr = builder.avg(builder.coalesce(vrSubQuery.get("rating"), 0.0));
-//		avgRatingQuery.select(builder.coalesce(avgRatingExpr,0.0));
-//		avgRatingQuery.where(builder.equal(vrSubQuery.get("idvolunteer"),vRoot.get("idvolunteer")));
-//
-//		Subquery<Long> countSrQuery = cq.subquery(Long.class);
-//		Root<VolunteerAssignment> vaSubQuery = countSrQuery.from(VolunteerAssignment.class);
-//		countSrQuery.select(builder.countDistinct(vaSubQuery.get("phonenosrcitizen")));
-//		countSrQuery.where(builder.equal(vaSubQuery.get("idvolunteer"), vRoot.get("idvolunteer")),
-//				builder.equal(vaSubQuery.get("status"), "Assigned"));
-//
-//		cq.multiselect(vRoot.get("idvolunteer"),vRoot.get("firstName"),vRoot.get("lastName"),vRoot.get("phoneNo"),vRoot.get("email"),
-//				vRoot.get("gender"),vRoot.get("state"),vRoot.get("district"),vRoot.get("block"),vRoot.get("address"),
-//				vRoot.get("Village"), vRoot.get("assignedtoFellow"),vRoot.get("assignedtoFellowContact"),vRoot.get("pic"),
-//				vRoot.get("role"),vRoot.get("adminId"),vRoot.get("status"),
-//				avgRatingQuery.getSelection().alias("average_rating"),
-//				countSrQuery.getSelection().alias("countsr"));
-//
-//		TypedQuery<Tuple> typedQuery;
-//		
-//		typedQuery = em.createQuery(cq
-//					.where(conditions.toArray(new Predicate[] {}))
-//					.groupBy(vRoot.get("idvolunteer")));
-//		
-//		Long rowCount = (long) typedQuery.getResultList().size();
-//		if(request.getPagenumber()>0 && request.getLimit()>0) {
-//			typedQuery.setFirstResult((request.getPagenumber())*request.getLimit());
-//			typedQuery.setMaxResults(request.getLimit());
-//		}
-//		List<Tuple> tupleList = typedQuery.getResultList();
-//		HashMap<String,Object> map = new HashMap<>();
-//		map.put("result",tupleList);
-//		map.put("rowCount", rowCount);
-//		return map;
-//	}
 
 }
