@@ -511,6 +511,11 @@ public class VolunteerService implements VolunteerInterface {
 				vo.setCount_SrCitizen(Integer.valueOf(String.valueOf(row.get(18))));
 				volunteerList.add(vo);
 			});
+			volResponse.setMessage("Success");
+			volResponse.setStatusCode(0);
+		}else {
+			volResponse.setMessage("Failure");
+			volResponse.setStatusCode(1);
 		}
 		if(!request.getSortBy().isEmpty()) {
 			String sortType = (request.getSortType()!=null && request.getSortType().equalsIgnoreCase("asc")) ? "asc" : "desc";
@@ -593,6 +598,15 @@ public class VolunteerService implements VolunteerInterface {
 		if(request.getPagenumber()>0 && request.getLimit()>0) {
 			typedQuery.setFirstResult((request.getPagenumber())*request.getLimit());
 			typedQuery.setMaxResults(request.getLimit());
+		}else if(request.getPagenumber()==0 && request.getLimit()>0) {
+			typedQuery.setFirstResult((request.getPagenumber())*request.getLimit());
+			typedQuery.setMaxResults(request.getLimit());
+		}else if(request.getPagenumber()==0 && request.getLimit()==0) {
+			List<Tuple> tupleList = typedQuery.getResultList();
+			HashMap<String,Object> map = new HashMap<>();
+			map.put("result",tupleList);
+			map.put("rowCount", rowCount);
+			return map;
 		}
 		List<Tuple> tupleList = typedQuery.getResultList();
 		HashMap<String,Object> map = new HashMap<>();
